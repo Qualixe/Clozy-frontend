@@ -452,7 +452,9 @@ export function AddProductDialog() {
                   <Label htmlFor="category">Category</Label>
                   <Select
                     value={form.category}
-                    onValueChange={(value) => update("category", value)}
+                    onValueChange={(value) => {
+                      if (value !== null) update("category", value);
+                    }}
                   >
                     <SelectTrigger id="category" className="w-full">
                       <SelectValue placeholder="Select category" />

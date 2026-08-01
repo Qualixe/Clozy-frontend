@@ -250,7 +250,9 @@ export function CheckoutPage() {
                   <Label htmlFor="district">District</Label>
                   <Select
                     value={form.district}
-                    onValueChange={(value) => updateField("district", value)}
+                    onValueChange={(value) => {
+                      if (value !== null) updateField("district", value);
+                    }}
                   >
                     <SelectTrigger id="district" className="w-full">
                       <SelectValue placeholder="Select district" />

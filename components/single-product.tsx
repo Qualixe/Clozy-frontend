@@ -111,15 +111,15 @@ export function ProductPage({ product }: { product: ProductDetail }) {
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/">Home</Link>
-              </BreadcrumbLink>
+              <BreadcrumbLink render={<Link href="/">Home</Link>} />
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/shop/outerwear">{product.category}</Link>
-              </BreadcrumbLink>
+              <BreadcrumbLink
+                render={
+                  <Link href="/shop/outerwear">{product.category}</Link>
+                }
+              />
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -369,7 +369,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
             </div>
 
             {/* Accordion */}
-            <Accordion type="single" collapsible className="mt-8">
+            <Accordion className="mt-8">
               <AccordionItem value="details">
                 <AccordionTrigger>Details &amp; Care</AccordionTrigger>
                 <AccordionContent>
