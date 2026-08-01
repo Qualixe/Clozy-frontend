@@ -8,6 +8,7 @@ import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/lib/cart-context";
 
 export type Product = {
   id: string;
@@ -32,6 +33,17 @@ export function ProductCard({
   as?: React.ElementType;
 }) {
   const [wishlisted, setWishlisted] = React.useState(false);
+  const { addItem } = useCart();
+
+  function handleAddToCart() {
+    addItem({
+      id: product.id,
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+    });
+  }
 
   return (
     <div className="group">
@@ -77,7 +89,7 @@ export function ProductCard({
         </Button>
 
         <div className="absolute inset-x-3 bottom-3 translate-y-12 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <Button size="sm" className="w-full">
+          <Button size="sm" className="w-full" onClick={handleAddToCart}>
             <ShoppingCart className="h-4 w-4" />
             Add to Cart
           </Button>

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { CheckCircle2, Truck } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { INITIAL_CART_ITEMS } from "@/data/cart-items";
+import { useCart } from "@/lib/cart-context";
 import districts from "@/data/districts.json";
 
 // ---------------------------------------------------------------------------
@@ -80,13 +81,14 @@ function validate(form: FormState) {
 // ---------------------------------------------------------------------------
 
 export function CheckoutPage() {
-  const [items] = React.useState(INITIAL_CART_ITEMS);
+  const { items, clear } = useCart();
   const [form, setForm] = React.useState<FormState>(INITIAL_FORM);
   const [errors, setErrors] = React.useState<
     Partial<Record<keyof FormState, string>>
   >({});
   const [submitting, setSubmitting] = React.useState(false);
   const [orderPlaced, setOrderPlaced] = React.useState(false);
+  const [confirmedTotal, setConfirmedTotal] = React.useState(0);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shippingCost = getShippingCost(form.district);
@@ -108,26 +110,10 @@ export function CheckoutPage() {
     // No orders API yet — simulate placing the order.
     setTimeout(() => {
       setSubmitting(false);
+      setConfirmedTotal(total);
       setOrderPlaced(true);
+      clear();
     }, 600);
-  }
-
-  if (items.length === 0) {
-    return (
-      <main className="mx-auto flex max-w-lg flex-col items-center gap-3 px-4 py-24 text-center">
-        <h1 className="text-2xl font-semibold text-foreground">
-          Your cart is empty
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Add something to your cart before checking out.
-        </p>
-        <Button
-          className="mt-2"
-          nativeButton={false}
-          render={<Link href="/shop">Continue Shopping</Link>}
-        />
-      </main>
-    );
   }
 
   if (orderPlaced) {
@@ -145,10 +131,28 @@ export function CheckoutPage() {
             : "We'll send a bKash payment request shortly."}
         </p>
         <p className="mt-2 text-sm font-medium text-foreground">
-          Total paid: ${total}
+          Total paid: ${confirmedTotal}
         </p>
         <Button
           className="mt-4"
+          nativeButton={false}
+          render={<Link href="/shop">Continue Shopping</Link>}
+        />
+      </main>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <main className="mx-auto flex max-w-lg flex-col items-center gap-3 px-4 py-24 text-center">
+        <h1 className="text-2xl font-semibold text-foreground">
+          Your cart is empty
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Add something to your cart before checking out.
+        </p>
+        <Button
+          className="mt-2"
           nativeButton={false}
           render={<Link href="/shop">Continue Shopping</Link>}
         />
@@ -361,17 +365,32 @@ export function CheckoutPage() {
             </h2>
             <ul className="mt-4 divide-y divide-border">
               {items.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex items-center justify-between py-3 text-sm"
-                >
-                  <span className="text-foreground">
-                    {item.name}{" "}
-                    <span className="text-muted-foreground">×{item.qty}</span>
-                  </span>
-                  <span className="font-medium text-foreground">
-                    ${item.price * item.qty}
-                  </span>
+                <li key={item.id} className="flex items-center gap-3 py-3 text-sm">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-muted">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-1 items-center justify-between gap-2">
+                    <div>
+                      <span className="text-foreground">{item.name}</span>
+                      {item.variant && (
+                        <p className="text-xs text-muted-foreground">
+                          {item.variant}
+                        </p>
+                      )}
+                      <span className="block text-xs text-muted-foreground">
+                        ×{item.qty}
+                      </span>
+                    </div>
+                    <span className="font-medium text-foreground">
+                      ${item.price * item.qty}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>

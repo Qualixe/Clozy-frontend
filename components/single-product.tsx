@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { RelatedProducts } from "@/components/related-products";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/lib/cart-context";
 
 // ---------------------------------------------------------------------------
 // Data shape — populated from the Laravel API (`GET /products/{id}`)
@@ -91,6 +92,25 @@ export function ProductPage({ product }: { product: ProductDetail }) {
   const [selectedSize, setSelectedSize] = React.useState<string | null>(null);
   const [quantity, setQuantity] = React.useState(1);
   const [wishlisted, setWishlisted] = React.useState(false);
+  const { addItem } = useCart();
+
+  function handleAddToCart() {
+    if (!selectedSize) return;
+
+    const variant = [selectedColor, selectedSize].filter(Boolean).join(" / ");
+
+    addItem(
+      {
+        id: `${product.id}-${variant}`,
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0],
+        variant: variant || undefined,
+      },
+      quantity
+    );
+  }
 
   React.useEffect(() => {
     if (!galleryApi) return;
@@ -325,7 +345,11 @@ export function ProductPage({ product }: { product: ProductDetail }) {
                 </Button>
               </div>
 
-              <Button className="h-11 flex-1" disabled={!selectedSize}>
+              <Button
+                className="h-11 flex-1"
+                disabled={!selectedSize}
+                onClick={handleAddToCart}
+              >
                 {selectedSize ? "Add to Cart" : "Select a size"}
               </Button>
 

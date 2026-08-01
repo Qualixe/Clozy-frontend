@@ -1,3 +1,7 @@
+import Link from "next/link";
+import { FolderTree } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { ProductsTable } from "@/components/dashboard/products-table";
 import { AddProductDialog } from "@/components/dashboard/add-product-dialog";
 import type { Product } from "@/components/product-card";
@@ -22,7 +26,20 @@ export default async function DashboardProductsPage() {
             {products.length} products in your catalog.
           </p>
         </div>
-        <AddProductDialog />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={
+              <Link href="/dashboard/products/categories">
+                <FolderTree className="h-4 w-4" />
+                Categories
+              </Link>
+            }
+          />
+          <AddProductDialog />
+        </div>
       </div>
 
       <ProductsTable products={products} />

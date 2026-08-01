@@ -24,6 +24,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import {
   Avatar,
@@ -32,7 +35,14 @@ import {
 
 const NAV_ITEMS = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Products", href: "/dashboard/products", icon: Package },
+  {
+    title: "Products",
+    href: "/dashboard/products",
+    icon: Package,
+    children: [
+      { title: "Categories", href: "/dashboard/products/categories" },
+    ],
+  },
   { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
   { title: "Customers", href: "/dashboard/customers", icon: Users },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
@@ -71,6 +81,22 @@ export function AppSidebar() {
                       </Link>
                     }
                   />
+                  {item.children && (
+                    <SidebarMenuSub>
+                      {item.children.map((child) => (
+                        <SidebarMenuSubItem key={child.href}>
+                          <SidebarMenuSubButton
+                            isActive={pathname === child.href}
+                            render={
+                              <Link href={child.href}>
+                                <span>{child.title}</span>
+                              </Link>
+                            }
+                          />
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
