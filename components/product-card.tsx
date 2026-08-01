@@ -1,0 +1,121 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Heart, ShoppingCart, Star } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+export type Product = {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  originalPrice?: number;
+  rating: number;
+  reviews: number;
+  image: string;
+  tag?: "New" | "Sale";
+  tabs: Array<"featured" | "bestsellers" | "new" | "sale">;
+};
+
+export function ProductCard({
+  product,
+  as: MediaWrapper = "div",
+}: {
+  product: Product;
+  /** Element/component the image is wrapped in — pass `ProductCarouselMedia`
+   *  when rendering inside a `ProductCarousel` so its height can be measured. */
+  as?: React.ElementType;
+}) {
+  const [wishlisted, setWishlisted] = React.useState(false);
+
+  return (
+    <div className="group">
+      <MediaWrapper className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-muted">
+        <Link href={`/products/${product.id}`}>
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          />
+        </Link>
+
+        {product.tag && (
+          <Badge
+            className={cn(
+              "absolute left-3 top-3",
+              product.tag === "Sale"
+                ? "bg-destructive text-destructive-foreground"
+                : "bg-foreground text-background"
+            )}
+          >
+            {product.tag}
+          </Badge>
+        )}
+
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={() => setWishlisted((w) => !w)}
+          aria-label={
+            wishlisted ? "Remove from wishlist" : "Add to wishlist"
+          }
+          className="absolute right-3 top-3 h-8 w-8 rounded-full opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+        >
+          <Heart
+            className={cn(
+              "h-4 w-4",
+              wishlisted && "fill-destructive text-destructive"
+            )}
+          />
+        </Button>
+
+        <div className="absolute inset-x-3 bottom-3 translate-y-12 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+          <Button size="sm" className="w-full">
+            <ShoppingCart className="h-4 w-4" />
+            Add to Cart
+          </Button>
+        </div>
+      </MediaWrapper>
+
+      <div className="mt-3">
+        <p className="text-xs text-muted-foreground">{product.category}</p>
+        <Link
+          href={`/products/${product.id}`}
+          className="mt-0.5 block text-sm font-medium text-foreground hover:underline underline-offset-4"
+        >
+          {product.name}
+        </Link>
+
+        <div className="mt-1 flex items-center gap-1">
+          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+          <span className="text-xs font-medium text-foreground">
+            {product.rating}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            ({product.reviews})
+          </span>
+        </div>
+
+        <div className="mt-1.5 flex items-center gap-2">
+          <span className="text-sm font-semibold text-foreground">
+            ${product.price}
+          </span>
+          {product.originalPrice && (
+            <span className="text-xs text-muted-foreground line-through">
+              ${product.originalPrice}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ProductCard;
