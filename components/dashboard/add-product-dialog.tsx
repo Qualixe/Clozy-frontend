@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { ProductForm } from "@/components/dashboard/product-form";
 
-export function ProductDialog({ trigger }: { trigger?: React.ReactNode }) {
+export function ProductDialog({ trigger }: { trigger?: React.ReactElement }) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [formKey, setFormKey] = React.useState(0);

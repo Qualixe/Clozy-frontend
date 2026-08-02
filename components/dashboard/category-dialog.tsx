@@ -56,7 +56,7 @@ export function CategoryDialog({
   /** Pass an existing category to edit it; omit to create a new one. */
   category?: Category;
   /** Custom trigger element (e.g. an Edit menu item). Defaults to an "Add Category" button. */
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 }) {
   const router = useRouter();
   const { token } = useAuth();
