@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   User,
   Search,
@@ -10,6 +11,7 @@ import {
   Heart,
   LogOut,
   Settings,
+  LayoutDashboard,
   Shirt,
   Watch,
   Footprints,
@@ -48,6 +50,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { CartDrawer } from "@/components/cart-drawer";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import { canAccessDashboard } from "@/lib/auth-cookie";
 import navData from "@/data/nav.json";
 
 // ---------------------------------------------------------------------------
@@ -74,6 +78,14 @@ export function SiteHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [isDark, setIsDark] = React.useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const { user, ready, logout } = useAuth();
+
+  async function handleSignOut() {
+    await logout();
+    router.push("/");
+    router.refresh();
+  }
 
   function toggleSearch() {
     setSearchOpen((open) => {
@@ -246,55 +258,74 @@ export function SiteHeader() {
               }
             />
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <p className="font-medium">Hi there</p>
-                <p className="text-xs font-normal text-muted-foreground">
-                  Sign in to view your account
-                </p>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                render={
-                  <Link href="/login">
-                    <User className="mr-2 h-4 w-4" />
-                    Sign in
-                  </Link>
-                }
-              />
-              <DropdownMenuItem
-                render={
-                  <Link href="/account/orders">
-                    <Package className="mr-2 h-4 w-4" />
-                    Orders
-                  </Link>
-                }
-              />
-              <DropdownMenuItem
-                render={
-                  <Link href="/account/wishlist">
-                    <Heart className="mr-2 h-4 w-4" />
-                    Wishlist
-                  </Link>
-                }
-              />
-              <DropdownMenuItem
-                render={
-                  <Link href="/account/settings">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
-                }
-              />
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                render={
-                  <Link href="/logout">
+              {ready && user ? (
+                <>
+                  <DropdownMenuLabel>
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-xs font-normal text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {canAccessDashboard(user) && (
+                    <DropdownMenuItem
+                      render={
+                        <Link href="/dashboard">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      }
+                    />
+                  )}
+                  <DropdownMenuItem
+                    render={
+                      <Link href="/account/orders">
+                        <Package className="mr-2 h-4 w-4" />
+                        Orders
+                      </Link>
+                    }
+                  />
+                  <DropdownMenuItem
+                    render={
+                      <Link href="/account/wishlist">
+                        <Heart className="mr-2 h-4 w-4" />
+                        Wishlist
+                      </Link>
+                    }
+                  />
+                  <DropdownMenuItem
+                    render={
+                      <Link href="/account/settings">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </Link>
+                    }
+                  />
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign out
-                  </Link>
-                }
-              />
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuLabel>
+                    <p className="font-medium">Hi there</p>
+                    <p className="text-xs font-normal text-muted-foreground">
+                      Sign in to view your account
+                    </p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    render={
+                      <Link href="/login">
+                        <User className="mr-2 h-4 w-4" />
+                        Sign in
+                      </Link>
+                    }
+                  />
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
 

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
@@ -33,6 +33,7 @@ import {
   Avatar,
   AvatarFallback,
 } from "@/components/ui/avatar";
+import { useAuth } from "@/lib/auth-context";
 
 const NAV_ITEMS = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -60,6 +61,22 @@ const NAV_ITEMS = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
+
+  async function handleSignOut() {
+    await logout();
+    router.push("/dashboard/login");
+  }
+
+  const initials = user
+    ? user.name
+        .split(" ")
+        .map((part) => part[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "?";
 
   return (
     <Sidebar collapsible="icon">
@@ -117,8 +134,23 @@ export function AppSidebar() {
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {user?.role === "admin" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={pathname === "/dashboard/users"}
+                    tooltip="Users"
+                    render={
+                      <Link href="/dashboard/users">
+                        <Users />
+                        <span>Users</span>
+                      </Link>
+                    }
+                  />
+                </SidebarMenuItem>
+              )}
               <SidebarMenuItem>
                 <SidebarMenuButton
+                  isActive={pathname === "/dashboard/settings"}
                   tooltip="Settings"
                   render={
                     <Link href="/dashboard/settings">
@@ -136,26 +168,25 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              tooltip="Account"
-              render={
-                <Link href="/dashboard/settings">
-                  <Avatar className="h-6 w-6 rounded-md">
-                    <AvatarFallback className="rounded-md text-xs">
-                      CZ
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col text-left leading-tight group-data-[collapsible=icon]:hidden">
-                    <span className="text-sm font-medium">Admin</span>
-                    <span className="text-xs text-muted-foreground">
-                      admin@clozy.com
-                    </span>
-                  </div>
-                  <LogOut className="ml-auto h-4 w-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
-                </Link>
-              }
-            />
+            <SidebarMenuButton size="lg" tooltip="Account" className="pointer-events-none">
+              <Avatar className="h-6 w-6 rounded-md">
+                <AvatarFallback className="rounded-md text-xs">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col text-left leading-tight group-data-[collapsible=icon]:hidden">
+                <span className="text-sm font-medium">{user?.name ?? "…"}</span>
+                <span className="text-xs text-muted-foreground">
+                  {user?.email ?? ""}
+                </span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Sign out" onClick={handleSignOut}>
+              <LogOut />
+              <span>Sign out</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

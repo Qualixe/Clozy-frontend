@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/lib/auth-context";
 import type { Order, OrderDetail, OrderStatus } from "@/data/orders";
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -27,6 +28,7 @@ export function OrderDetailSheet({
   order: Order | null;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { token } = useAuth();
   const [detail, setDetail] = React.useState<OrderDetail | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -39,7 +41,9 @@ export function OrderDetailSheet({
 
     setLoading(true);
     setError(null);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
       .then((res) => {
         if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
         return res.json();
@@ -47,7 +51,7 @@ export function OrderDetailSheet({
       .then((data: OrderDetail) => setDetail(data))
       .catch(() => setError("Could not load this order."))
       .finally(() => setLoading(false));
-  }, [order]);
+  }, [order, token]);
 
   return (
     <Sheet open={order !== null} onOpenChange={onOpenChange}>

@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useAuth } from "@/lib/auth-context";
 
 export type MenuSummary = {
   id: string;
@@ -34,6 +35,7 @@ export type MenuSummary = {
 
 export function MenusTable({ menus }: { menus: MenuSummary[] }) {
   const router = useRouter();
+  const { token } = useAuth();
   const [pendingDelete, setPendingDelete] = React.useState<MenuSummary | null>(null);
   const [deleting, setDeleting] = React.useState(false);
   const [deleteError, setDeleteError] = React.useState<string | null>(null);
@@ -47,7 +49,10 @@ export function MenusTable({ menus }: { menus: MenuSummary[] }) {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/menus/${pendingDelete.id}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
       );
 
       if (!res.ok && res.status !== 204) {

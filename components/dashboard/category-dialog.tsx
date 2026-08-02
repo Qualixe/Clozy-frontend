@@ -18,6 +18,7 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/lib/auth-context";
 
 export type Category = {
   id: string;
@@ -58,6 +59,7 @@ export function CategoryDialog({
   trigger?: React.ReactNode;
 }) {
   const router = useRouter();
+  const { token } = useAuth();
   const isEditing = !!category;
 
   const [open, setOpen] = React.useState(false);
@@ -98,7 +100,10 @@ export function CategoryDialog({
 
       const res = await fetch(url, {
         method: isEditing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(form),
       });
 

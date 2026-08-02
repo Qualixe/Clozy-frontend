@@ -16,9 +16,11 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/lib/auth-context";
 
 export function AddMenuDialog() {
   const router = useRouter();
+  const { token } = useAuth();
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
@@ -47,7 +49,10 @@ export function AddMenuDialog() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/menus`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ name }),
       });
 

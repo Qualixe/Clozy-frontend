@@ -31,6 +31,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { OrderDetailSheet } from "@/components/dashboard/order-detail-sheet";
+import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/data/orders";
 
@@ -52,6 +53,7 @@ const STATUS_TRIGGER_STYLES: Record<OrderStatus, string> = {
 
 export function OrdersTable({ orders }: { orders: Order[] }) {
   const router = useRouter();
+  const { token } = useAuth();
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<(typeof STATUS_TABS)[number]>("All");
   const [page, setPage] = React.useState(1);
@@ -86,7 +88,10 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
         `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/status`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({ status: next }),
         }
       );

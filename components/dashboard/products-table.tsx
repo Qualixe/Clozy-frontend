@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, Star, Pencil, Trash2 } from "lucide-react";
 
@@ -26,11 +27,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ProductDialog } from "@/components/dashboard/add-product-dialog";
+import { useAuth } from "@/lib/auth-context";
 import type { Product } from "@/components/product-card";
 
 export function ProductsTable({ products }: { products: Product[] }) {
   const router = useRouter();
+  const { token } = useAuth();
   const [query, setQuery] = React.useState("");
   const [pendingDelete, setPendingDelete] = React.useState<Product | null>(null);
   const [deleting, setDeleting] = React.useState(false);
@@ -49,7 +51,10 @@ export function ProductsTable({ products }: { products: Product[] }) {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/products/${pendingDelete.id}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
       );
 
       if (!res.ok && res.status !== 204) {
@@ -146,16 +151,15 @@ export function ProductsTable({ products }: { products: Product[] }) {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-end gap-1">
-                    <ProductDialog
-                      productId={product.id}
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Edit ${product.name}`}
-                        >
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Edit ${product.name}`}
+                      nativeButton={false}
+                      render={
+                        <Link href={`/dashboard/products/${product.id}/edit`}>
                           <Pencil className="h-4 w-4" />
-                        </Button>
+                        </Link>
                       }
                     />
                     <Button

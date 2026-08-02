@@ -26,9 +26,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CategoryDialog, type Category } from "@/components/dashboard/category-dialog";
+import { useAuth } from "@/lib/auth-context";
 
 export function CategoriesTable({ categories }: { categories: Category[] }) {
   const router = useRouter();
+  const { token } = useAuth();
   const [query, setQuery] = React.useState("");
   const [pendingDelete, setPendingDelete] = React.useState<Category | null>(null);
   const [deleting, setDeleting] = React.useState(false);
@@ -47,7 +49,10 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/categories/${pendingDelete.id}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
       );
 
       if (!res.ok && res.status !== 204) {

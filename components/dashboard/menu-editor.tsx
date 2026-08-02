@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/lib/auth-context";
 
 export type MenuItemNode = {
   id: string;
@@ -169,6 +170,7 @@ export function MenuEditor({
   categories: Category[];
 }) {
   const router = useRouter();
+  const { token } = useAuth();
   const [name, setName] = React.useState(menu.name);
   const [items, setItems] = React.useState<ItemForm[]>(() =>
     menu.items.map(fromNode)
@@ -255,7 +257,10 @@ export function MenuEditor({
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/menus/${menu.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           name,
           items: items.map(toPayload),
