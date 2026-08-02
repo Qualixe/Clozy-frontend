@@ -12,14 +12,9 @@ import {
   LogOut,
   Settings,
   LayoutDashboard,
-  Shirt,
-  Watch,
-  Footprints,
-  Gem,
   Sun,
   Moon,
   X,
-  type LucideIcon,
 } from "lucide-react";
 
 import {
@@ -47,39 +42,43 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { CartDrawer } from "@/components/cart-drawer";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { canAccessDashboard } from "@/lib/auth-cookie";
+import { MENU_ICONS } from "@/lib/menu-icons";
+import type { Menu as NavMenu, MenuLink } from "@/lib/get-menu";
 import navData from "@/data/nav.json";
 
 // ---------------------------------------------------------------------------
 // Data
 // ---------------------------------------------------------------------------
-// Nav structure lives in `data/nav.json`; icons can't be serialized to JSON,
-// so categories reference an icon name that's resolved through this map.
+// Top-level nav links come from the "main-menu" Menu (editable at
+// /dashboard/content/menus), with `data/nav.json`'s `links` as a fallback if
+// that menu is missing/unreachable.
 
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  Shirt,
-  Footprints,
-  Watch,
-  Gem,
-};
-
-const CATEGORIES = navData.categories;
-const NAV_LINKS = navData.links;
+const FALLBACK_LINKS: MenuLink[] = navData.links.map((link) => ({
+  id: link.href,
+  label: link.label,
+  url: link.href,
+  type: "custom",
+  displayStyle: "link",
+  icon: null,
+  children: [],
+}));
 
 // ---------------------------------------------------------------------------
 // Header
 // ---------------------------------------------------------------------------
 
-export function SiteHeader() {
+export function SiteHeader({ menu }: { menu: NavMenu | null }) {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [isDark, setIsDark] = React.useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user, ready, logout } = useAuth();
+
+  const navLinks = menu?.items.length ? menu.items : FALLBACK_LINKS;
 
   async function handleSignOut() {
     await logout();
@@ -121,75 +120,94 @@ export function SiteHeader() {
         {/* Desktop nav */}
         <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>Shop</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="grid w-[640px] grid-cols-4 gap-6 p-5">
-                  {CATEGORIES.map((cat) => {
-                    const Icon = CATEGORY_ICONS[cat.icon];
-                    return (
-                      <div key={cat.title}>
-                        <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
-                          <Icon className="h-4 w-4 text-muted-foreground" />
-                          {cat.title}
-                        </div>
-                        <ul className="space-y-2">
-                          {cat.items.map((item) => (
-                            <li key={item}>
-                              <NavigationMenuLink
-                                render={
-                                  <Link
-                                    href={`${cat.href}/${item
-                                      .toLowerCase()
-                                      .replace(/\s+/g, "-")}`}
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground hover:underline underline-offset-4"
-                                  >
-                                    {item}
-                                  </Link>
-                                }
-                              />
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    );
-                  })}
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between px-5 py-3 text-sm">
-                  <span className="text-muted-foreground">
-                    New season arrivals are here.
-                  </span>
-                  <NavigationMenuLink
-                    render={
-                      <Link
-                        href="/shop/new"
-                        className="font-medium text-foreground hover:underline underline-offset-4"
-                      >
-                        Shop the collection →
-                      </Link>
-                    }
-                  />
-                </div>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
+            {navLinks.map((link) => {
+              if (link.children.length === 0) {
+                return (
+                  <NavigationMenuItem key={link.id}>
+                    <NavigationMenuLink
+                      render={
+                        <Link
+                          href={link.url}
+                          className={cn(
+                            "inline-flex h-9 items-center rounded-md px-3 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
+                          )}
+                        >
+                          {link.label}
+                        </Link>
+                      }
+                    />
+                  </NavigationMenuItem>
+                );
+              }
 
-            {NAV_LINKS.map((link) => (
-              <NavigationMenuItem key={link.href}>
-                <NavigationMenuLink
-                  render={
-                    <Link
-                      href={link.href}
-                      className={cn(
-                        "inline-flex h-9 items-center rounded-md px-3 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
-                      )}
-                    >
-                      {link.label}
-                    </Link>
-                  }
-                />
-              </NavigationMenuItem>
-            ))}
+              if (link.displayStyle === "megamenu") {
+                return (
+                  <NavigationMenuItem key={link.id}>
+                    <NavigationMenuTrigger>{link.label}</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div
+                        className="grid gap-6 p-5"
+                        style={{
+                          gridTemplateColumns: `repeat(${Math.max(link.children.length, 1)}, minmax(140px, 1fr))`,
+                        }}
+                      >
+                        {link.children.map((group) => {
+                          const Icon = group.icon ? MENU_ICONS[group.icon] : null;
+                          return (
+                            <div key={group.id}>
+                              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
+                                {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+                                {group.label}
+                              </div>
+                              <ul className="space-y-2">
+                                {group.children.map((leaf) => (
+                                  <li key={leaf.id}>
+                                    <NavigationMenuLink
+                                      render={
+                                        <Link
+                                          href={leaf.url}
+                                          className="text-sm text-muted-foreground transition-colors hover:text-foreground hover:underline underline-offset-4"
+                                        >
+                                          {leaf.label}
+                                        </Link>
+                                      }
+                                    />
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                );
+              }
+
+              return (
+                <NavigationMenuItem key={link.id}>
+                  <NavigationMenuTrigger>{link.label}</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="w-56 space-y-1 p-2">
+                      {link.children.map((child) => (
+                        <li key={child.id}>
+                          <NavigationMenuLink
+                            render={
+                              <Link
+                                href={child.url}
+                                className="block rounded-md px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
+                              >
+                                {child.label}
+                              </Link>
+                            }
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              );
+            })}
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -351,30 +369,41 @@ export function SiteHeader() {
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
               <div className="mt-4 flex flex-col gap-1 px-1">
-                <Link
-                  href="/shop"
-                  className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                >
-                  Shop
-                </Link>
-                {CATEGORIES.map((cat) => (
-                  <Link
-                    key={cat.title}
-                    href={cat.href}
-                    className="rounded-md px-3 py-2 pl-6 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  >
-                    {cat.title}
-                  </Link>
-                ))}
-                <Separator className="my-2" />
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                  >
-                    {link.label}
-                  </Link>
+                {navLinks.map((link) => (
+                  <React.Fragment key={link.id}>
+                    <Link
+                      href={link.url}
+                      className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                    {link.children.map((child) =>
+                      child.children.length > 0 ? (
+                        <React.Fragment key={child.id}>
+                          <span className="px-3 pt-2 pb-1 pl-6 text-xs font-medium text-muted-foreground">
+                            {child.label}
+                          </span>
+                          {child.children.map((leaf) => (
+                            <Link
+                              key={leaf.id}
+                              href={leaf.url}
+                              className="rounded-md px-3 py-2 pl-9 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            >
+                              {leaf.label}
+                            </Link>
+                          ))}
+                        </React.Fragment>
+                      ) : (
+                        <Link
+                          key={child.id}
+                          href={child.url}
+                          className="rounded-md px-3 py-2 pl-6 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        >
+                          {child.label}
+                        </Link>
+                      )
+                    )}
+                  </React.Fragment>
                 ))}
               </div>
             </SheetContent>

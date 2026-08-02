@@ -16,12 +16,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth-context";
+import { MENU_ICONS, MENU_ICON_KEYS } from "@/lib/menu-icons";
+
+export type DisplayStyle = "link" | "dropdown" | "megamenu";
 
 export type MenuItemNode = {
   id: string;
   label: string;
   type: "custom" | "collection";
   url: string;
+  displayStyle: DisplayStyle;
+  /** Only meaningful on a megamenu's column-group items. */
+  icon: string | null;
   children: MenuItemNode[];
 };
 
@@ -40,6 +46,10 @@ type ItemForm = {
   label: string;
   type: "custom" | "collection";
   url: string;
+  /** Only meaningful on top-level items — controls how children render. */
+  displayStyle: DisplayStyle;
+  /** Only meaningful on a megamenu's column-group items. */
+  icon: string;
   children: ItemForm[];
 };
 
@@ -55,30 +65,32 @@ function fromNode(node: MenuItemNode): ItemForm {
     label: node.label,
     type: node.type,
     url: node.url,
-    children: node.children.map((child) => ({
-      key: nextKey(),
-      label: child.label,
-      type: child.type,
-      url: child.url,
-      children: [],
-    })),
+    displayStyle: node.displayStyle ?? "link",
+    icon: node.icon ?? "",
+    children: node.children.map(fromNode),
   };
 }
 
 function emptyItem(): ItemForm {
-  return { key: nextKey(), label: "", type: "custom", url: "", children: [] };
+  return {
+    key: nextKey(),
+    label: "",
+    type: "custom",
+    url: "",
+    displayStyle: "link",
+    icon: "",
+    children: [],
+  };
 }
 
-function toPayload(item: ItemForm) {
+function toPayload(item: ItemForm): unknown {
   return {
     label: item.label,
     type: item.type,
     url: item.url,
-    children: item.children.map((child) => ({
-      label: child.label,
-      type: child.type,
-      url: child.url,
-    })),
+    displayStyle: item.displayStyle,
+    icon: item.icon || null,
+    children: item.children.map(toPayload),
   };
 }
 
@@ -90,6 +102,7 @@ function move<T>(arr: T[], index: number, delta: number): T[] {
   return next;
 }
 
+/** Label + link-type + URL fields for a leaf navigation item. */
 function LinkFields({
   item,
   categories,
@@ -162,6 +175,47 @@ function LinkFields({
   );
 }
 
+/** Label + icon fields for a mega-menu column-group header (not itself a link). */
+function GroupFields({
+  item,
+  onChange,
+}: {
+  item: ItemForm;
+  onChange: (patch: Partial<ItemForm>) => void;
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+      <Input
+        placeholder="Column heading (e.g. Clothing)"
+        value={item.label}
+        onChange={(e) => onChange({ label: e.target.value })}
+      />
+
+      <Select
+        value={item.icon}
+        onValueChange={(value) => {
+          if (value !== null) onChange({ icon: value });
+        }}
+      >
+        <SelectTrigger size="sm" className="w-40">
+          <SelectValue placeholder="Icon" />
+        </SelectTrigger>
+        <SelectContent>
+          {MENU_ICON_KEYS.map((key) => {
+            const Icon = MENU_ICONS[key];
+            return (
+              <SelectItem key={key} value={key}>
+                <Icon className="h-3.5 w-3.5" />
+                {key}
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 export function MenuEditor({
   menu,
   categories,
@@ -194,6 +248,34 @@ export function MenuEditor({
               ...item,
               children: item.children.map((child, j) =>
                 j === childIndex ? { ...child, ...patch } : child
+              ),
+            }
+          : item
+      )
+    );
+    setSaved(false);
+  }
+
+  function updateGrandchild(
+    parentIndex: number,
+    childIndex: number,
+    grandchildIndex: number,
+    patch: Partial<ItemForm>
+  ) {
+    setItems((current) =>
+      current.map((item, i) =>
+        i === parentIndex
+          ? {
+              ...item,
+              children: item.children.map((child, j) =>
+                j === childIndex
+                  ? {
+                      ...child,
+                      children: child.children.map((grandchild, k) =>
+                        k === grandchildIndex ? { ...grandchild, ...patch } : grandchild
+                      ),
+                    }
+                  : child
               ),
             }
           : item
@@ -244,6 +326,68 @@ export function MenuEditor({
       current.map((item, i) =>
         i === parentIndex
           ? { ...item, children: move(item.children, childIndex, delta) }
+          : item
+      )
+    );
+    setSaved(false);
+  }
+
+  function addGrandchild(parentIndex: number, childIndex: number) {
+    setItems((current) =>
+      current.map((item, i) =>
+        i === parentIndex
+          ? {
+              ...item,
+              children: item.children.map((child, j) =>
+                j === childIndex
+                  ? { ...child, children: [...child.children, emptyItem()] }
+                  : child
+              ),
+            }
+          : item
+      )
+    );
+    setSaved(false);
+  }
+
+  function removeGrandchild(parentIndex: number, childIndex: number, grandchildIndex: number) {
+    setItems((current) =>
+      current.map((item, i) =>
+        i === parentIndex
+          ? {
+              ...item,
+              children: item.children.map((child, j) =>
+                j === childIndex
+                  ? {
+                      ...child,
+                      children: child.children.filter((_, k) => k !== grandchildIndex),
+                    }
+                  : child
+              ),
+            }
+          : item
+      )
+    );
+    setSaved(false);
+  }
+
+  function moveGrandchild(
+    parentIndex: number,
+    childIndex: number,
+    grandchildIndex: number,
+    delta: number
+  ) {
+    setItems((current) =>
+      current.map((item, i) =>
+        i === parentIndex
+          ? {
+              ...item,
+              children: item.children.map((child, j) =>
+                j === childIndex
+                  ? { ...child, children: move(child.children, grandchildIndex, delta) }
+                  : child
+              ),
+            }
           : item
       )
     );
@@ -313,113 +457,258 @@ export function MenuEditor({
         )}
 
         <div className="space-y-3">
-          {items.map((item, index) => (
-            <div key={item.key} className="rounded-lg border border-border p-3">
-              <div className="flex items-start gap-2">
-                <div className="flex flex-col gap-0.5 pt-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Move up"
-                    disabled={index === 0}
-                    onClick={() => moveItem(index, -1)}
-                  >
-                    <ChevronUp className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Move down"
-                    disabled={index === items.length - 1}
-                    onClick={() => moveItem(index, 1)}
-                  >
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+          {items.map((item, index) => {
+            const isMegamenu = item.displayStyle === "megamenu";
 
-                <div className="flex-1">
-                  <LinkFields
-                    item={item}
-                    categories={categories}
-                    onChange={(patch) => updateItem(index, patch)}
-                  />
-                </div>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className="text-muted-foreground hover:text-destructive"
-                  aria-label="Remove item"
-                  onClick={() => removeItem(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Sub-items */}
-              <div className="mt-3 ml-8 space-y-2 border-l border-border pl-4">
-                {item.children.map((child, childIndex) => (
-                  <div key={child.key} className="flex items-start gap-2">
-                    <div className="flex flex-col gap-0.5 pt-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Move up"
-                        disabled={childIndex === 0}
-                        onClick={() => moveChild(index, childIndex, -1)}
-                      >
-                        <ChevronUp className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Move down"
-                        disabled={childIndex === item.children.length - 1}
-                        onClick={() => moveChild(index, childIndex, 1)}
-                      >
-                        <ChevronDown className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-
-                    <div className="flex-1">
-                      <LinkFields
-                        item={child}
-                        categories={categories}
-                        onChange={(patch) => updateChild(index, childIndex, patch)}
-                      />
-                    </div>
-
+            return (
+              <div key={item.key} className="rounded-lg border border-border p-3">
+                <div className="flex items-start gap-2">
+                  <div className="flex flex-col gap-0.5 pt-1">
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      className="text-muted-foreground hover:text-destructive"
-                      aria-label="Remove sub-item"
-                      onClick={() => removeChild(index, childIndex)}
+                      aria-label="Move up"
+                      disabled={index === 0}
+                      onClick={() => moveItem(index, -1)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <ChevronUp className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Move down"
+                      disabled={index === items.length - 1}
+                      onClick={() => moveItem(index, 1)}
+                    >
+                      <ChevronDown className="h-3.5 w-3.5" />
                     </Button>
                   </div>
-                ))}
 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground"
-                  onClick={() => addChild(index)}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Add sub-item
-                </Button>
+                  <div className="flex-1 space-y-2">
+                    <LinkFields
+                      item={item}
+                      categories={categories}
+                      onChange={(patch) => updateItem(index, patch)}
+                    />
+                    {item.children.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs font-normal text-muted-foreground">
+                          Sub-items display as
+                        </Label>
+                        <Select
+                          value={item.displayStyle}
+                          onValueChange={(value) => {
+                            if (value) updateItem(index, { displayStyle: value as DisplayStyle });
+                          }}
+                        >
+                          <SelectTrigger size="sm" className="w-40">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="dropdown">Simple dropdown</SelectItem>
+                            <SelectItem value="megamenu">Mega-menu (columns)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-muted-foreground hover:text-destructive"
+                    aria-label="Remove item"
+                    onClick={() => removeItem(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Sub-items */}
+                <div className="mt-3 ml-8 space-y-3 border-l border-border pl-4">
+                  {item.children.map((child, childIndex) =>
+                    isMegamenu ? (
+                      // Column group: label + icon, plus its own leaf links.
+                      <div
+                        key={child.key}
+                        className="space-y-2 rounded-md border border-dashed border-border p-2.5"
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className="flex flex-col gap-0.5 pt-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label="Move up"
+                              disabled={childIndex === 0}
+                              onClick={() => moveChild(index, childIndex, -1)}
+                            >
+                              <ChevronUp className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label="Move down"
+                              disabled={childIndex === item.children.length - 1}
+                              onClick={() => moveChild(index, childIndex, 1)}
+                            >
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+
+                          <div className="flex-1">
+                            <GroupFields
+                              item={child}
+                              onChange={(patch) => updateChild(index, childIndex, patch)}
+                            />
+                          </div>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-muted-foreground hover:text-destructive"
+                            aria-label="Remove column"
+                            onClick={() => removeChild(index, childIndex)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        {/* Leaf links within this column */}
+                        <div className="ml-8 space-y-2 border-l border-border pl-4">
+                          {child.children.map((grandchild, grandchildIndex) => (
+                            <div key={grandchild.key} className="flex items-start gap-2">
+                              <div className="flex flex-col gap-0.5 pt-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  aria-label="Move up"
+                                  disabled={grandchildIndex === 0}
+                                  onClick={() =>
+                                    moveGrandchild(index, childIndex, grandchildIndex, -1)
+                                  }
+                                >
+                                  <ChevronUp className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  aria-label="Move down"
+                                  disabled={grandchildIndex === child.children.length - 1}
+                                  onClick={() =>
+                                    moveGrandchild(index, childIndex, grandchildIndex, 1)
+                                  }
+                                >
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+
+                              <div className="flex-1">
+                                <LinkFields
+                                  item={grandchild}
+                                  categories={categories}
+                                  onChange={(patch) =>
+                                    updateGrandchild(index, childIndex, grandchildIndex, patch)
+                                  }
+                                />
+                              </div>
+
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                className="text-muted-foreground hover:text-destructive"
+                                aria-label="Remove link"
+                                onClick={() =>
+                                  removeGrandchild(index, childIndex, grandchildIndex)
+                                }
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground"
+                            onClick={() => addGrandchild(index, childIndex)}
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                            Add link
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      // Simple dropdown: a flat leaf link.
+                      <div key={child.key} className="flex items-start gap-2">
+                        <div className="flex flex-col gap-0.5 pt-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="Move up"
+                            disabled={childIndex === 0}
+                            onClick={() => moveChild(index, childIndex, -1)}
+                          >
+                            <ChevronUp className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="Move down"
+                            disabled={childIndex === item.children.length - 1}
+                            onClick={() => moveChild(index, childIndex, 1)}
+                          >
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+
+                        <div className="flex-1">
+                          <LinkFields
+                            item={child}
+                            categories={categories}
+                            onChange={(patch) => updateChild(index, childIndex, patch)}
+                          />
+                        </div>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          className="text-muted-foreground hover:text-destructive"
+                          aria-label="Remove sub-item"
+                          onClick={() => removeChild(index, childIndex)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )
+                  )}
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground"
+                    onClick={() => addChild(index)}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    {isMegamenu ? "Add column" : "Add sub-item"}
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
