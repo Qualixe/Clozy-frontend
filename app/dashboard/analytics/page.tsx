@@ -9,11 +9,12 @@ import {
 } from "@/components/ui/card";
 import { RevenueChart, type RevenuePoint } from "@/components/dashboard/revenue-chart";
 import { StatusChart, type StatusPoint } from "@/components/dashboard/status-chart";
-import { ORDERS, type OrderStatus } from "@/data/orders";
+import { getOrders } from "@/lib/get-orders";
+import type { Order, OrderStatus } from "@/data/orders";
 
-function getRevenueByDay(): RevenuePoint[] {
+function getRevenueByDay(orders: Order[]): RevenuePoint[] {
   const byDate = new Map<string, number>();
-  for (const order of ORDERS) {
+  for (const order of orders) {
     byDate.set(order.date, (byDate.get(order.date) ?? 0) + order.total);
   }
   return Array.from(byDate.entries())
@@ -21,13 +22,13 @@ function getRevenueByDay(): RevenuePoint[] {
     .map(([date, revenue]) => ({ date, revenue }));
 }
 
-function getStatusBreakdown(): StatusPoint[] {
+function getStatusBreakdown(orders: Order[]): StatusPoint[] {
   const counts: Record<OrderStatus, number> = {
     Fulfilled: 0,
     Processing: 0,
     Cancelled: 0,
   };
-  for (const order of ORDERS) counts[order.status] += 1;
+  for (const order of orders) counts[order.status] += 1;
 
   return [
     { label: "Fulfilled", count: counts.Fulfilled, tone: "good" },
@@ -36,16 +37,18 @@ function getStatusBreakdown(): StatusPoint[] {
   ];
 }
 
-export default function DashboardAnalyticsPage() {
-  const revenueByDay = getRevenueByDay();
-  const statusBreakdown = getStatusBreakdown();
+export default async function DashboardAnalyticsPage() {
+  const orders = await getOrders();
+  const revenueByDay = getRevenueByDay(orders);
+  const statusBreakdown = getStatusBreakdown(orders);
 
-  const totalRevenue = ORDERS.reduce((sum, o) => sum + o.total, 0);
-  const totalOrders = ORDERS.length;
-  const avgOrderValue = Math.round(totalRevenue / totalOrders);
-  const fulfilledRate = Math.round(
-    (statusBreakdown[0].count / totalOrders) * 100
-  );
+  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+  const totalOrders = orders.length;
+  const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+  const fulfilledRate =
+    totalOrders > 0
+      ? Math.round((statusBreakdown[0].count / totalOrders) * 100)
+      : 0;
 
   const stats = [
     { label: "Total Revenue", value: `$${totalRevenue}`, icon: DollarSign },
@@ -86,7 +89,13 @@ export default function DashboardAnalyticsPage() {
             <CardDescription>Daily revenue from recent orders.</CardDescription>
           </CardHeader>
           <CardContent>
-            <RevenueChart data={revenueByDay} />
+            {revenueByDay.length > 0 ? (
+              <RevenueChart data={revenueByDay} />
+            ) : (
+              <p className="py-12 text-center text-sm text-muted-foreground">
+                No orders yet.
+              </p>
+            )}
           </CardContent>
         </Card>
 

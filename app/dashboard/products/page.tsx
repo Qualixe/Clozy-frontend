@@ -3,7 +3,7 @@ import { FolderTree } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ProductsTable } from "@/components/dashboard/products-table";
-import { AddProductDialog } from "@/components/dashboard/add-product-dialog";
+import { ProductDialog } from "@/components/dashboard/add-product-dialog";
 import type { Product } from "@/components/product-card";
 
 async function getProducts(): Promise<Product[]> {
@@ -38,7 +38,7 @@ export default async function DashboardProductsPage() {
               </Link>
             }
           />
-          <AddProductDialog />
+          <ProductDialog />
         </div>
       </div>
 

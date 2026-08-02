@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Search, MoreHorizontal, Star, Pencil, Trash2 } from "lucide-react";
+import { Search, Star, Pencil, Trash2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +17,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -32,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ProductDialog } from "@/components/dashboard/add-product-dialog";
 import type { Product } from "@/components/product-card";
 
 export function ProductsTable({ products }: { products: Product[] }) {
@@ -150,35 +145,32 @@ export function ProductsTable({ products }: { products: Product[] }) {
                   )}
                 </TableCell>
                 <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
+                  <div className="flex items-center justify-end gap-1">
+                    <ProductDialog
+                      productId={product.id}
+                      trigger={
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          aria-label={`Actions for ${product.name}`}
+                          aria-label={`Edit ${product.name}`}
                         >
-                          <MoreHorizontal className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" />
                         </Button>
                       }
                     />
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => {
-                          setDeleteError(null);
-                          setPendingDelete(product);
-                        }}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="text-muted-foreground hover:text-destructive"
+                      aria-label={`Delete ${product.name}`}
+                      onClick={() => {
+                        setDeleteError(null);
+                        setPendingDelete(product);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

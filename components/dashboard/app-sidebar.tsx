@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   Users,
   BarChart3,
+  FileText,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -46,6 +47,15 @@ const NAV_ITEMS = [
   { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
   { title: "Customers", href: "/dashboard/customers", icon: Users },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+  {
+    title: "Content",
+    href: "/dashboard/content",
+    icon: FileText,
+    children: [
+      { title: "Menus", href: "/dashboard/content/menus" },
+      { title: "Media", href: "/dashboard/content/media" },
+    ],
+  },
 ];
 
 export function AppSidebar() {

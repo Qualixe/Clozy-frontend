@@ -61,7 +61,17 @@ function getPageItems(current: number, total: number): Array<number | "ellipsis"
   return items;
 }
 
-export function CollectionPage({ products }: { products: Product[] }) {
+export function CollectionPage({
+  products,
+  eyebrow = "Shop",
+  title = "All Products",
+  description,
+}: {
+  products: Product[];
+  eyebrow?: string;
+  title?: string;
+  description?: string | null;
+}) {
   const availableCategories = React.useMemo(
     () => Array.from(new Set(products.map((p) => p.category))).sort(),
     [products]
@@ -149,10 +159,15 @@ export function CollectionPage({ products }: { products: Product[] }) {
     <main className="w-full bg-background">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">Shop</p>
+          <p className="text-sm font-medium text-muted-foreground">{eyebrow}</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            All Products
+            {title}
           </h1>
+          {description && (
+            <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+              {description}
+            </p>
+          )}
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">

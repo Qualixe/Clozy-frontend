@@ -87,6 +87,7 @@ export function CheckoutPage() {
     Partial<Record<keyof FormState, string>>
   >({});
   const [submitting, setSubmitting] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [orderPlaced, setOrderPlaced] = React.useState(false);
   const [confirmedTotal, setConfirmedTotal] = React.useState(0);
 
@@ -99,7 +100,7 @@ export function CheckoutPage() {
     setErrors((e) => ({ ...e, [key]: undefined }));
   }
 
-  function handleSubmit(e: React.SubmitEvent) {
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
 
     const validationErrors = validate(form);
@@ -107,13 +108,47 @@ export function CheckoutPage() {
     if (Object.keys(validationErrors).length > 0) return;
 
     setSubmitting(true);
-    // No orders API yet — simulate placing the order.
-    setTimeout(() => {
-      setSubmitting(false);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          email: form.email,
+          address: form.address,
+          district: form.district,
+          paymentMethod: form.paymentMethod,
+          bkashNumber: form.paymentMethod === "bkash" ? form.bkashNumber : null,
+          shippingCost,
+          items: items.map((item) => ({
+            productId: item.productId,
+            name: item.name,
+            variant: item.variant ?? null,
+            image: item.image,
+            price: item.price,
+            qty: item.qty,
+          })),
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? `Request failed with status ${res.status}`);
+      }
+
       setConfirmedTotal(total);
       setOrderPlaced(true);
       clear();
-    }, 600);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Could not place order."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (orderPlaced) {
@@ -417,7 +452,11 @@ export function CheckoutPage() {
               <span>${total}</span>
             </div>
 
-            <Button type="submit" className="mt-5 w-full" disabled={submitting}>
+            {submitError && (
+              <p className="mt-3 text-sm text-destructive">{submitError}</p>
+            )}
+
+            <Button type="submit" className="mt-3 w-full" disabled={submitting}>
               {submitting ? "Placing order…" : "Place Order"}
             </Button>
           </div>

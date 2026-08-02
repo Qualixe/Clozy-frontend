@@ -23,7 +23,7 @@ export function RelatedProducts({ items }: { items: RelatedProduct[] }) {
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4">
         {items.map((item) => (
-          <Link key={item.id} href={`/products/${item.id}`} className="group">
+          <Link key={item.id} href={`/products/${item.slug}`} className="group">
             <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-muted">
               <Image
                 src={item.image}

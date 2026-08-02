@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import ProductPage, { type ProductDetail } from "@/components/single-product";
 
-async function getProduct(id: string): Promise<ProductDetail | null> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}`, {
+async function getProduct(slug: string): Promise<ProductDetail | null> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${slug}`, {
     cache: "no-store",
   });
 
@@ -16,10 +16,10 @@ async function getProduct(id: string): Promise<ProductDetail | null> {
 export default async function Page({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = await params;
-  const product = await getProduct(id);
+  const { slug } = await params;
+  const product = await getProduct(slug);
 
   if (!product) notFound();
 

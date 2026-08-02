@@ -56,6 +56,7 @@ export type ProductReview = {
 
 export type RelatedProduct = {
   id: string;
+  slug: string;
   name: string;
   price: number;
   image: string;
@@ -65,6 +66,7 @@ export type ProductDetail = {
   id: string;
   name: string;
   category: string;
+  categorySlug?: string | null;
   price: number;
   originalPrice?: number;
   rating: number;
@@ -137,7 +139,15 @@ export function ProductPage({ product }: { product: ProductDetail }) {
             <BreadcrumbItem>
               <BreadcrumbLink
                 render={
-                  <Link href="/shop/outerwear">{product.category}</Link>
+                  <Link
+                    href={
+                      product.categorySlug
+                        ? `/collections/${product.categorySlug}`
+                        : "/shop"
+                    }
+                  >
+                    {product.category}
+                  </Link>
                 }
               />
             </BreadcrumbItem>

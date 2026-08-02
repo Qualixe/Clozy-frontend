@@ -139,6 +139,52 @@ function nextId() {
   return `id-${idCounter}`;
 }
 
+type ProductEditResponse = {
+  title: string;
+  shortDescription: string | null;
+  description: string | null;
+  stock: number | null;
+  sku: string | null;
+  category: string | null;
+  tags: string[];
+  metafields: Metafield[];
+  images: string[];
+  seoTitle: string | null;
+  seoDescription: string | null;
+  hasVariants: boolean;
+  options: { name: string; values: string[] }[];
+  variants: { optionValues: Record<string, string>; price: string; sku: string; stock: string }[];
+};
+
+function fromEditResponse(data: ProductEditResponse): ProductForm {
+  return {
+    title: data.title ?? "",
+    shortDescription: data.shortDescription ?? "",
+    description: data.description ?? "",
+    stock: data.stock != null ? String(data.stock) : "",
+    sku: data.sku ?? "",
+    tags: data.tags ?? [],
+    category: data.category ?? "",
+    metafields: data.metafields?.length ? data.metafields : [{ key: "", value: "" }],
+    images: data.images?.length ? data.images : [""],
+    seoTitle: data.seoTitle ?? "",
+    seoDescription: data.seoDescription ?? "",
+    hasVariants: data.hasVariants ?? false,
+    options: (data.options ?? []).map((o) => ({
+      id: nextId(),
+      name: o.name,
+      values: o.values,
+    })),
+    variants: (data.variants ?? []).map((v) => ({
+      id: comboKey(v.optionValues),
+      optionValues: v.optionValues,
+      price: v.price ?? "",
+      sku: v.sku ?? "",
+      stock: v.stock ?? "",
+    })),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Reusable tag/chip input
 // ---------------------------------------------------------------------------
@@ -195,17 +241,29 @@ function TagInput({
 }
 
 // ---------------------------------------------------------------------------
-// Add product dialog
+// Add / edit product dialog
 // ---------------------------------------------------------------------------
 
-export function AddProductDialog() {
+export function ProductDialog({
+  productId,
+  trigger,
+}: {
+  /** Pass an existing product's id to edit it; omit to create a new one. */
+  productId?: string;
+  /** Custom trigger element (e.g. an Edit button). Defaults to an "Add Product" button. */
+  trigger?: React.ReactNode;
+}) {
   const router = useRouter();
+  const isEditing = !!productId;
+
   const [open, setOpen] = React.useState(false);
   const [form, setForm] = React.useState<ProductForm>(EMPTY_FORM);
+  const [loading, setLoading] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [titleError, setTitleError] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
-  const [created, setCreated] = React.useState(false);
+  const [saved, setSaved] = React.useState(false);
 
   function update<K extends keyof ProductForm>(key: K, value: ProductForm[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -213,15 +271,35 @@ export function AddProductDialog() {
 
   function resetForm() {
     setForm(EMPTY_FORM);
+    setLoadError(null);
     setTitleError(false);
     setSubmitting(false);
     setSubmitError(null);
-    setCreated(false);
+    setSaved(false);
   }
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
-    if (!next) resetForm();
+    if (!next) {
+      resetForm();
+      return;
+    }
+
+    if (!isEditing) {
+      setForm(EMPTY_FORM);
+      return;
+    }
+
+    setLoading(true);
+    setLoadError(null);
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}/edit`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+        return res.json();
+      })
+      .then((data: ProductEditResponse) => setForm(fromEditResponse(data)))
+      .catch(() => setLoadError("Could not load this product."))
+      .finally(() => setLoading(false));
   }
 
   function updateMetafield(index: number, key: keyof Metafield, value: string) {
@@ -317,8 +395,12 @@ export function AddProductDialog() {
     setSubmitError(null);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
-        method: "POST",
+      const url = isEditing
+        ? `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/products`;
+
+      const res = await fetch(url, {
+        method: isEditing ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
@@ -328,11 +410,13 @@ export function AddProductDialog() {
         throw new Error(body?.message ?? `Request failed with status ${res.status}`);
       }
 
-      setCreated(true);
+      setSaved(true);
       router.refresh();
     } catch (err) {
       setSubmitError(
-        err instanceof Error ? err.message : "Could not create product."
+        err instanceof Error
+          ? err.message
+          : `Could not ${isEditing ? "update" : "create"} product.`
       );
     } finally {
       setSubmitting(false);
@@ -343,36 +427,56 @@ export function AddProductDialog() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button size="sm">
-            <Plus className="h-4 w-4" />
-            Add Product
-          </Button>
+          trigger ?? (
+            <Button size="sm">
+              <Plus className="h-4 w-4" />
+              Add Product
+            </Button>
+          )
         }
       />
       <DialogContent className="max-h-[85vh] w-full overflow-y-auto sm:max-w-2xl">
-        {created ? (
+        {saved ? (
           <div className="flex flex-col items-center gap-3 px-2 py-10 text-center">
             <CheckCircle2 className="h-10 w-10 text-emerald-600 dark:text-emerald-500" />
             <h3 className="text-lg font-semibold text-foreground">
-              Product created
+              {isEditing ? "Product updated" : "Product created"}
             </h3>
             <p className="max-w-sm text-sm text-muted-foreground">
               "{form.title}"
-              {form.variants.length > 0
-                ? ` has been added with ${form.variants.length} variant${form.variants.length === 1 ? "" : "s"}.`
-                : " has been added to your catalog."}
+              {isEditing
+                ? " has been updated."
+                : form.variants.length > 0
+                  ? ` has been added with ${form.variants.length} variant${form.variants.length === 1 ? "" : "s"}.`
+                  : " has been added to your catalog."}
             </p>
             <Button className="mt-2" onClick={() => handleOpenChange(false)}>
               Done
             </Button>
           </div>
+        ) : loading ? (
+          <div className="flex flex-col items-center gap-2 px-2 py-16 text-center">
+            <p className="text-sm text-muted-foreground">Loading product…</p>
+          </div>
+        ) : loadError ? (
+          <div className="flex flex-col items-center gap-3 px-2 py-16 text-center">
+            <p className="text-sm text-destructive">{loadError}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleOpenChange(true)}
+            >
+              Try again
+            </Button>
+          </div>
         ) : (
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Add Product</DialogTitle>
+              <DialogTitle>{isEditing ? "Edit Product" : "Add Product"}</DialogTitle>
               <DialogDescription>
-                Fill in the details below to add a new product to your
-                catalog.
+                {isEditing
+                  ? "Update this product's details."
+                  : "Fill in the details below to add a new product to your catalog."}
               </DialogDescription>
             </DialogHeader>
 
@@ -760,7 +864,11 @@ export function AddProductDialog() {
                 Cancel
               </Button>
               <Button type="submit" disabled={submitting}>
-                {submitting ? "Saving…" : "Add Product"}
+                {submitting
+                  ? "Saving…"
+                  : isEditing
+                    ? "Save Changes"
+                    : "Add Product"}
               </Button>
             </DialogFooter>
           </form>
@@ -770,4 +878,4 @@ export function AddProductDialog() {
   );
 }
 
-export default AddProductDialog;
+export default ProductDialog;

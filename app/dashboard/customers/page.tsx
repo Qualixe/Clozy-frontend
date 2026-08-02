@@ -2,12 +2,13 @@ import {
   CustomersTable,
   type Customer,
 } from "@/components/dashboard/customers-table";
-import { ORDERS } from "@/data/orders";
+import { getOrders } from "@/lib/get-orders";
+import type { Order } from "@/data/orders";
 
-function getCustomers(): Customer[] {
+function toCustomers(orders: Order[]): Customer[] {
   const byEmail = new Map<string, Customer>();
 
-  for (const order of ORDERS) {
+  for (const order of orders) {
     const existing = byEmail.get(order.email);
     if (existing) {
       existing.orders += 1;
@@ -31,8 +32,9 @@ function getCustomers(): Customer[] {
   );
 }
 
-export default function DashboardCustomersPage() {
-  const customers = getCustomers();
+export default async function DashboardCustomersPage() {
+  const orders = await getOrders();
+  const customers = toCustomers(orders);
 
   return (
     <div className="flex flex-col gap-6">

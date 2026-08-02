@@ -12,8 +12,10 @@ import { useCart } from "@/lib/cart-context";
 
 export type Product = {
   id: string;
+  slug: string;
   name: string;
   category: string;
+  categorySlug?: string | null;
   price: number;
   originalPrice?: number;
   rating: number;
@@ -48,7 +50,7 @@ export function ProductCard({
   return (
     <div className="group">
       <MediaWrapper className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-muted">
-        <Link href={`/products/${product.id}`}>
+        <Link href={`/products/${product.slug}`}>
           <Image
             src={product.image}
             alt={product.name}
@@ -97,9 +99,18 @@ export function ProductCard({
       </MediaWrapper>
 
       <div className="mt-3">
-        <p className="text-xs text-muted-foreground">{product.category}</p>
+        {product.categorySlug ? (
+          <Link
+            href={`/collections/${product.categorySlug}`}
+            className="text-xs text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
+          >
+            {product.category}
+          </Link>
+        ) : (
+          <p className="text-xs text-muted-foreground">{product.category}</p>
+        )}
         <Link
-          href={`/products/${product.id}`}
+          href={`/products/${product.slug}`}
           className="mt-0.5 block text-sm font-medium text-foreground hover:underline underline-offset-4"
         >
           {product.name}

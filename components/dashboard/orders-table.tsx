@@ -1,11 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Eye } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -22,26 +30,39 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { OrderDetailSheet } from "@/components/dashboard/order-detail-sheet";
+import { cn } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/data/orders";
 
 const PAGE_SIZE = 8;
 
 const STATUS_TABS = ["All", "Processing", "Fulfilled", "Cancelled"] as const;
 
-const STATUS_STYLES: Record<OrderStatus, string> = {
-  Fulfilled: "bg-foreground text-background",
-  Processing: "bg-muted text-foreground",
-  Cancelled: "bg-destructive text-destructive-foreground",
+const STATUS_OPTIONS: { value: Lowercase<OrderStatus>; label: OrderStatus }[] = [
+  { value: "processing", label: "Processing" },
+  { value: "fulfilled", label: "Fulfilled" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
+const STATUS_TRIGGER_STYLES: Record<OrderStatus, string> = {
+  Fulfilled: "border-transparent bg-foreground text-background",
+  Processing: "border-transparent bg-muted text-foreground",
+  Cancelled: "border-transparent bg-destructive text-destructive-foreground",
 };
 
 export function OrdersTable({ orders }: { orders: Order[] }) {
+  const router = useRouter();
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<(typeof STATUS_TABS)[number]>("All");
   const [page, setPage] = React.useState(1);
+  const [viewingOrder, setViewingOrder] = React.useState<Order | null>(null);
+  const [updatingId, setUpdatingId] = React.useState<string | null>(null);
+  const [statusError, setStatusError] = React.useState<string | null>(null);
 
   const filtered = orders.filter((order) => {
     if (status !== "All" && order.status !== status) return false;
-    const haystack = `${order.id} ${order.customer} ${order.email}`.toLowerCase();
+    const haystack =
+      `${order.orderNumber} ${order.customer} ${order.email}`.toLowerCase();
     return haystack.includes(query.toLowerCase());
   });
 
@@ -55,6 +76,35 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
   React.useEffect(() => {
     setPage(1);
   }, [status, query]);
+
+  async function changeStatus(order: Order, next: Lowercase<OrderStatus>) {
+    setUpdatingId(order.id);
+    setStatusError(null);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: next }),
+        }
+      );
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? `Request failed with status ${res.status}`);
+      }
+
+      router.refresh();
+    } catch (err) {
+      setStatusError(
+        err instanceof Error ? err.message : "Could not update order status."
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -80,6 +130,10 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
         </div>
       </div>
 
+      {statusError && (
+        <p className="text-sm text-destructive">{statusError}</p>
+      )}
+
       <div className="overflow-hidden rounded-xl border border-border">
         <Table>
           <TableHeader>
@@ -90,13 +144,14 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
               <TableHead className="text-right">Total</TableHead>
+              <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginated.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium text-foreground">
-                  {order.id}
+                  {order.orderNumber}
                 </TableCell>
                 <TableCell>
                   <div>
@@ -110,12 +165,32 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                   {order.payment}
                 </TableCell>
                 <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className={STATUS_STYLES[order.status]}
+                  <Select
+                    value={order.status.toLowerCase()}
+                    disabled={updatingId === order.id}
+                    onValueChange={(value) => {
+                      if (value) {
+                        changeStatus(order, value as Lowercase<OrderStatus>);
+                      }
+                    }}
                   >
-                    {order.status}
-                  </Badge>
+                    <SelectTrigger
+                      size="sm"
+                      className={cn(
+                        "w-[120px]",
+                        STATUS_TRIGGER_STYLES[order.status]
+                      )}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STATUS_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {order.date}
@@ -123,13 +198,23 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                 <TableCell className="text-right text-foreground">
                   ${order.total}
                 </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`View ${order.orderNumber}`}
+                    onClick={() => setViewingOrder(order)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
 
             {paginated.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="py-10 text-center text-sm text-muted-foreground"
                 >
                   No orders match your search.
@@ -186,6 +271,13 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
           </PaginationContent>
         </Pagination>
       )}
+
+      <OrderDetailSheet
+        order={viewingOrder}
+        onOpenChange={(open) => {
+          if (!open) setViewingOrder(null);
+        }}
+      />
     </div>
   );
 }
