@@ -19,13 +19,18 @@ export type Menu = {
 };
 
 export async function getMenuByHandle(handle: string): Promise<Menu | null> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/menus/handle/${handle}`, {
-    // The header renders on every page — cache briefly so a dashboard edit
-    // shows up without needing a full redeploy, but normal traffic doesn't
-    // hit the API on every request.
-    next: { revalidate: 60 },
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) return null;
-  return res.json();
+  // Force this to render dynamically (fetched per-request) rather than at
+  // build time — the backend isn't guaranteed to be reachable during a
+  // Vercel build, and a failed build-time fetch fails the whole build.
+  // Also swallow network-level failures (backend unreachable at request
+  // time) so the header falls back to its static links instead of a 500.
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/menus/handle/${handle}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
