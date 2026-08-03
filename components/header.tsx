@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   User,
-  Search,
   Menu,
   Package,
   Heart,
@@ -14,7 +13,6 @@ import {
   LayoutDashboard,
   Sun,
   Moon,
-  X,
 } from "lucide-react";
 
 import {
@@ -41,8 +39,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { CartDrawer } from "@/components/cart-drawer";
+import { HeaderSearch } from "@/components/header-search";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { canAccessDashboard } from "@/lib/auth-cookie";
@@ -72,9 +70,7 @@ const FALLBACK_LINKS: MenuLink[] = navData.links.map((link) => ({
 // ---------------------------------------------------------------------------
 
 export function SiteHeader({ menu }: { menu: NavMenu | null }) {
-  const [searchOpen, setSearchOpen] = React.useState(false);
   const [isDark, setIsDark] = React.useState(false);
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user, ready, logout } = useAuth();
 
@@ -84,17 +80,6 @@ export function SiteHeader({ menu }: { menu: NavMenu | null }) {
     await logout();
     router.push("/");
     router.refresh();
-  }
-
-  function toggleSearch() {
-    setSearchOpen((open) => {
-      const next = !open;
-      if (next) {
-        // wait for the expand transition/mount before focusing
-        requestAnimationFrame(() => searchInputRef.current?.focus());
-      }
-      return next;
-    });
   }
 
   function toggleTheme() {
@@ -213,38 +198,8 @@ export function SiteHeader({ menu }: { menu: NavMenu | null }) {
 
         {/* Right side actions */}
         <div className="flex items-center gap-1">
-          {/* Expandable search */}
-          <div className="flex items-center">
-            <div
-              className={cn(
-                "overflow-hidden transition-all duration-300 ease-in-out",
-                searchOpen ? "w-40 sm:w-64 opacity-100" : "w-0 opacity-0"
-              )}
-            >
-              <Input
-                ref={searchInputRef}
-                type="search"
-                placeholder="Search products…"
-                className="h-9"
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") setSearchOpen(false);
-                }}
-              />
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 shrink-0"
-              aria-label={searchOpen ? "Close search" : "Search"}
-              onClick={toggleSearch}
-            >
-              {searchOpen ? (
-                <X className="h-[18px] w-[18px]" />
-              ) : (
-                <Search className="h-[18px] w-[18px]" />
-              )}
-            </Button>
-          </div>
+          {/* Expandable AJAX search */}
+          <HeaderSearch />
 
           {/* Theme toggle */}
           <Button
