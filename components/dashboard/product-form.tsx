@@ -132,6 +132,9 @@ export function ProductForm({
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [imagePickerOpen, setImagePickerOpen] = React.useState(false);
+  const [variantImagePickerIndex, setVariantImagePickerIndex] = React.useState<
+    number | null
+  >(null);
 
   function update<K extends keyof ProductFormValues>(
     key: K,
@@ -215,7 +218,7 @@ export function ProductForm({
 
   function updateVariant(
     index: number,
-    key: "price" | "sku" | "stock",
+    key: "price" | "sku" | "stock" | "image",
     value: string
   ) {
     const variants = [...form.variants];
@@ -438,6 +441,7 @@ export function ProductForm({
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead>Image</TableHead>
                         <TableHead>Variant</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>SKU</TableHead>
@@ -447,6 +451,29 @@ export function ProductForm({
                     <TableBody>
                       {form.variants.map((variant, i) => (
                         <TableRow key={variant.id}>
+                          <TableCell>
+                            <button
+                              type="button"
+                              onClick={() => setVariantImagePickerIndex(i)}
+                              className="group relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-dashed border-input bg-muted text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+                              aria-label={
+                                variant.image
+                                  ? "Change variant image"
+                                  : "Add variant image"
+                              }
+                            >
+                              {variant.image ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={variant.image}
+                                  alt=""
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <Plus className="mx-auto h-4 w-4" />
+                              )}
+                            </button>
+                          </TableCell>
                           <TableCell className="font-medium text-foreground">
                             {comboKey(variant.optionValues)}
                           </TableCell>
@@ -490,6 +517,19 @@ export function ProductForm({
                   </Table>
                 </div>
               )}
+
+              <MediaPickerDialog
+                open={variantImagePickerIndex !== null}
+                onOpenChange={(open) => {
+                  if (!open) setVariantImagePickerIndex(null);
+                }}
+                multiple={false}
+                onSelect={([url]) => {
+                  if (variantImagePickerIndex !== null) {
+                    updateVariant(variantImagePickerIndex, "image", url);
+                  }
+                }}
+              />
             </div>
           )}
         </section>

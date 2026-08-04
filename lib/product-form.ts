@@ -8,6 +8,7 @@ export type ProductVariant = {
   price: string;
   sku: string;
   stock: string;
+  image: string;
 };
 
 export type ProductFormValues = {
@@ -79,7 +80,9 @@ export function regenerateVariants(
   return cartesian(options).map((combo) => {
     const key = comboKey(combo);
     const match = existing.find((v) => comboKey(v.optionValues) === key);
-    return match ?? { id: key, optionValues: combo, price: "", sku: "", stock: "" };
+    return (
+      match ?? { id: key, optionValues: combo, price: "", sku: "", stock: "", image: "" }
+    );
   });
 }
 
@@ -103,7 +106,13 @@ export type ProductEditResponse = {
   seoDescription: string | null;
   hasVariants: boolean;
   options: { name: string; values: string[] }[];
-  variants: { optionValues: Record<string, string>; price: string; sku: string; stock: string }[];
+  variants: {
+    optionValues: Record<string, string>;
+    price: string;
+    sku: string;
+    stock: string;
+    image: string;
+  }[];
 };
 
 export function fromEditResponse(data: ProductEditResponse): ProductFormValues {
@@ -131,6 +140,7 @@ export function fromEditResponse(data: ProductEditResponse): ProductFormValues {
       price: v.price ?? "",
       sku: v.sku ?? "",
       stock: v.stock ?? "",
+      image: v.image ?? "",
     })),
   };
 }

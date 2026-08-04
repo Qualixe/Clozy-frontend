@@ -72,7 +72,7 @@ export type ProductDetail = {
   rating: number;
   reviews: number;
   description: string;
-  colors: { name: string; value: string }[];
+  colors: { name: string; value: string; image?: string | null }[];
   sizes: string[];
   outOfStockSizes: string[];
   images: string[];
@@ -119,6 +119,14 @@ export function ProductPage({ product }: { product: ProductDetail }) {
     setActiveImage(galleryApi.selectedScrollSnap());
     galleryApi.on("select", () => setActiveImage(galleryApi.selectedScrollSnap()));
   }, [galleryApi]);
+
+  React.useEffect(() => {
+    if (!galleryApi) return;
+    const color = product.colors.find((c) => c.name === selectedColor);
+    if (!color?.image) return;
+    const index = product.images.indexOf(color.image);
+    if (index !== -1) galleryApi.scrollTo(index);
+  }, [selectedColor, galleryApi, product.colors, product.images]);
 
   const discountPct = product.originalPrice
     ? Math.round(
