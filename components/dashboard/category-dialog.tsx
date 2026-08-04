@@ -179,20 +179,12 @@ export function CategoryDialog({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="category-image">Image</Label>
-                <div className="flex items-center gap-2">
-                  <ImageUploader
-                    compact
-                    value={form.image}
-                    onChange={(url) => update("image", url)}
-                  />
-                  <Input
-                    id="category-image"
-                    placeholder="https://example.com/image.jpg"
-                    value={form.image}
-                    onChange={(e) => update("image", e.target.value)}
-                  />
-                </div>
+                <Label>Image</Label>
+                <ImageUploader
+                  className="max-w-[180px]"
+                  value={form.image}
+                  onChange={(url) => update("image", url)}
+                />
               </div>
             </section>
 

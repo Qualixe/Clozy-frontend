@@ -50,7 +50,7 @@ export function ProductCard({
   return (
     <div className="group">
       <MediaWrapper className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-muted">
-        <Link href={`/products/${product.slug}`}>
+        <Link href={`/products/${product.slug}`} className="relative block h-full w-full">
           <Image
             src={product.image}
             alt={product.name}
@@ -91,7 +91,7 @@ export function ProductCard({
         </Button>
 
         <div className="absolute inset-x-3 bottom-3 translate-y-12 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <Button size="sm" className="w-full" onClick={handleAddToCart}>
+          <Button className="w-full" onClick={handleAddToCart}>
             <ShoppingCart className="h-4 w-4" />
             Add to Cart
           </Button>

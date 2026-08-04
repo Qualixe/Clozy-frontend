@@ -16,6 +16,8 @@ export type ImageTextSectionProps = {
   /** Which side the image sits on at desktop width. Defaults to "left". */
   imagePosition?: "left" | "right";
   className?: string;
+  /** Set when this section renders above the fold (e.g. directly after the hero). */
+  priority?: boolean;
 };
 
 /**
@@ -32,6 +34,7 @@ export function ImageTextSection({
   ctaHref,
   imagePosition = "left",
   className,
+  priority = false,
 }: ImageTextSectionProps) {
   return (
     <section className={cn("w-full bg-background py-16 sm:py-20", className)}>
@@ -49,6 +52,7 @@ export function ImageTextSection({
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
+              priority={priority}
             />
           </div>
 

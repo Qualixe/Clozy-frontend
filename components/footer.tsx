@@ -178,6 +178,7 @@ export function SiteFooter() {
                     variant="ghost"
                     size="icon"
                     className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                    nativeButton={false}
                     render={
                       <Link href={href} aria-label={label} target="_blank" rel="noreferrer">
                         <Icon className="h-[18px] w-[18px]" />

@@ -124,7 +124,6 @@ export function CartDrawer() {
           </div>
           <Button
             className="w-full"
-            size="sm"
             disabled={items.length === 0}
             nativeButton={false}
             onClick={() => setOpen(false)}

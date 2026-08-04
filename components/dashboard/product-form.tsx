@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
-import { ImageUploader } from "@/components/dashboard/image-uploader";
+import { MediaPickerDialog } from "@/components/dashboard/media-picker-dialog";
 import { useAuth } from "@/lib/auth-context";
 import {
   EMPTY_PRODUCT_FORM,
@@ -131,6 +131,7 @@ export function ProductForm({
   const [titleError, setTitleError] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [imagePickerOpen, setImagePickerOpen] = React.useState(false);
 
   function update<K extends keyof ProductFormValues>(
     key: K,
@@ -156,20 +157,22 @@ export function ProductForm({
     );
   }
 
-  function updateImage(index: number, value: string) {
-    const next = [...form.images];
-    next[index] = value;
-    update("images", next);
+  function addImages(urls: string[]) {
+    const existing = new Set(form.images);
+    const merged = [...form.images];
+    for (const url of urls) {
+      if (!existing.has(url)) {
+        merged.push(url);
+        existing.add(url);
+      }
+    }
+    update("images", merged);
   }
 
-  function addImage() {
-    update("images", [...form.images, ""]);
-  }
-
-  function removeImage(index: number) {
+  function removeImage(url: string) {
     update(
       "images",
-      form.images.filter((_, i) => i !== index)
+      form.images.filter((u) => u !== url)
     );
   }
 
@@ -535,39 +538,42 @@ export function ProductForm({
 
         {/* Images */}
         <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label>Images</Label>
-            <Button type="button" variant="outline" size="sm" onClick={addImage}>
-              <Plus className="h-3.5 w-3.5" />
-              Add image
-            </Button>
-          </div>
-          <div className="space-y-2">
-            {form.images.map((url, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <ImageUploader
-                  compact
-                  value={url}
-                  onChange={(next) => updateImage(i, next)}
-                />
-                <Input
-                  placeholder="https://example.com/image.jpg"
-                  value={url}
-                  onChange={(e) => updateImage(i, e.target.value)}
-                />
-                <Button
+          <Label>Media</Label>
+          <div className="flex flex-wrap gap-3">
+            {form.images.map((url) => (
+              <div
+                key={url}
+                className="group relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-border bg-muted"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="h-full w-full object-cover" />
+                <button
                   type="button"
-                  variant="ghost"
-                  size="icon-sm"
+                  onClick={() => removeImage(url)}
                   aria-label="Remove image"
-                  onClick={() => removeImage(i)}
-                  disabled={form.images.length === 1}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
                 >
-                  <X className="h-4 w-4" />
-                </Button>
+                  <X className="h-3 w-3" />
+                </button>
               </div>
             ))}
+
+            <button
+              type="button"
+              onClick={() => setImagePickerOpen(true)}
+              className="flex h-24 w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-input text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+            >
+              <Plus className="h-5 w-5" />
+              <span className="text-xs">Add</span>
+            </button>
           </div>
+
+          <MediaPickerDialog
+            open={imagePickerOpen}
+            onOpenChange={setImagePickerOpen}
+            multiple
+            onSelect={addImages}
+          />
         </section>
 
         <Separator />
