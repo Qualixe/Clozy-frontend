@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, X, ImagePlus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
+import { ImageUploader } from "@/components/dashboard/image-uploader";
 import { useAuth } from "@/lib/auth-context";
 import {
   EMPTY_PRODUCT_FORM,
@@ -544,21 +545,11 @@ export function ProductForm({
           <div className="space-y-2">
             {form.images.map((url, i) => (
               <div key={i} className="flex items-center gap-2">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
-                  {url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={url}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.visibility = "hidden";
-                      }}
-                    />
-                  ) : (
-                    <ImagePlus className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
+                <ImageUploader
+                  compact
+                  value={url}
+                  onChange={(next) => updateImage(i, next)}
+                />
                 <Input
                   placeholder="https://example.com/image.jpg"
                   value={url}

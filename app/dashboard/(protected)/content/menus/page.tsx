@@ -3,14 +3,14 @@ import { ArrowLeft } from "lucide-react";
 
 import { MenusTable, type MenuSummary } from "@/components/dashboard/menus-table";
 import { AddMenuDialog } from "@/components/dashboard/add-menu-dialog";
-import { getServerAuthHeaders } from "@/lib/auth-server";
+import { assertDashboardFetchOk, getServerAuthHeaders } from "@/lib/auth-server";
 
 async function getMenus(): Promise<MenuSummary[]> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/menus`, {
     cache: "no-store",
     headers: await getServerAuthHeaders(),
   });
-  if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+  assertDashboardFetchOk(res);
   return res.json();
 }
 

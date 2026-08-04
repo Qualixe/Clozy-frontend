@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { MenuEditor, type MenuDetail } from "@/components/dashboard/menu-editor";
-import { getServerAuthHeaders } from "@/lib/auth-server";
+import { assertDashboardFetchOk, getServerAuthHeaders } from "@/lib/auth-server";
 
 async function getMenu(id: string): Promise<MenuDetail | null> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/menus/${id}`, {
@@ -11,7 +11,7 @@ async function getMenu(id: string): Promise<MenuDetail | null> {
     headers: await getServerAuthHeaders(),
   });
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+  assertDashboardFetchOk(res);
   return res.json();
 }
 

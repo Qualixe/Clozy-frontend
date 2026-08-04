@@ -2,7 +2,7 @@ import { ShieldAlert } from "lucide-react";
 
 import { UsersTable } from "@/components/dashboard/users-table";
 import { UserDialog, type ManagedUser } from "@/components/dashboard/user-dialog";
-import { getServerAuthHeaders } from "@/lib/auth-server";
+import { assertDashboardFetchOk, getServerAuthHeaders } from "@/lib/auth-server";
 
 async function getUsers(): Promise<{ users: ManagedUser[] | null; forbidden: boolean }> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
@@ -10,7 +10,7 @@ async function getUsers(): Promise<{ users: ManagedUser[] | null; forbidden: boo
     headers: await getServerAuthHeaders(),
   });
   if (res.status === 403) return { users: null, forbidden: true };
-  if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+  assertDashboardFetchOk(res);
   return { users: await res.json(), forbidden: false };
 }
 

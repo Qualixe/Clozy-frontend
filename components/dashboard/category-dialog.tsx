@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Plus, ImagePlus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ImageUploader } from "@/components/dashboard/image-uploader";
 import { useAuth } from "@/lib/auth-context";
 
 export type Category = {
@@ -180,21 +181,11 @@ export function CategoryDialog({
               <div className="space-y-1.5">
                 <Label htmlFor="category-image">Image</Label>
                 <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
-                    {form.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={form.image}
-                        alt=""
-                        className="h-full w-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.visibility = "hidden";
-                        }}
-                      />
-                    ) : (
-                      <ImagePlus className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </div>
+                  <ImageUploader
+                    compact
+                    value={form.image}
+                    onChange={(url) => update("image", url)}
+                  />
                   <Input
                     id="category-image"
                     placeholder="https://example.com/image.jpg"
