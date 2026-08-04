@@ -139,7 +139,7 @@ export function ProductsTable({ products }: { products: Product[] }) {
                     <Badge
                       className={
                         product.tag === "Sale"
-                          ? "bg-destructive text-destructive-foreground"
+                          ? "bg-green-600 text-white"
                           : "bg-foreground text-background"
                       }
                     >

@@ -65,7 +65,7 @@ export function ProductCard({
             className={cn(
               "absolute left-3 top-3",
               product.tag === "Sale"
-                ? "bg-destructive text-destructive-foreground"
+                ? "bg-green-600 text-white"
                 : "bg-foreground text-background"
             )}
           >

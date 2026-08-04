@@ -321,7 +321,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
                       className={cn(
                         "flex h-10 w-12 items-center justify-center rounded-md border text-sm font-medium transition-colors",
                         outOfStock &&
-                          "cursor-not-allowed border-border text-muted-foreground/40 line-through",
+                          "cursor-not-allowed border-destructive/20 bg-destructive/10 text-destructive/60 line-through",
                         !outOfStock &&
                           selectedSize === size &&
                           "border-foreground bg-foreground text-background",
