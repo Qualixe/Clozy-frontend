@@ -19,6 +19,8 @@ export type ProductFormValues = {
   sku: string;
   tags: string[];
   category: string;
+  /** Additional collection ids the product also shows up under, beyond `category`. */
+  collections: string[];
   metafields: Metafield[];
   images: string[];
   seoTitle: string;
@@ -36,6 +38,7 @@ export const EMPTY_PRODUCT_FORM: ProductFormValues = {
   sku: "",
   tags: [],
   category: "",
+  collections: [],
   metafields: [{ key: "", value: "" }],
   images: [],
   seoTitle: "",
@@ -99,6 +102,7 @@ export type ProductEditResponse = {
   stock: number | null;
   sku: string | null;
   category: string | null;
+  collections: string[];
   tags: string[];
   metafields: Metafield[];
   images: string[];
@@ -124,6 +128,7 @@ export function fromEditResponse(data: ProductEditResponse): ProductFormValues {
     sku: data.sku ?? "",
     tags: data.tags ?? [],
     category: data.category ?? "",
+    collections: data.collections ?? [],
     metafields: data.metafields?.length ? data.metafields : [{ key: "", value: "" }],
     images: data.images ?? [],
     seoTitle: data.seoTitle ?? "",

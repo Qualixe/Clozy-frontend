@@ -25,6 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
 import { MediaPickerDialog } from "@/components/dashboard/media-picker-dialog";
 import { useAuth } from "@/lib/auth-context";
@@ -37,15 +39,6 @@ import {
   type ProductFormValues,
   type ProductOption,
 } from "@/lib/product-form";
-
-const CATEGORIES = [
-  "Knitwear",
-  "Footwear",
-  "Shirts",
-  "Outerwear",
-  "Trousers",
-  "Accessories",
-] as const;
 
 const MAX_OPTIONS = 3;
 
@@ -105,6 +98,83 @@ function TagInput({
 }
 
 // ---------------------------------------------------------------------------
+// Collections multi-select — lets a product belong to any number of
+// collections in addition to its primary Category.
+// ---------------------------------------------------------------------------
+
+function CollectionsPicker({
+  categories,
+  selected,
+  onChange,
+}: {
+  categories: { id: string; name: string }[];
+  selected: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  function toggle(id: string) {
+    onChange(
+      selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id]
+    );
+  }
+
+  const selectedCategories = categories.filter((c) => selected.includes(c.id));
+
+  return (
+    <div className="space-y-2">
+      {selectedCategories.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {selectedCategories.map((category) => (
+            <Badge key={category.id} variant="secondary" className="gap-1">
+              {category.name}
+              <button
+                type="button"
+                onClick={() => toggle(category.id)}
+                aria-label={`Remove ${category.name}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          render={
+            <Button type="button" variant="outline" size="sm">
+              <Plus className="h-3.5 w-3.5" />
+              Add to collection
+            </Button>
+          }
+        />
+        <PopoverContent align="start" className="p-1">
+          <div className="max-h-64 overflow-y-auto">
+            {categories.length === 0 && (
+              <p className="p-2 text-xs text-muted-foreground">
+                No collections yet.
+              </p>
+            )}
+            {categories.map((category) => (
+              <label
+                key={category.id}
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted"
+              >
+                <Checkbox
+                  checked={selected.includes(category.id)}
+                  onCheckedChange={() => toggle(category.id)}
+                />
+                {category.name}
+              </label>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Product form — shared by the "Add Product" dialog and the dedicated
 // product edit page.
 // ---------------------------------------------------------------------------
@@ -135,6 +205,14 @@ export function ProductForm({
   const [variantImagePickerIndex, setVariantImagePickerIndex] = React.useState<
     number | null
   >(null);
+  const [categories, setCategories] = React.useState<{ id: string; name: string }[]>([]);
+
+  React.useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: { id: string; name: string }[]) => setCategories(data))
+      .catch(() => setCategories([]));
+  }, []);
 
   function update<K extends keyof ProductFormValues>(
     key: K,
@@ -352,13 +430,30 @@ export function ProductForm({
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.name}>
+                    {category.name}
                   </SelectItem>
                 ))}
+                {form.category &&
+                  !categories.some((c) => c.name === form.category) && (
+                    <SelectItem value={form.category}>{form.category}</SelectItem>
+                  )}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Collections</Label>
+            <p className="text-xs text-muted-foreground">
+              Also show this product under other collection pages, in addition to
+              its category above.
+            </p>
+            <CollectionsPicker
+              categories={categories}
+              selected={form.collections}
+              onChange={(ids) => update("collections", ids)}
+            />
           </div>
 
           <div className="space-y-1.5">
