@@ -10,6 +10,7 @@ import {
   Users,
   BarChart3,
   FileText,
+  Palette,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -56,6 +57,12 @@ const NAV_ITEMS = [
       { title: "Menus", href: "/dashboard/content/menus" },
       { title: "Media", href: "/dashboard/content/media" },
     ],
+  },
+  {
+    title: "Theme",
+    href: "/dashboard/theme",
+    icon: Palette,
+    children: [{ title: "Hero", href: "/dashboard/theme/hero" }],
   },
 ];
 

@@ -7,55 +7,24 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
-// Data
+// Data — populated from the Laravel API (`GET /hero-slides`), editable from
+// the dashboard's Theme page.
 // ---------------------------------------------------------------------------
-// Swap `image` for your own product photography (transparent PNG works best
-// for the floating effect), e.g. "/hero/autumn-edit.png"
 
-const SLIDES = [
-  {
-    id: "autumn-edit",
-    eyebrow: "New Collection",
-    ghostText: "AUTUMN",
-    heading: ["Layers Built For", "The Season Ahead."],
-    body: "Considered outerwear and knitwear, cut from fabrics that hold up when the weather doesn't.",
-    ctaLabel: "Explore More",
-    ctaHref: "/shop/autumn-edit",
-    image: "https://picsum.photos/seed/nordly-hero-autumn/900/900",
-    from: "#e8d9c3",
-    to: "#8a6a52",
-    accent: "#8a4a34",
-    textColor: "#2b1d13",
-  },
-  {
-    id: "summer-whites",
-    eyebrow: "Featured",
-    ghostText: "SUMMER",
-    heading: ["Light Fabrics.", "Effortless Fit."],
-    body: "Breathable essentials designed for warm days and easy movement, in a palette that stays quiet.",
-    ctaLabel: "Shop Now",
-    ctaHref: "/shop/summer-whites",
-    image: "https://picsum.photos/seed/nordly-hero-summer/900/900",
-    from: "#eef1ee",
-    to: "#a9b8ab",
-    accent: "#3f5142",
-    textColor: "#1c231d",
-  },
-  {
-    id: "night-edit",
-    eyebrow: "Just Dropped",
-    ghostText: "MIDNIGHT",
-    heading: ["Sharper Silhouettes.", "After Dark."],
-    body: "Tailored pieces in deep tones, built for evenings that call for something more deliberate.",
-    ctaLabel: "Discover",
-    ctaHref: "/shop/night-edit",
-    image: "https://picsum.photos/seed/nordly-hero-night/900/900",
-    from: "#2b2d33",
-    to: "#0e0f12",
-    accent: "#c9a876",
-    textColor: "#f4f1ea",
-  },
-] as const;
+export type HeroSlide = {
+  id: string;
+  eyebrow: string | null;
+  ghostText: string | null;
+  heading: string[];
+  body: string | null;
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  image: string;
+  gradientFrom: string;
+  gradientTo: string;
+  accentColor: string;
+  textColor: string;
+};
 
 const AUTOPLAY_MS = 5500;
 
@@ -63,23 +32,27 @@ const AUTOPLAY_MS = 5500;
 // Hero slider
 // ---------------------------------------------------------------------------
 
-export function HeroSlider() {
+export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   const [index, setIndex] = React.useState(0);
   const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const goTo = React.useCallback((i: number) => {
-    setIndex((i + SLIDES.length) % SLIDES.length);
-  }, []);
+  const goTo = React.useCallback(
+    (i: number) => {
+      setIndex((i + slides.length) % slides.length);
+    },
+    [slides.length]
+  );
 
   const next = React.useCallback(() => goTo(index + 1), [goTo, index]);
   const prev = React.useCallback(() => goTo(index - 1), [goTo, index]);
 
   const startAutoplay = React.useCallback(() => {
     stopAutoplay();
+    if (slides.length <= 1) return;
     timerRef.current = setInterval(() => {
-      setIndex((i) => (i + 1) % SLIDES.length);
+      setIndex((i) => (i + 1) % slides.length);
     }, AUTOPLAY_MS);
-  }, []);
+  }, [slides.length]);
 
   function stopAutoplay() {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -90,7 +63,7 @@ export function HeroSlider() {
     return stopAutoplay;
   }, [startAutoplay]);
 
-  const active = SLIDES[index];
+  if (slides.length === 0) return null;
 
   return (
     <section
@@ -104,12 +77,12 @@ export function HeroSlider() {
           className="flex h-full transition-transform duration-700 ease-out"
           style={{ transform: `translateX(-${index * 100}%)` }}
         >
-          {SLIDES.map((slide) => (
+          {slides.map((slide) => (
             <div
               key={slide.id}
               className="relative h-full w-full shrink-0 overflow-hidden"
               style={{
-                background: `linear-gradient(135deg, ${slide.from}, ${slide.to})`,
+                background: `linear-gradient(135deg, ${slide.gradientFrom}, ${slide.gradientTo})`,
               }}
             >
               {/* Ghost watermark text */}
@@ -147,14 +120,16 @@ export function HeroSlider() {
                   >
                     {slide.body}
                   </p>
-                  <Link
-                    href={slide.ctaHref}
-                    className="mt-7 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5"
-                    style={{ backgroundColor: slide.accent }}
-                  >
-                    {slide.ctaLabel}
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Link>
+                  {slide.ctaLabel && (
+                    <Link
+                      href={slide.ctaHref || "#"}
+                      className="mt-7 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5"
+                      style={{ backgroundColor: slide.accentColor }}
+                    >
+                      {slide.ctaLabel}
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Link>
+                  )}
                 </div>
 
                 {/* Image column */}
@@ -165,7 +140,7 @@ export function HeroSlider() {
                     fill
                     sizes="(max-width: 1024px) 0px, 45vw"
                     className="object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.35)]"
-                    priority={slide.id === SLIDES[0].id}
+                    priority={slide.id === slides[0].id}
                   />
                 </div>
               </div>
@@ -173,38 +148,42 @@ export function HeroSlider() {
           ))}
         </div>
 
-        {/* Arrows */}
-        <button
-          onClick={prev}
-          aria-label="Previous slide"
-          className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 sm:left-5"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        <button
-          onClick={next}
-          aria-label="Next slide"
-          className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 sm:right-5"
-        >
-          <ArrowRight className="h-4 w-4" />
-        </button>
-
-        {/* Dots */}
-        <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
-          {SLIDES.map((slide, i) => (
+        {slides.length > 1 && (
+          <>
+            {/* Arrows */}
             <button
-              key={slide.id}
-              onClick={() => goTo(i)}
-              aria-label={`Go to slide ${i + 1}`}
-              className={cn(
-                "h-2 rounded-full transition-all duration-300",
-                i === index
-                  ? "w-6 bg-white"
-                  : "w-2 bg-white/50 hover:bg-white/70"
-              )}
-            />
-          ))}
-        </div>
+              onClick={prev}
+              aria-label="Previous slide"
+              className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 sm:left-5"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={next}
+              aria-label="Next slide"
+              className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 sm:right-5"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </button>
+
+            {/* Dots */}
+            <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+              {slides.map((slide, i) => (
+                <button
+                  key={slide.id}
+                  onClick={() => goTo(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={cn(
+                    "h-2 rounded-full transition-all duration-300",
+                    i === index
+                      ? "w-6 bg-white"
+                      : "w-2 bg-white/50 hover:bg-white/70"
+                  )}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

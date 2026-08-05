@@ -3,15 +3,19 @@ import HeroSlider from "@/components/hero";
 import { ImageTextSection } from "@/components/image-text-section";
 import ProductsSection from "@/components/products";
 import { getCategories } from "@/lib/get-categories";
+import { getHeroSlides } from "@/lib/get-hero-slides";
 
 export default async function Home() {
   // A backend hiccup shouldn't take the homepage down — fall back to an
-  // empty category list rather than throwing.
-  const categories = await getCategories().catch(() => []);
+  // empty list rather than throwing.
+  const [categories, heroSlides] = await Promise.all([
+    getCategories().catch(() => []),
+    getHeroSlides().catch(() => []),
+  ]);
 
   return (
     <>
-      <HeroSlider />
+      <HeroSlider slides={heroSlides} />
       <CategoryShowcase categories={categories} />
 
       <ProductsSection />
