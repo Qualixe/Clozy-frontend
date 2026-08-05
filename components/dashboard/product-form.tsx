@@ -296,7 +296,7 @@ export function ProductForm({
 
   function updateVariant(
     index: number,
-    key: "price" | "sku" | "stock" | "image",
+    key: "price" | "compareAtPrice" | "sku" | "stock" | "image",
     value: string
   ) {
     const variants = [...form.variants];
@@ -395,6 +395,34 @@ export function ProductForm({
         <section className="space-y-4">
           {!form.hasVariants && (
             <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="price">Price</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  placeholder="0.00"
+                  value={form.price}
+                  onChange={(e) => update("price", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="compareAtPrice">Compare-at Price</Label>
+                <Input
+                  id="compareAtPrice"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  placeholder="0.00"
+                  value={form.compareAtPrice}
+                  onChange={(e) => update("compareAtPrice", e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Shown crossed out next to the price when higher — leave blank
+                  if not on sale.
+                </p>
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="stock">Stock</Label>
                 <Input
@@ -539,6 +567,7 @@ export function ProductForm({
                         <TableHead>Image</TableHead>
                         <TableHead>Variant</TableHead>
                         <TableHead>Price</TableHead>
+                        <TableHead>Compare-at</TableHead>
                         <TableHead>SKU</TableHead>
                         <TableHead>Stock</TableHead>
                       </TableRow>
@@ -580,6 +609,18 @@ export function ProductForm({
                               value={variant.price}
                               onChange={(e) =>
                                 updateVariant(i, "price", e.target.value)
+                              }
+                              className="h-8 w-24"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="number"
+                              min={0}
+                              placeholder="0.00"
+                              value={variant.compareAtPrice}
+                              onChange={(e) =>
+                                updateVariant(i, "compareAtPrice", e.target.value)
                               }
                               className="h-8 w-24"
                             />

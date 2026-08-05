@@ -75,6 +75,11 @@ export type ProductDetail = {
   colors: { name: string; value: string; image?: string | null }[];
   sizes: string[];
   outOfStockSizes: string[];
+  variants: {
+    optionValues: Record<string, string>;
+    price: number;
+    compareAtPrice: number | null;
+  }[];
   images: string[];
   details: string[];
   reviewsList: ProductReview[];
@@ -96,6 +101,16 @@ export function ProductPage({ product }: { product: ProductDetail }) {
   const [wishlisted, setWishlisted] = React.useState(false);
   const { addItem } = useCart();
 
+  // The variant matching whatever color/size is currently selected — used to
+  // show that combination's actual price rather than the product's base price.
+  const activeVariant = product.variants.find((v) => {
+    if (selectedColor && v.optionValues.Color !== selectedColor) return false;
+    if (selectedSize && v.optionValues.Size !== selectedSize) return false;
+    return true;
+  });
+  const displayPrice = activeVariant?.price ?? product.price;
+  const displayOriginalPrice = activeVariant?.compareAtPrice ?? product.originalPrice;
+
   function handleAddToCart() {
     if (!selectedSize) return;
 
@@ -106,7 +121,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
         id: `${product.id}-${variant}`,
         productId: product.id,
         name: product.name,
-        price: product.price,
+        price: displayPrice,
         image: product.images[0],
         variant: variant || undefined,
       },
@@ -128,9 +143,9 @@ export function ProductPage({ product }: { product: ProductDetail }) {
     if (index !== -1) galleryApi.scrollTo(index);
   }, [selectedColor, galleryApi, product.colors, product.images]);
 
-  const discountPct = product.originalPrice
+  const discountPct = displayOriginalPrice
     ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100
+        ((displayOriginalPrice - displayPrice) / displayOriginalPrice) * 100
       )
     : null;
 
@@ -259,11 +274,11 @@ export function ProductPage({ product }: { product: ProductDetail }) {
 
             <div className="mt-4 flex items-center gap-3">
               <span className="text-2xl font-semibold text-foreground">
-                ${product.price}
+                ${displayPrice}
               </span>
-              {product.originalPrice && (
+              {displayOriginalPrice && (
                 <span className="text-base text-muted-foreground line-through">
-                  ${product.originalPrice}
+                  ${displayOriginalPrice}
                 </span>
               )}
             </div>

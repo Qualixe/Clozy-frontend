@@ -6,6 +6,7 @@ export type ProductVariant = {
   id: string;
   optionValues: Record<string, string>;
   price: string;
+  compareAtPrice: string;
   sku: string;
   stock: string;
   image: string;
@@ -17,6 +18,8 @@ export type ProductFormValues = {
   description: string;
   stock: string;
   sku: string;
+  price: string;
+  compareAtPrice: string;
   tags: string[];
   category: string;
   /** Additional collection ids the product also shows up under, beyond `category`. */
@@ -36,6 +39,8 @@ export const EMPTY_PRODUCT_FORM: ProductFormValues = {
   description: "",
   stock: "",
   sku: "",
+  price: "",
+  compareAtPrice: "",
   tags: [],
   category: "",
   collections: [],
@@ -84,7 +89,15 @@ export function regenerateVariants(
     const key = comboKey(combo);
     const match = existing.find((v) => comboKey(v.optionValues) === key);
     return (
-      match ?? { id: key, optionValues: combo, price: "", sku: "", stock: "", image: "" }
+      match ?? {
+        id: key,
+        optionValues: combo,
+        price: "",
+        compareAtPrice: "",
+        sku: "",
+        stock: "",
+        image: "",
+      }
     );
   });
 }
@@ -101,6 +114,8 @@ export type ProductEditResponse = {
   description: string | null;
   stock: number | null;
   sku: string | null;
+  price: string | null;
+  compareAtPrice: string | null;
   category: string | null;
   collections: string[];
   tags: string[];
@@ -113,6 +128,7 @@ export type ProductEditResponse = {
   variants: {
     optionValues: Record<string, string>;
     price: string;
+    compareAtPrice: string;
     sku: string;
     stock: string;
     image: string;
@@ -126,6 +142,8 @@ export function fromEditResponse(data: ProductEditResponse): ProductFormValues {
     description: data.description ?? "",
     stock: data.stock != null ? String(data.stock) : "",
     sku: data.sku ?? "",
+    price: data.price ?? "",
+    compareAtPrice: data.compareAtPrice ?? "",
     tags: data.tags ?? [],
     category: data.category ?? "",
     collections: data.collections ?? [],
@@ -143,6 +161,7 @@ export function fromEditResponse(data: ProductEditResponse): ProductFormValues {
       id: comboKey(v.optionValues),
       optionValues: v.optionValues,
       price: v.price ?? "",
+      compareAtPrice: v.compareAtPrice ?? "",
       sku: v.sku ?? "",
       stock: v.stock ?? "",
       image: v.image ?? "",

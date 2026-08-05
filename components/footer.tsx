@@ -7,7 +7,6 @@ import { ArrowUp, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -51,6 +50,87 @@ function YoutubeIcon(props: React.SVGProps<SVGSVGElement>) {
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
       <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
     </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Payment icons
+// ---------------------------------------------------------------------------
+// Rendered as small white "cards" so the brand marks read correctly in both
+// light and dark themes, matching how these logos are shown everywhere else.
+
+function PaymentCard({
+  children,
+  fill = "white",
+  className,
+  label,
+}: {
+  children: React.ReactNode;
+  fill?: string;
+  className?: string;
+  label: string;
+}) {
+  return (
+    <svg viewBox="0 0 48 32" className={className} role="img" aria-label={label}>
+      <rect
+        width="47"
+        height="31"
+        x="0.5"
+        y="0.5"
+        rx="5"
+        fill={fill}
+        stroke="currentColor"
+        strokeOpacity="0.12"
+      />
+      {children}
+    </svg>
+  );
+}
+
+function VisaIcon(props: { className?: string }) {
+  return (
+    <PaymentCard {...props} label="Visa">
+      <text
+        x="24"
+        y="21"
+        textAnchor="middle"
+        fontFamily="Georgia, 'Times New Roman', serif"
+        fontWeight="700"
+        fontStyle="italic"
+        fontSize="14"
+        fill="#1A1F71"
+        letterSpacing="0.5"
+      >
+        VISA
+      </text>
+    </PaymentCard>
+  );
+}
+
+function MastercardIcon(props: { className?: string }) {
+  return (
+    <PaymentCard {...props} label="Mastercard">
+      <circle cx="20" cy="16" r="9" fill="#EB001B" />
+      <circle cx="28" cy="16" r="9" fill="#F79E1B" />
+      <path d="M24 9.3a9 9 0 010 13.4 9 9 0 010-13.4z" fill="#FF5F00" />
+    </PaymentCard>
+  );
+}
+
+function BkashIcon({ className }: { className?: string }) {
+  return (
+    <div
+      role="img"
+      aria-label="bKash"
+      className={`flex items-center justify-center overflow-hidden rounded-[5px] border border-foreground/10 bg-white p-1 ${className ?? ""}`}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/BKash-bKash2-Logo.wine%20(1).svg"
+        alt=""
+        className="h-full w-full object-contain"
+      />
+    </div>
   );
 }
 
@@ -106,7 +186,11 @@ const SOCIALS = [
   { label: "YouTube", href: "https://youtube.com", icon: YoutubeIcon },
 ];
 
-const PAYMENT_METHODS = ["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay"];
+const PAYMENT_METHODS = [
+  { label: "Visa", icon: VisaIcon, className: "h-8 w-12" },
+  { label: "Mastercard", icon: MastercardIcon, className: "h-8 w-12" },
+  { label: "bKash", icon: BkashIcon, className: "h-8 w-16" },
+];
 
 // ---------------------------------------------------------------------------
 // Footer
@@ -114,6 +198,7 @@ const PAYMENT_METHODS = ["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay"];
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
+  const [currency, setCurrency] = React.useState("us-en-usd");
 
   function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -221,23 +306,26 @@ export function SiteFooter() {
           </p>
 
           <div className="order-1 flex flex-wrap items-center justify-center gap-2 sm:order-2">
-            {PAYMENT_METHODS.map((method) => (
-              <Badge
-                key={method}
-                variant="outline"
-                className="font-normal text-muted-foreground"
-              >
-                {method}
-              </Badge>
+            {PAYMENT_METHODS.map(({ label, icon: Icon, className }) => (
+              <Icon key={label} className={`${className} text-foreground`} />
             ))}
           </div>
 
           <div className="order-2 flex items-center gap-3 sm:order-3">
-            <Select defaultValue="us-en-usd">
-              <SelectTrigger size="sm" className="h-8 w-[150px] text-xs">
-                <SelectValue placeholder="Region" />
+            <Select
+              value={currency}
+              onValueChange={(value) => {
+                if (value) setCurrency(value);
+              }}
+            >
+              <SelectTrigger size="sm" className="h-8 w-20 text-xs">
+                <SelectValue placeholder="Currency">
+                  {(value: string | null) =>
+                    value ? value.split("-").pop()?.toUpperCase() : "Currency"
+                  }
+                </SelectValue>
               </SelectTrigger>
-              <SelectContent align="end">
+              <SelectContent align="end" className="w-56">
                 <SelectItem value="us-en-usd">United States · $ USD</SelectItem>
                 <SelectItem value="uk-en-gbp">United Kingdom · £ GBP</SelectItem>
                 <SelectItem value="eu-en-eur">Europe · € EUR</SelectItem>
