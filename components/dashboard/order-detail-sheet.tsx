@@ -89,20 +89,26 @@ export function OrderDetailSheet({
             <Separator />
 
             <div className="space-y-2.5 text-sm">
-              <div className="flex items-start gap-2.5">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-foreground">{detail.email}</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-foreground">{detail.phone}</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-foreground">
-                  {detail.address}, {detail.district}
-                </span>
-              </div>
+              {detail.email && (
+                <div className="flex items-start gap-2.5">
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="text-foreground">{detail.email}</span>
+                </div>
+              )}
+              {detail.phone && (
+                <div className="flex items-start gap-2.5">
+                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="text-foreground">{detail.phone}</span>
+                </div>
+              )}
+              {(detail.address || detail.district) && (
+                <div className="flex items-start gap-2.5">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="text-foreground">
+                    {[detail.address, detail.district].filter(Boolean).join(", ")}
+                  </span>
+                </div>
+              )}
               <div className="flex items-start gap-2.5">
                 <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                 <span className="text-foreground">

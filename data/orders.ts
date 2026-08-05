@@ -1,11 +1,12 @@
 export type OrderStatus = "Processing" | "Fulfilled" | "Cancelled";
-export type PaymentMethod = "COD" | "bKash";
+export type PaymentMethod = "COD" | "bKash" | "Cash";
 
 export type Order = {
   id: string;
   orderNumber: string;
   customer: string;
-  email: string;
+  /** Null for dashboard-created walk-in/POS sales, which don't collect an email. */
+  email: string | null;
   status: OrderStatus;
   payment: PaymentMethod;
   total: number;
@@ -22,9 +23,9 @@ export type OrderItem = {
 };
 
 export type OrderDetail = Order & {
-  phone: string;
-  address: string;
-  district: string;
+  phone: string | null;
+  address: string | null;
+  district: string | null;
   subtotal: number;
   shippingCost: number;
   bkashNumber: string | null;

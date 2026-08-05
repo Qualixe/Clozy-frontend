@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, Plus } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { OrderDetailSheet } from "@/components/dashboard/order-detail-sheet";
+import { CreateOrderDialog } from "@/components/dashboard/create-order-dialog";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/data/orders";
@@ -60,11 +61,12 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
   const [viewingOrder, setViewingOrder] = React.useState<Order | null>(null);
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
   const [statusError, setStatusError] = React.useState<string | null>(null);
+  const [createOpen, setCreateOpen] = React.useState(false);
 
   const filtered = orders.filter((order) => {
     if (status !== "All" && order.status !== status) return false;
     const haystack =
-      `${order.orderNumber} ${order.customer} ${order.email}`.toLowerCase();
+      `${order.orderNumber} ${order.customer} ${order.email ?? ""}`.toLowerCase();
     return haystack.includes(query.toLowerCase());
   });
 
@@ -124,14 +126,20 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
           </TabsList>
         </Tabs>
 
-        <div className="relative max-w-xs">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search orders…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-8"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative max-w-xs">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search orders…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Create Order
+          </Button>
         </div>
       </div>
 
@@ -283,6 +291,8 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
           if (!open) setViewingOrder(null);
         }}
       />
+
+      <CreateOrderDialog open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   );
 }

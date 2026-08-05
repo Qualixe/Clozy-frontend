@@ -6,10 +6,13 @@ import { getOrders } from "@/lib/get-orders";
 import type { Order } from "@/data/orders";
 
 function toCustomers(orders: Order[]): Customer[] {
-  const byEmail = new Map<string, Customer>();
+  const byKey = new Map<string, Customer>();
 
   for (const order of orders) {
-    const existing = byEmail.get(order.email);
+    // Walk-in/POS orders have no email — each one is its own customer
+    // rather than being merged together under a shared null key.
+    const key = order.email ?? `order-${order.id}`;
+    const existing = byKey.get(key);
     if (existing) {
       existing.orders += 1;
       existing.totalSpent += order.total;
@@ -17,9 +20,9 @@ function toCustomers(orders: Order[]): Customer[] {
         existing.lastOrderDate = order.date;
       }
     } else {
-      byEmail.set(order.email, {
+      byKey.set(key, {
         name: order.customer,
-        email: order.email,
+        email: order.email ?? "—",
         orders: 1,
         totalSpent: order.total,
         lastOrderDate: order.date,
@@ -27,7 +30,7 @@ function toCustomers(orders: Order[]): Customer[] {
     }
   }
 
-  return Array.from(byEmail.values()).sort(
+  return Array.from(byKey.values()).sort(
     (a, b) => b.totalSpent - a.totalSpent
   );
 }
