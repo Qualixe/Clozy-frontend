@@ -139,3 +139,43 @@
   pointer-events: none;
   color: var(--muted-foreground);
 }
+
+/* Tiptap table editing — official recipe, see tiptap.dev/docs/editor/extensions/nodes/table */
+.tiptap table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+.tiptap table td,
+.tiptap table th {
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.5rem;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+.tiptap table th {
+  background-color: var(--muted);
+  font-weight: 600;
+  text-align: left;
+}
+.tiptap table .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  pointer-events: none;
+}
+.tiptap table .column-resize-handle {
+  position: absolute;
+  right: -1px;
+  top: 0;
+  bottom: -2px;
+  width: 3px;
+  background-color: var(--primary);
+  pointer-events: none;
+}
+.tiptap.resize-cursor {
+  cursor: col-resize;
+}

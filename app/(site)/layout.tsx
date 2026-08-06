@@ -1,6 +1,7 @@
 import SiteHeader from "@/components/header";
 import SiteFooter from "@/components/footer";
 import { Pixels } from "@/components/pixels";
+import { ChatWidget } from "@/components/chat-widget";
 import { CartProvider } from "@/lib/cart-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { getMenuByHandle } from "@/lib/get-menu";
@@ -20,6 +21,7 @@ export default async function SiteLayout({
       googleAnalyticsId: null,
       googleTagManagerId: null,
       tiktokPixelId: null,
+      aiChatEnabled: false,
     })),
   ]);
 
@@ -30,6 +32,7 @@ export default async function SiteLayout({
         <SiteHeader menu={menu} />
         {children}
         <SiteFooter menu={footerMenu} />
+        <ChatWidget enabled={settings.aiChatEnabled} />
       </WishlistProvider>
     </CartProvider>
   );

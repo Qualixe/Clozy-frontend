@@ -3,6 +3,7 @@ export type StoreSettings = {
   googleAnalyticsId: string | null;
   googleTagManagerId: string | null;
   tiktokPixelId: string | null;
+  aiChatEnabled: boolean;
 };
 
 export async function getSettings(): Promise<StoreSettings> {
