@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { RevenueChart, type RevenuePoint } from "@/components/dashboard/revenue-chart";
 import { StatusChart, type StatusPoint } from "@/components/dashboard/status-chart";
+import { AiInsightsCard } from "@/components/dashboard/ai-insights-card";
 import { getOrders } from "@/lib/get-orders";
 import type { Order, OrderStatus } from "@/data/orders";
 
@@ -109,6 +110,8 @@ export default async function DashboardAnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AiInsightsCard />
     </div>
   );
 }

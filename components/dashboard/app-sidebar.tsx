@@ -13,6 +13,7 @@ import {
   Palette,
   Percent,
   MessageSquareText,
+  MessageCircle,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -67,6 +68,15 @@ const NAV_ITEMS = [
     href: "/dashboard/theme",
     icon: Palette,
     children: [{ title: "Hero", href: "/dashboard/theme/hero" }],
+  },
+  {
+    title: "SMS",
+    href: "/dashboard/sms",
+    icon: MessageCircle,
+    children: [
+      { title: "Promotional", href: "/dashboard/sms/promotional" },
+      { title: "Logs", href: "/dashboard/sms/logs" },
+    ],
   },
 ];
 

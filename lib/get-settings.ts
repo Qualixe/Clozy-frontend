@@ -15,3 +15,17 @@ export async function getSettings(): Promise<StoreSettings> {
   if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
   return res.json();
 }
+
+/** Admin-only shape — adds the SMS gateway credentials, never sent publicly. */
+export type AdminStoreSettings = StoreSettings & {
+  smsGatewayUrl: string | null;
+  smsApiKey: string | null;
+  smsSenderId: string | null;
+  smsOrderConfirmationEnabled: boolean;
+  smsOrderConfirmationTemplate: string | null;
+  smsOrderCancelledEnabled: boolean;
+  smsOrderCancelledTemplate: string | null;
+  smsPromotionalEnabled: boolean;
+  anthropicApiKey: string | null;
+  anthropicConfigured: boolean;
+};

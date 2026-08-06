@@ -16,7 +16,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { useAuth } from "@/lib/auth-context";
-import type { StoreSettings } from "@/lib/get-settings";
+import type { AdminStoreSettings } from "@/lib/get-settings";
 
 type SettingsState = {
   storeName: string;
@@ -32,11 +32,33 @@ type SettingsState = {
   googleAnalyticsId: string;
   googleTagManagerId: string;
   tiktokPixelId: string;
+  smsGatewayUrl: string;
+  smsApiKey: string;
+  smsSenderId: string;
+  smsOrderConfirmationEnabled: boolean;
+  smsOrderConfirmationTemplate: string;
+  smsOrderCancelledEnabled: boolean;
+  smsOrderCancelledTemplate: string;
+  smsPromotionalEnabled: boolean;
+  anthropicApiKey: string;
 };
 
-const INITIAL_SETTINGS: Omit<
+const DEFAULT_CONFIRMATION_TEMPLATE =
+  "Hi {customer_name}, your order {order_number} has been confirmed. Total: {total}. Thank you for shopping with us!";
+const DEFAULT_CANCELLED_TEMPLATE =
+  "Hi {customer_name}, your order {order_number} has been cancelled. Contact us if you have questions.";
+
+const INITIAL_SETTINGS: Pick<
   SettingsState,
-  "facebookPixelId" | "googleAnalyticsId" | "googleTagManagerId" | "tiktokPixelId"
+  | "storeName"
+  | "supportEmail"
+  | "supportPhone"
+  | "storeDescription"
+  | "insideDhakaRate"
+  | "outsideDhakaRate"
+  | "codEnabled"
+  | "bkashEnabled"
+  | "bkashMerchantNumber"
 > = {
   storeName: "Clozy",
   supportEmail: "hello@clozy.com",
@@ -51,17 +73,28 @@ const INITIAL_SETTINGS: Omit<
 };
 
 export function SettingsForm({
-  initialPixelSettings,
+  initialSettings,
 }: {
-  initialPixelSettings: StoreSettings;
+  initialSettings: AdminStoreSettings;
 }) {
   const { token } = useAuth();
   const [settings, setSettings] = React.useState<SettingsState>({
     ...INITIAL_SETTINGS,
-    facebookPixelId: initialPixelSettings.facebookPixelId ?? "",
-    googleAnalyticsId: initialPixelSettings.googleAnalyticsId ?? "",
-    googleTagManagerId: initialPixelSettings.googleTagManagerId ?? "",
-    tiktokPixelId: initialPixelSettings.tiktokPixelId ?? "",
+    facebookPixelId: initialSettings.facebookPixelId ?? "",
+    googleAnalyticsId: initialSettings.googleAnalyticsId ?? "",
+    googleTagManagerId: initialSettings.googleTagManagerId ?? "",
+    tiktokPixelId: initialSettings.tiktokPixelId ?? "",
+    smsGatewayUrl: initialSettings.smsGatewayUrl ?? "",
+    smsApiKey: initialSettings.smsApiKey ?? "",
+    smsSenderId: initialSettings.smsSenderId ?? "",
+    smsOrderConfirmationEnabled: initialSettings.smsOrderConfirmationEnabled,
+    smsOrderConfirmationTemplate:
+      initialSettings.smsOrderConfirmationTemplate ?? DEFAULT_CONFIRMATION_TEMPLATE,
+    smsOrderCancelledEnabled: initialSettings.smsOrderCancelledEnabled,
+    smsOrderCancelledTemplate:
+      initialSettings.smsOrderCancelledTemplate ?? DEFAULT_CANCELLED_TEMPLATE,
+    smsPromotionalEnabled: initialSettings.smsPromotionalEnabled,
+    anthropicApiKey: initialSettings.anthropicApiKey ?? "",
   });
   const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState<string | null>(null);
@@ -79,8 +112,8 @@ export function SettingsForm({
     setSaveError(null);
 
     try {
-      // Only the Pixels tab is backed by a real API right now — the rest
-      // of this form (store/shipping/payment) is still local-only.
+      // Only the Pixels and SMS tabs are backed by a real API right now —
+      // the rest of this form (store/shipping/payment) is still local-only.
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
         method: "PUT",
         headers: {
@@ -92,6 +125,15 @@ export function SettingsForm({
           googleAnalyticsId: settings.googleAnalyticsId || null,
           googleTagManagerId: settings.googleTagManagerId || null,
           tiktokPixelId: settings.tiktokPixelId || null,
+          smsGatewayUrl: settings.smsGatewayUrl || null,
+          smsApiKey: settings.smsApiKey || null,
+          smsSenderId: settings.smsSenderId || null,
+          smsOrderConfirmationEnabled: settings.smsOrderConfirmationEnabled,
+          smsOrderConfirmationTemplate: settings.smsOrderConfirmationTemplate || null,
+          smsOrderCancelledEnabled: settings.smsOrderCancelledEnabled,
+          smsOrderCancelledTemplate: settings.smsOrderCancelledTemplate || null,
+          smsPromotionalEnabled: settings.smsPromotionalEnabled,
+          anthropicApiKey: settings.anthropicApiKey || null,
         }),
       });
 
@@ -118,6 +160,8 @@ export function SettingsForm({
           <TabsTrigger value="shipping">Shipping</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="pixels">Pixels</TabsTrigger>
+          <TabsTrigger value="sms">SMS</TabsTrigger>
+          <TabsTrigger value="ai">AI</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="mt-6 max-w-xl space-y-5">
@@ -292,6 +336,174 @@ export function SettingsForm({
               placeholder="e.g. CXXXXXXXXXXXXXXXXXXX"
               value={settings.tiktokPixelId}
               onChange={(e) => update("tiktokPixelId", e.target.value)}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="sms" className="mt-6 max-w-xl space-y-6">
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">Gateway</p>
+              <p className="text-xs text-muted-foreground">
+                A generic HTTP gateway — fill in your provider's details
+                (SSL Wireless, BulkSMSBD, Alpha SMS, etc).
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="smsGatewayUrl">Gateway URL</Label>
+              <Input
+                id="smsGatewayUrl"
+                placeholder="https://api.yourprovider.com/send"
+                value={settings.smsGatewayUrl}
+                onChange={(e) => update("smsGatewayUrl", e.target.value)}
+              />
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="smsApiKey">API Key</Label>
+                <Input
+                  id="smsApiKey"
+                  type="password"
+                  value={settings.smsApiKey}
+                  onChange={(e) => update("smsApiKey", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="smsSenderId">Sender ID</Label>
+                <Input
+                  id="smsSenderId"
+                  placeholder="e.g. CLOZY"
+                  value={settings.smsSenderId}
+                  onChange={(e) => update("smsSenderId", e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="rounded-lg border border-border p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  Order Confirmation SMS
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Sent to the customer's phone right after an order is placed.
+                </p>
+              </div>
+              <Switch
+                checked={settings.smsOrderConfirmationEnabled}
+                onCheckedChange={(checked) =>
+                  update("smsOrderConfirmationEnabled", checked)
+                }
+              />
+            </div>
+            {settings.smsOrderConfirmationEnabled && (
+              <>
+                <Separator className="my-4" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="smsOrderConfirmationTemplate">Message</Label>
+                  <Textarea
+                    id="smsOrderConfirmationTemplate"
+                    rows={3}
+                    value={settings.smsOrderConfirmationTemplate}
+                    onChange={(e) =>
+                      update("smsOrderConfirmationTemplate", e.target.value)
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Placeholders: {"{customer_name}"}, {"{order_number}"}, {"{total}"}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="rounded-lg border border-border p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  Order Cancelled SMS
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Sent when an order's status is changed to Cancelled.
+                </p>
+              </div>
+              <Switch
+                checked={settings.smsOrderCancelledEnabled}
+                onCheckedChange={(checked) =>
+                  update("smsOrderCancelledEnabled", checked)
+                }
+              />
+            </div>
+            {settings.smsOrderCancelledEnabled && (
+              <>
+                <Separator className="my-4" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="smsOrderCancelledTemplate">Message</Label>
+                  <Textarea
+                    id="smsOrderCancelledTemplate"
+                    rows={3}
+                    value={settings.smsOrderCancelledTemplate}
+                    onChange={(e) =>
+                      update("smsOrderCancelledTemplate", e.target.value)
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Placeholders: {"{customer_name}"}, {"{order_number}"}, {"{total}"}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border border-border p-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Promotional SMS
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Allow sending one-off marketing SMS blasts from Dashboard
+                &gt; SMS &gt; Promotional.
+              </p>
+            </div>
+            <Switch
+              checked={settings.smsPromotionalEnabled}
+              onCheckedChange={(checked) =>
+                update("smsPromotionalEnabled", checked)
+              }
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ai" className="mt-6 max-w-xl space-y-5">
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              Claude API Key
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Powers the &quot;Generate AI Insights&quot; button on the
+              Analytics page. Get a key from{" "}
+              <a
+                href="https://console.anthropic.com/settings/keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                console.anthropic.com
+              </a>
+              . Leave blank to disable AI insights.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="anthropicApiKey">API Key</Label>
+            <Input
+              id="anthropicApiKey"
+              type="password"
+              placeholder="sk-ant-…"
+              value={settings.anthropicApiKey}
+              onChange={(e) => update("anthropicApiKey", e.target.value)}
             />
           </div>
         </TabsContent>

@@ -1,8 +1,18 @@
 import { SettingsForm } from "@/components/dashboard/settings-form";
-import { getSettings } from "@/lib/get-settings";
+import type { AdminStoreSettings } from "@/lib/get-settings";
+import { assertDashboardFetchOk, getServerAuthHeaders } from "@/lib/auth-server";
+
+async function getAdminSettings(): Promise<AdminStoreSettings> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/admin`, {
+    cache: "no-store",
+    headers: await getServerAuthHeaders(),
+  });
+  assertDashboardFetchOk(res);
+  return res.json();
+}
 
 export default async function DashboardSettingsPage() {
-  const settings = await getSettings();
+  const settings = await getAdminSettings();
 
   return (
     <div className="flex flex-col gap-6">
@@ -13,7 +23,7 @@ export default async function DashboardSettingsPage() {
         </p>
       </div>
 
-      <SettingsForm initialPixelSettings={settings} />
+      <SettingsForm initialSettings={settings} />
     </div>
   );
 }
