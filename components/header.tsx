@@ -26,6 +26,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -233,12 +234,14 @@ export function SiteHeader({ menu }: { menu: NavMenu | null }) {
             <DropdownMenuContent align="end" className="w-56">
               {ready && user ? (
                 <>
-                  <DropdownMenuLabel>
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-xs font-normal text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>
+                      <p className="font-medium">{user.name}</p>
+                      <p className="text-xs font-normal text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   {canAccessDashboard(user) && (
                     <DropdownMenuItem
@@ -282,12 +285,14 @@ export function SiteHeader({ menu }: { menu: NavMenu | null }) {
                 </>
               ) : (
                 <>
-                  <DropdownMenuLabel>
-                    <p className="font-medium">Hi there</p>
-                    <p className="text-xs font-normal text-muted-foreground">
-                      Sign in to view your account
-                    </p>
-                  </DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>
+                      <p className="font-medium">Hi there</p>
+                      <p className="text-xs font-normal text-muted-foreground">
+                        Sign in to view your account
+                      </p>
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     render={
