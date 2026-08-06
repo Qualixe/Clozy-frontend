@@ -15,6 +15,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { useAuth } from "@/lib/auth-context";
+import type { StoreSettings } from "@/lib/get-settings";
 
 type SettingsState = {
   storeName: string;
@@ -26,9 +28,16 @@ type SettingsState = {
   codEnabled: boolean;
   bkashEnabled: boolean;
   bkashMerchantNumber: string;
+  facebookPixelId: string;
+  googleAnalyticsId: string;
+  googleTagManagerId: string;
+  tiktokPixelId: string;
 };
 
-const INITIAL_SETTINGS: SettingsState = {
+const INITIAL_SETTINGS: Omit<
+  SettingsState,
+  "facebookPixelId" | "googleAnalyticsId" | "googleTagManagerId" | "tiktokPixelId"
+> = {
   storeName: "Clozy",
   supportEmail: "hello@clozy.com",
   supportPhone: "+880 1234 567890",
@@ -41,8 +50,21 @@ const INITIAL_SETTINGS: SettingsState = {
   bkashMerchantNumber: "01700000000",
 };
 
-export function SettingsForm() {
-  const [settings, setSettings] = React.useState(INITIAL_SETTINGS);
+export function SettingsForm({
+  initialPixelSettings,
+}: {
+  initialPixelSettings: StoreSettings;
+}) {
+  const { token } = useAuth();
+  const [settings, setSettings] = React.useState<SettingsState>({
+    ...INITIAL_SETTINGS,
+    facebookPixelId: initialPixelSettings.facebookPixelId ?? "",
+    googleAnalyticsId: initialPixelSettings.googleAnalyticsId ?? "",
+    googleTagManagerId: initialPixelSettings.googleTagManagerId ?? "",
+    tiktokPixelId: initialPixelSettings.tiktokPixelId ?? "",
+  });
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState(false);
 
   function update<K extends keyof SettingsState>(key: K, value: SettingsState[K]) {
@@ -50,10 +72,42 @@ export function SettingsForm() {
     setSaved(false);
   }
 
-  function handleSave(e: React.SubmitEvent) {
+  async function handleSave(e: React.SubmitEvent) {
     e.preventDefault();
-    // No settings API yet — this just reflects the change locally.
-    setSaved(true);
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      // Only the Pixels tab is backed by a real API right now — the rest
+      // of this form (store/shipping/payment) is still local-only.
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          facebookPixelId: settings.facebookPixelId || null,
+          googleAnalyticsId: settings.googleAnalyticsId || null,
+          googleTagManagerId: settings.googleTagManagerId || null,
+          tiktokPixelId: settings.tiktokPixelId || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? `Request failed with status ${res.status}`);
+      }
+
+      setSaved(true);
+    } catch (err) {
+      setSaveError(
+        err instanceof Error ? err.message : "Could not save settings."
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -63,6 +117,7 @@ export function SettingsForm() {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="shipping">Shipping</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
+          <TabsTrigger value="pixels">Pixels</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="mt-6 max-w-xl space-y-5">
@@ -189,11 +244,66 @@ export function SettingsForm() {
             )}
           </div>
         </TabsContent>
+
+        <TabsContent value="pixels" className="mt-6 max-w-xl space-y-5">
+          <p className="text-sm text-muted-foreground">
+            Add tracking IDs to fire the matching pixel on every storefront
+            page. Leave a field blank to skip that provider.
+          </p>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="facebookPixelId">Meta (Facebook) Pixel ID</Label>
+            <Input
+              id="facebookPixelId"
+              placeholder="e.g. 123456789012345"
+              value={settings.facebookPixelId}
+              onChange={(e) => update("facebookPixelId", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="googleAnalyticsId">
+              Google Analytics Measurement ID
+            </Label>
+            <Input
+              id="googleAnalyticsId"
+              placeholder="e.g. G-XXXXXXXXXX"
+              value={settings.googleAnalyticsId}
+              onChange={(e) => update("googleAnalyticsId", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="googleTagManagerId">
+              Google Tag Manager Container ID
+            </Label>
+            <Input
+              id="googleTagManagerId"
+              placeholder="e.g. GTM-XXXXXXX"
+              value={settings.googleTagManagerId}
+              onChange={(e) => update("googleTagManagerId", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="tiktokPixelId">TikTok Pixel ID</Label>
+            <Input
+              id="tiktokPixelId"
+              placeholder="e.g. CXXXXXXXXXXXXXXXXXXX"
+              value={settings.tiktokPixelId}
+              onChange={(e) => update("tiktokPixelId", e.target.value)}
+            />
+          </div>
+        </TabsContent>
       </Tabs>
 
+      {saveError && <p className="text-sm text-destructive">{saveError}</p>}
+
       <div className="flex items-center gap-3">
-        <Button type="submit">Save Changes</Button>
-        {saved && (
+        <Button type="submit" disabled={saving}>
+          {saving ? "Saving…" : "Save Changes"}
+        </Button>
+        {saved && !saving && (
           <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-500">
             <Check className="h-4 w-4" />
             Saved

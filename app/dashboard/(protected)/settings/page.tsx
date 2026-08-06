@@ -1,6 +1,9 @@
 import { SettingsForm } from "@/components/dashboard/settings-form";
+import { getSettings } from "@/lib/get-settings";
 
-export default function DashboardSettingsPage() {
+export default async function DashboardSettingsPage() {
+  const settings = await getSettings();
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -10,7 +13,7 @@ export default function DashboardSettingsPage() {
         </p>
       </div>
 
-      <SettingsForm />
+      <SettingsForm initialPixelSettings={settings} />
     </div>
   );
 }
