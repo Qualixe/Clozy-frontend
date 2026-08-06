@@ -28,6 +28,8 @@ export type OrderDetail = Order & {
   district: string | null;
   subtotal: number;
   shippingCost: number;
+  discountCode: string | null;
+  discountAmount: number;
   bkashNumber: string | null;
   items: OrderItem[];
 };

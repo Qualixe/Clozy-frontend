@@ -57,6 +57,14 @@ const INITIAL_FORM: FormState = {
   bkashNumber: "",
 };
 
+type AppliedDiscount = {
+  code: string;
+  type: "percentage" | "fixed" | "free_shipping";
+  value: number | null;
+  amountOff: number;
+  freeShipping: boolean;
+};
+
 function validate(form: FormState) {
   const errors: Partial<Record<keyof FormState, string>> = {};
 
@@ -90,10 +98,55 @@ export function CheckoutPage() {
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [orderPlaced, setOrderPlaced] = React.useState(false);
   const [confirmedTotal, setConfirmedTotal] = React.useState(0);
+  const [confirmedOrderNumber, setConfirmedOrderNumber] = React.useState("");
+
+  const [discountCode, setDiscountCode] = React.useState("");
+  const [appliedDiscount, setAppliedDiscount] =
+    React.useState<AppliedDiscount | null>(null);
+  const [applyingDiscount, setApplyingDiscount] = React.useState(false);
+  const [discountError, setDiscountError] = React.useState<string | null>(null);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shippingCost = getShippingCost(form.district);
-  const total = subtotal + shippingCost;
+  const effectiveShipping = appliedDiscount?.freeShipping ? 0 : shippingCost;
+  const discountAmount = appliedDiscount?.amountOff ?? 0;
+  const total = Math.max(0, subtotal + effectiveShipping - discountAmount);
+
+  async function applyDiscount() {
+    if (!discountCode.trim()) return;
+
+    setApplyingDiscount(true);
+    setDiscountError(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/discounts/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: discountCode.trim(), subtotal }),
+      });
+
+      const body = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(body?.message ?? "That discount code isn't valid.");
+      }
+
+      setAppliedDiscount(body as AppliedDiscount);
+    } catch (err) {
+      setAppliedDiscount(null);
+      setDiscountError(
+        err instanceof Error ? err.message : "That discount code isn't valid."
+      );
+    } finally {
+      setApplyingDiscount(false);
+    }
+  }
+
+  function removeDiscount() {
+    setAppliedDiscount(null);
+    setDiscountCode("");
+    setDiscountError(null);
+  }
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -123,6 +176,7 @@ export function CheckoutPage() {
           paymentMethod: form.paymentMethod,
           bkashNumber: form.paymentMethod === "bkash" ? form.bkashNumber : null,
           shippingCost,
+          discountCode: appliedDiscount?.code,
           items: items.map((item) => ({
             productId: item.productId,
             name: item.name,
@@ -139,6 +193,8 @@ export function CheckoutPage() {
         throw new Error(body?.message ?? `Request failed with status ${res.status}`);
       }
 
+      const order = await res.json();
+      setConfirmedOrderNumber(order.orderNumber ?? "");
       setConfirmedTotal(total);
       setOrderPlaced(true);
       clear();
@@ -168,11 +224,23 @@ export function CheckoutPage() {
         <p className="mt-2 text-sm font-medium text-foreground">
           Total paid: ${confirmedTotal}
         </p>
-        <Button
-          className="mt-4"
-          nativeButton={false}
-          render={<Link href="/shop">Continue Shopping</Link>}
-        />
+        <div className="mt-4 flex items-center gap-3">
+          <Button
+            nativeButton={false}
+            render={<Link href="/shop">Continue Shopping</Link>}
+          />
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={
+              <Link
+                href={`/track-order?order=${encodeURIComponent(confirmedOrderNumber)}&contact=${encodeURIComponent(form.email)}`}
+              >
+                Track Your Order
+              </Link>
+            }
+          />
+        </div>
       </main>
     );
   }
@@ -432,6 +500,60 @@ export function CheckoutPage() {
 
             <Separator className="my-4" />
 
+            {appliedDiscount ? (
+              <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/50 p-3 text-sm">
+                <div>
+                  <p className="font-medium text-foreground">
+                    {appliedDiscount.code}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {appliedDiscount.freeShipping
+                      ? "Free shipping applied"
+                      : appliedDiscount.type === "percentage"
+                        ? `${appliedDiscount.value}% off applied`
+                        : `$${appliedDiscount.value} off applied`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeDiscount}
+                  className="text-xs font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <Label htmlFor="discountCode">Discount Code</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="discountCode"
+                    placeholder="Enter code"
+                    value={discountCode}
+                    onChange={(e) => {
+                      setDiscountCode(e.target.value.toUpperCase());
+                      setDiscountError(null);
+                    }}
+                    aria-invalid={!!discountError}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0"
+                    disabled={applyingDiscount || !discountCode.trim()}
+                    onClick={applyDiscount}
+                  >
+                    {applyingDiscount ? "Checking…" : "Apply"}
+                  </Button>
+                </div>
+                {discountError && (
+                  <p className="text-xs text-destructive">{discountError}</p>
+                )}
+              </div>
+            )}
+
+            <Separator className="my-4" />
+
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
@@ -440,9 +562,26 @@ export function CheckoutPage() {
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className="text-foreground">
-                  {form.district ? `$${shippingCost}` : "—"}
+                  {appliedDiscount?.freeShipping && form.district ? (
+                    <>
+                      <span className="mr-1.5 text-muted-foreground line-through">
+                        ${shippingCost}
+                      </span>
+                      $0
+                    </>
+                  ) : form.district ? (
+                    `$${effectiveShipping}`
+                  ) : (
+                    "—"
+                  )}
                 </span>
               </div>
+              {discountAmount > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Discount</span>
+                  <span className="text-foreground">-${discountAmount}</span>
+                </div>
+              )}
             </div>
 
             <Separator className="my-4" />
