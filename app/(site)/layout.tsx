@@ -10,8 +10,9 @@ export default async function SiteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [menu, settings] = await Promise.all([
+  const [menu, footerMenu, settings] = await Promise.all([
     getMenuByHandle("main-menu"),
+    getMenuByHandle("footer-menu"),
     // A backend hiccup shouldn't take the storefront down over analytics.
     getSettings().catch(() => ({
       facebookPixelId: null,
@@ -26,7 +27,7 @@ export default async function SiteLayout({
       <Pixels settings={settings} />
       <SiteHeader menu={menu} />
       {children}
-      <SiteFooter />
+      <SiteFooter menu={footerMenu} />
     </CartProvider>
   );
 }

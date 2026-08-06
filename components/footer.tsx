@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Menu } from "@/lib/get-menu";
 
 // ---------------------------------------------------------------------------
 // Brand icons
@@ -137,8 +138,12 @@ function BkashIcon({ className }: { className?: string }) {
 // ---------------------------------------------------------------------------
 // Data
 // ---------------------------------------------------------------------------
+// Columns come from the "footer-menu" Menu (editable at
+// /dashboard/content/menus), with this hardcoded list as a fallback if
+// that menu is missing/unreachable — top-level items are column titles,
+// their children are the links inside each column.
 
-const FOOTER_LINKS: { title: string; links: { label: string; href: string }[] }[] = [
+const FALLBACK_FOOTER_LINKS: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "Shop",
     links: [
@@ -196,9 +201,19 @@ const PAYMENT_METHODS = [
 // Footer
 // ---------------------------------------------------------------------------
 
-export function SiteFooter() {
+export function SiteFooter({ menu }: { menu: Menu | null }) {
   const year = new Date().getFullYear();
   const [currency, setCurrency] = React.useState("us-en-usd");
+
+  const footerColumns = menu?.items.length
+    ? menu.items.map((column) => ({
+        title: column.label,
+        links: column.children.map((link) => ({
+          label: link.label,
+          href: link.url,
+        })),
+      }))
+    : FALLBACK_FOOTER_LINKS;
 
   function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -276,7 +291,7 @@ export function SiteFooter() {
           </div>
 
           {/* Link columns */}
-          {FOOTER_LINKS.map((col) => (
+          {footerColumns.map((col) => (
             <div key={col.title}>
               <h4 className="text-sm font-medium text-foreground">
                 {col.title}
