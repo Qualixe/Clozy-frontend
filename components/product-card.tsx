@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
+import { useWishlist } from "@/lib/wishlist-context";
 
 export type Product = {
   id: string;
@@ -34,8 +35,9 @@ export function ProductCard({
    *  when rendering inside a `ProductCarousel` so its height can be measured. */
   as?: React.ElementType;
 }) {
-  const [wishlisted, setWishlisted] = React.useState(false);
   const { addItem } = useCart();
+  const { isWishlisted, toggle } = useWishlist();
+  const wishlisted = isWishlisted(product.id);
 
   function handleAddToCart() {
     addItem({
@@ -43,6 +45,17 @@ export function ProductCard({
       productId: product.id,
       name: product.name,
       price: product.price,
+      image: product.image,
+    });
+  }
+
+  function handleToggleWishlist() {
+    toggle({
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      price: product.price,
+      originalPrice: product.originalPrice,
       image: product.image,
     });
   }
@@ -76,7 +89,7 @@ export function ProductCard({
         <Button
           variant="secondary"
           size="icon"
-          onClick={() => setWishlisted((w) => !w)}
+          onClick={handleToggleWishlist}
           aria-label={
             wishlisted ? "Remove from wishlist" : "Add to wishlist"
           }

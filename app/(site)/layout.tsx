@@ -2,6 +2,7 @@ import SiteHeader from "@/components/header";
 import SiteFooter from "@/components/footer";
 import { Pixels } from "@/components/pixels";
 import { CartProvider } from "@/lib/cart-context";
+import { WishlistProvider } from "@/lib/wishlist-context";
 import { getMenuByHandle } from "@/lib/get-menu";
 import { getSettings } from "@/lib/get-settings";
 
@@ -24,10 +25,12 @@ export default async function SiteLayout({
 
   return (
     <CartProvider>
-      <Pixels settings={settings} />
-      <SiteHeader menu={menu} />
-      {children}
-      <SiteFooter menu={footerMenu} />
+      <WishlistProvider>
+        <Pixels settings={settings} />
+        <SiteHeader menu={menu} />
+        {children}
+        <SiteFooter menu={footerMenu} />
+      </WishlistProvider>
     </CartProvider>
   );
 }

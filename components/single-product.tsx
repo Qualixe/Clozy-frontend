@@ -42,6 +42,7 @@ import { RelatedProducts } from "@/components/related-products";
 import { WriteReviewDialog } from "@/components/write-review-dialog";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
+import { useWishlist } from "@/lib/wishlist-context";
 
 // ---------------------------------------------------------------------------
 // Data shape — populated from the Laravel API (`GET /products/{id}`)
@@ -73,6 +74,7 @@ export type ContentBlock = {
 
 export type ProductDetail = {
   id: string;
+  slug: string;
   name: string;
   category: string;
   categorySlug?: string | null;
@@ -109,8 +111,9 @@ export function ProductPage({ product }: { product: ProductDetail }) {
   );
   const [selectedSize, setSelectedSize] = React.useState<string | null>(null);
   const [quantity, setQuantity] = React.useState(1);
-  const [wishlisted, setWishlisted] = React.useState(false);
   const { addItem } = useCart();
+  const { isWishlisted, toggle: toggleWishlist } = useWishlist();
+  const wishlisted = isWishlisted(product.id);
 
   // The variant matching whatever color/size is currently selected — used to
   // show that combination's actual price rather than the product's base price.
@@ -414,7 +417,16 @@ export function ProductPage({ product }: { product: ProductDetail }) {
                 variant="outline"
                 size="icon"
                 className="h-11 w-11 shrink-0"
-                onClick={() => setWishlisted((w) => !w)}
+                onClick={() =>
+                  toggleWishlist({
+                    id: product.id,
+                    slug: product.slug,
+                    name: product.name,
+                    price: displayPrice,
+                    originalPrice: displayOriginalPrice ?? undefined,
+                    image: product.images[0],
+                  })
+                }
                 aria-label={
                   wishlisted ? "Remove from wishlist" : "Add to wishlist"
                 }
