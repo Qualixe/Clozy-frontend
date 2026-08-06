@@ -39,6 +39,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { RelatedProducts } from "@/components/related-products";
+import { WriteReviewDialog } from "@/components/write-review-dialog";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
 
@@ -62,6 +63,14 @@ export type RelatedProduct = {
   image: string;
 };
 
+/** An admin-authored rich-text section shown above/below the Add to Cart button. */
+export type ContentBlock = {
+  key: string;
+  heading: string;
+  /** Rich-text HTML from the dashboard's editor. */
+  value: string;
+};
+
 export type ProductDetail = {
   id: string;
   name: string;
@@ -82,6 +91,8 @@ export type ProductDetail = {
   }[];
   images: string[];
   details: string[];
+  contentBlocksBeforeBuyButton: ContentBlock[];
+  contentBlocksAfterBuyButton: ContentBlock[];
   reviewsList: ProductReview[];
   related: RelatedProduct[];
 };
@@ -352,6 +363,19 @@ export function ProductPage({ product }: { product: ProductDetail }) {
               </div>
             </div>
 
+            {/* Content blocks — before Buy Button */}
+            {product.contentBlocksBeforeBuyButton.map((block) => (
+              <div key={block.key} className="mt-6">
+                <h3 className="text-sm font-medium text-foreground">
+                  {block.heading}
+                </h3>
+                <div
+                  className="prose prose-sm mt-2 max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground"
+                  dangerouslySetInnerHTML={{ __html: block.value }}
+                />
+              </div>
+            ))}
+
             {/* Quantity + actions */}
             <div className="mt-6 flex items-center gap-3">
               <div className="flex items-center rounded-md border border-border">
@@ -404,6 +428,19 @@ export function ProductPage({ product }: { product: ProductDetail }) {
               </Button>
             </div>
 
+            {/* Content blocks — after Buy Button */}
+            {product.contentBlocksAfterBuyButton.map((block) => (
+              <div key={block.key} className="mt-6">
+                <h3 className="text-sm font-medium text-foreground">
+                  {block.heading}
+                </h3>
+                <div
+                  className="prose prose-sm mt-2 max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground"
+                  dangerouslySetInnerHTML={{ __html: block.value }}
+                />
+              </div>
+            ))}
+
             <Separator className="my-6" />
 
             {/* Trust badges */}
@@ -454,11 +491,14 @@ export function ProductPage({ product }: { product: ProductDetail }) {
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
               Reviews
             </h2>
-            <Button variant="outline" size="sm">
-              Write a review
-            </Button>
+            <WriteReviewDialog productId={product.id} />
           </div>
           <Separator className="my-5" />
+          {product.reviewsList.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No reviews yet — be the first to write one.
+            </p>
+          )}
           <div className="space-y-6">
             {product.reviewsList.map((review) => (
               <div key={review.id}>

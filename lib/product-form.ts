@@ -1,6 +1,18 @@
-export type Metafield = { key: string; value: string };
+export type MetafieldPlacement = "before_buy_button" | "after_buy_button";
 
-export type ProductOption = { id: string; name: string; values: string[] };
+export type Metafield = {
+  key: string;
+  value: string;
+  placement: MetafieldPlacement;
+};
+
+export type ProductOption = {
+  id: string;
+  name: string;
+  values: string[];
+  /** Hex color per value, keyed by the value string — only used for a "Color" option. */
+  swatches: Record<string, string>;
+};
 
 export type ProductVariant = {
   id: string;
@@ -44,7 +56,7 @@ export const EMPTY_PRODUCT_FORM: ProductFormValues = {
   tags: [],
   category: "",
   collections: [],
-  metafields: [{ key: "", value: "" }],
+  metafields: [{ key: "", value: "", placement: "after_buy_button" }],
   images: [],
   seoTitle: "",
   seoDescription: "",
@@ -124,7 +136,11 @@ export type ProductEditResponse = {
   seoTitle: string | null;
   seoDescription: string | null;
   hasVariants: boolean;
-  options: { name: string; values: string[] }[];
+  options: {
+    name: string;
+    values: string[];
+    swatches: Record<string, string>;
+  }[];
   variants: {
     optionValues: Record<string, string>;
     price: string;
@@ -147,7 +163,9 @@ export function fromEditResponse(data: ProductEditResponse): ProductFormValues {
     tags: data.tags ?? [],
     category: data.category ?? "",
     collections: data.collections ?? [],
-    metafields: data.metafields?.length ? data.metafields : [{ key: "", value: "" }],
+    metafields: data.metafields?.length
+      ? data.metafields
+      : [{ key: "", value: "", placement: "after_buy_button" }],
     images: data.images ?? [],
     seoTitle: data.seoTitle ?? "",
     seoDescription: data.seoDescription ?? "",
@@ -156,6 +174,7 @@ export function fromEditResponse(data: ProductEditResponse): ProductFormValues {
       id: nextId(),
       name: o.name,
       values: o.values,
+      swatches: o.swatches ?? {},
     })),
     variants: (data.variants ?? []).map((v) => ({
       id: comboKey(v.optionValues),

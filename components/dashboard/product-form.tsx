@@ -36,6 +36,7 @@ import {
   nextId,
   regenerateVariants,
   type Metafield,
+  type MetafieldPlacement,
   type ProductFormValues,
   type ProductOption,
 } from "@/lib/product-form";
@@ -221,14 +222,21 @@ export function ProductForm({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function updateMetafield(index: number, key: keyof Metafield, value: string) {
+  function updateMetafield<K extends keyof Metafield>(
+    index: number,
+    key: K,
+    value: Metafield[K]
+  ) {
     const next = [...form.metafields];
     next[index] = { ...next[index], [key]: value };
     update("metafields", next);
   }
 
   function addMetafield() {
-    update("metafields", [...form.metafields, { key: "", value: "" }]);
+    update("metafields", [
+      ...form.metafields,
+      { key: "", value: "", placement: "after_buy_button" },
+    ]);
   }
 
   function removeMetafield(index: number) {
@@ -261,7 +269,12 @@ export function ProductForm({
 
   function toggleVariants(enabled: boolean) {
     if (enabled && form.options.length === 0) {
-      const firstOption: ProductOption = { id: nextId(), name: "", values: [] };
+      const firstOption: ProductOption = {
+        id: nextId(),
+        name: "",
+        values: [],
+        swatches: {},
+      };
       setForm((f) => ({ ...f, hasVariants: true, options: [firstOption] }));
       return;
     }
@@ -270,7 +283,10 @@ export function ProductForm({
 
   function addOption() {
     if (form.options.length >= MAX_OPTIONS) return;
-    const options = [...form.options, { id: nextId(), name: "", values: [] }];
+    const options = [
+      ...form.options,
+      { id: nextId(), name: "", values: [], swatches: {} },
+    ];
     update("options", options);
   }
 
@@ -283,9 +299,28 @@ export function ProductForm({
 
   function updateOptionValues(index: number, values: string[]) {
     const options = [...form.options];
-    options[index] = { ...options[index], values };
+    const previous = options[index];
+    // Give every value an explicit swatch entry as soon as it's added —
+    // otherwise a value whose intended color is black never actually gets
+    // saved: the picker already *shows* black by default, so if the admin
+    // doesn't visibly change it, the browser never fires onChange and the
+    // value's swatch stays unset.
+    const swatches = { ...previous.swatches };
+    for (const value of values) {
+      if (!(value in swatches)) swatches[value] = "#000000";
+    }
+    options[index] = { ...previous, values, swatches };
     const variants = regenerateVariants(options, form.variants);
     setForm((f) => ({ ...f, options, variants }));
+  }
+
+  function updateOptionSwatch(index: number, value: string, swatch: string) {
+    const options = [...form.options];
+    options[index] = {
+      ...options[index],
+      swatches: { ...options[index].swatches, [value]: swatch },
+    };
+    update("options", options);
   }
 
   function removeOption(index: number) {
@@ -543,6 +578,33 @@ export function ProductForm({
                       onChange={(values) => updateOptionValues(i, values)}
                       placeholder="Add a value and press Enter"
                     />
+                    {option.name.trim().toLowerCase() === "color" &&
+                      option.values.length > 0 && (
+                        <div className="flex flex-wrap gap-3 pt-1">
+                          {option.values.map((value) => (
+                            <div key={value} className="flex items-center gap-1.5">
+                              <input
+                                type="color"
+                                value={
+                                  /^#[0-9a-fA-F]{6}$/.test(
+                                    option.swatches[value] ?? ""
+                                  )
+                                    ? option.swatches[value]
+                                    : "#000000"
+                                }
+                                onChange={(e) =>
+                                  updateOptionSwatch(i, value, e.target.value)
+                                }
+                                className="h-6 w-6 shrink-0 cursor-pointer rounded-full border border-input bg-transparent p-0"
+                                aria-label={`${value} swatch color`}
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                {value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                   </div>
                 ))}
 
@@ -672,39 +734,93 @@ export function ProductForm({
 
         <Separator />
 
-        {/* Metafields */}
+        {/* Metafields / content blocks */}
         <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label>Metafields</Label>
-            <Button type="button" variant="outline" size="sm" onClick={addMetafield}>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <Label>Content Blocks</Label>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Custom rich-text sections shown on the product page, placed
+                above or below the Add to Cart button.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              onClick={addMetafield}
+            >
               <Plus className="h-3.5 w-3.5" />
-              Add metafield
+              Add block
             </Button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-4">
             {form.metafields.map((field, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Input
-                  placeholder="Key"
-                  value={field.key}
-                  onChange={(e) => updateMetafield(i, "key", e.target.value)}
-                  className="w-1/3"
-                />
-                <Input
-                  placeholder="Value"
-                  value={field.value}
-                  onChange={(e) => updateMetafield(i, "value", e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="Remove metafield"
-                  onClick={() => removeMetafield(i)}
-                  disabled={form.metafields.length === 1}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+              <div key={i} className="space-y-3 rounded-lg border border-border p-4">
+                <div className="flex items-end gap-2">
+                  <div className="flex-1 space-y-1.5">
+                    <Label className="text-xs font-normal text-muted-foreground">
+                      Heading
+                    </Label>
+                    <Input
+                      placeholder="e.g. Fit & Sizing"
+                      value={field.key}
+                      onChange={(e) => updateMetafield(i, "key", e.target.value)}
+                    />
+                  </div>
+                  <div className="w-52 space-y-1.5">
+                    <Label className="text-xs font-normal text-muted-foreground">
+                      Placement
+                    </Label>
+                    <Select
+                      value={field.placement}
+                      onValueChange={(value) => {
+                        if (value) {
+                          updateMetafield(
+                            i,
+                            "placement",
+                            value as MetafieldPlacement
+                          );
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="before_buy_button">
+                          Before Buy Button
+                        </SelectItem>
+                        <SelectItem value="after_buy_button">
+                          After Buy Button
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Remove content block"
+                    onClick={() => removeMetafield(i)}
+                    disabled={form.metafields.length === 1}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-normal text-muted-foreground">
+                    Content
+                  </Label>
+                  <RichTextEditor
+                    value={field.value}
+                    onChange={(html) => updateMetafield(i, "value", html)}
+                    placeholder="Write the content shown under this heading…"
+                    minHeight="6rem"
+                  />
+                </div>
               </div>
             ))}
           </div>

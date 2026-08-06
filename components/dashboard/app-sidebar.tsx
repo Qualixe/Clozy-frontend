@@ -12,6 +12,7 @@ import {
   FileText,
   Palette,
   Percent,
+  MessageSquareText,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -49,6 +50,7 @@ const NAV_ITEMS = [
   },
   { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
   { title: "Discounts", href: "/dashboard/discounts", icon: Percent },
+  { title: "Reviews", href: "/dashboard/reviews", icon: MessageSquareText },
   { title: "Customers", href: "/dashboard/customers", icon: Users },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   {
