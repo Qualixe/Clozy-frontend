@@ -1,9 +1,9 @@
 import CategoryShowcase from "@/components/category";
 import HeroSlider from "@/components/hero";
-import { ImageTextSection } from "@/components/image-text-section";
 import ProductsSection from "@/components/products";
 import { NewArrivalsSection } from "@/components/new-arrivals";
 import { CategoryBanners } from "@/components/category-banners";
+import { SingleBanner } from "@/components/single-banner";
 import { getCategories } from "@/lib/get-categories";
 import { getHeroSlides } from "@/lib/get-hero-slides";
 import { getNewArrivals } from "@/lib/get-new-arrivals";
@@ -30,6 +30,15 @@ export default async function Home() {
       <ProductsSection />
       <CategoryBanners categories={categories} />
       <NewArrivalsSection data={newArrivals} />
+      <SingleBanner
+        image="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop"
+        imageAlt="Seasonal sale"
+        eyebrow="Limited Time"
+        heading="Up to 40% off selected styles"
+        body="Considered essentials at a considered price — while stocks last."
+        ctaLabel="Shop the Sale"
+        ctaHref="/shop"
+      />
       {/* <ImageTextSection
         image="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1200&auto=format&fit=crop"
         imageAlt="Considered essentials, made to last"

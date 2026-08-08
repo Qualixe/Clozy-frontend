@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { RelatedProducts } from "@/components/related-products";
 import { WriteReviewDialog } from "@/components/write-review-dialog";
+import type { Product } from "@/components/product-card";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
 import { useWishlist } from "@/lib/wishlist-context";
@@ -54,14 +55,6 @@ export type ProductReview = {
   rating: number;
   date: string;
   body: string;
-};
-
-export type RelatedProduct = {
-  id: string;
-  slug: string;
-  name: string;
-  price: number;
-  image: string;
 };
 
 /** An admin-authored rich-text section shown above/below the Add to Cart button. */
@@ -96,7 +89,7 @@ export type ProductDetail = {
   contentBlocksBeforeBuyButton: ContentBlock[];
   contentBlocksAfterBuyButton: ContentBlock[];
   reviewsList: ProductReview[];
-  related: RelatedProduct[];
+  related: Product[];
 };
 
 // ---------------------------------------------------------------------------

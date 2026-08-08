@@ -139,7 +139,7 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
                     alt={slide.heading.join(" ")}
                     fill
                     sizes="(max-width: 1024px) 0px, 45vw"
-                    className="object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.35)]"
+                    className="object-cover drop-shadow-[0_35px_45px_rgba(0,0,0,0.35)] rounded-[10px]"
                     priority={slide.id === slides[0].id}
                   />
                 </div>

@@ -1,10 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 
-import type { RelatedProduct } from "@/components/single-product";
+import { ProductCard, type Product } from "@/components/product-card";
 
-export function RelatedProducts({ items }: { items: RelatedProduct[] }) {
+export function RelatedProducts({ items }: { items: Product[] }) {
   if (items.length === 0) return null;
 
   return (
@@ -22,22 +21,8 @@ export function RelatedProducts({ items }: { items: RelatedProduct[] }) {
         </Link>
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4">
-        {items.map((item) => (
-          <Link key={item.id} href={`/products/${item.slug}`} className="group">
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-muted">
-              <Image
-                src={item.image}
-                alt={item.name}
-                fill
-                sizes="(max-width: 640px) 50vw, 25vw"
-                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-              />
-            </div>
-            <p className="mt-3 text-sm font-medium text-foreground">
-              {item.name}
-            </p>
-            <p className="text-sm text-muted-foreground">${item.price}</p>
-          </Link>
+        {items.map((product) => (
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </section>
