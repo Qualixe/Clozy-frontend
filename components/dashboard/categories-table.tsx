@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Search, Pencil, Trash2, ImageOff } from "lucide-react";
+import { Search, Pencil, Trash2, ImageOff, GripVertical } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CategoryDialog, type Category } from "@/components/dashboard/category-dialog";
 import { useAuth } from "@/lib/auth-context";
+import { cn } from "@/lib/utils";
 
 export function CategoriesTable({ categories }: { categories: Category[] }) {
   const router = useRouter();
@@ -36,9 +37,67 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
   const [deleting, setDeleting] = React.useState(false);
   const [deleteError, setDeleteError] = React.useState<string | null>(null);
 
-  const filtered = categories.filter((c) =>
+  // Local, reorderable copy of the list — resynced whenever the server data
+  // changes (e.g. after router.refresh() from an add/edit/delete). Adjusted
+  // during render rather than in an effect, per
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevCategories, setPrevCategories] = React.useState(categories);
+  const [items, setItems] = React.useState(categories);
+  if (categories !== prevCategories) {
+    setPrevCategories(categories);
+    setItems(categories);
+  }
+
+  const [draggedId, setDraggedId] = React.useState<string | null>(null);
+  const [dragOverId, setDragOverId] = React.useState<string | null>(null);
+  const [reorderError, setReorderError] = React.useState<string | null>(null);
+
+  // Drag-and-drop reordering only makes sense against the full, unfiltered
+  // list — row positions in a filtered view don't map cleanly to it.
+  const canReorder = query === "";
+
+  const filtered = items.filter((c) =>
     c.name.toLowerCase().includes(query.toLowerCase())
   );
+
+  async function persistOrder(next: Category[]) {
+    setReorderError(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories/reorder`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ ids: next.map((c) => c.id) }),
+      });
+
+      if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+    } catch (err) {
+      setReorderError(
+        err instanceof Error ? err.message : "Could not save the new order."
+      );
+      setItems(categories);
+    }
+  }
+
+  function handleDrop(targetId: string) {
+    setDragOverId(null);
+    if (!draggedId || draggedId === targetId) return;
+
+    setItems((current) => {
+      const from = current.findIndex((c) => c.id === draggedId);
+      const to = current.findIndex((c) => c.id === targetId);
+      if (from === -1 || to === -1) return current;
+
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      persistOrder(next);
+      return next;
+    });
+  }
 
   async function confirmDelete() {
     if (!pendingDelete) return;
@@ -73,20 +132,31 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="relative max-w-sm">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search categories…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="pl-8"
-        />
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative max-w-sm flex-1">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search categories…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        {reorderError && (
+          <p className="text-sm text-destructive">{reorderError}</p>
+        )}
+        {!canReorder && (
+          <p className="text-xs text-muted-foreground">
+            Clear the search to drag and reorder.
+          </p>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-8" />
               <TableHead>Category</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Products</TableHead>
@@ -95,7 +165,38 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
           </TableHeader>
           <TableBody>
             {filtered.map((category) => (
-              <TableRow key={category.id}>
+              <TableRow
+                key={category.id}
+                draggable={canReorder}
+                onDragStart={() => setDraggedId(category.id)}
+                onDragOver={(e) => {
+                  if (!canReorder) return;
+                  e.preventDefault();
+                  if (dragOverId !== category.id) setDragOverId(category.id);
+                }}
+                onDragLeave={() =>
+                  setDragOverId((current) => (current === category.id ? null : current))
+                }
+                onDrop={(e) => {
+                  e.preventDefault();
+                  handleDrop(category.id);
+                }}
+                onDragEnd={() => {
+                  setDraggedId(null);
+                  setDragOverId(null);
+                }}
+                className={cn(
+                  draggedId === category.id && "opacity-50",
+                  dragOverId === category.id &&
+                    draggedId !== category.id &&
+                    "border-t-2 border-t-primary"
+                )}
+              >
+                <TableCell className="text-muted-foreground">
+                  {canReorder && (
+                    <GripVertical className="h-4 w-4 cursor-grab active:cursor-grabbing" />
+                  )}
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
@@ -156,7 +257,7 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
             {filtered.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={5}
                   className="py-10 text-center text-sm text-muted-foreground"
                 >
                   No categories match your search.
