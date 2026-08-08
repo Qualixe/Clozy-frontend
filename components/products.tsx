@@ -17,6 +17,7 @@ import {
   ProductCarouselNext,
 } from "@/components/ui/product-carousel";
 import { ProductCard, type Product } from "@/components/product-card";
+import { ProductCardSkeleton } from "@/components/product-card-skeleton";
 
 const TABS = [
   { value: "featured", label: "Featured" },
@@ -81,9 +82,11 @@ export function ProductsSection() {
           </div>
 
           {status === "loading" && (
-            <p className="py-12 text-center text-sm text-muted-foreground">
-              Loading products…
-            </p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
           )}
 
           {status === "error" && (
