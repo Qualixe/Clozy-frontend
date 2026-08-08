@@ -72,13 +72,15 @@ export function ProductsSection() {
                 Our Products
               </h2>
             </div>
-            <TabsList className="shrink-0">
-              {TABS.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value}>
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="max-w-full overflow-x-auto sm:shrink-0">
+              <TabsList className="w-max">
+                {TABS.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value}>
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </div>
 
           {status === "loading" && (

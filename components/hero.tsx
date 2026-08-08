@@ -85,6 +85,29 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
                 background: `linear-gradient(135deg, ${slide.gradientFrom}, ${slide.gradientTo})`,
               }}
             >
+              {/* Background photo for mobile/tablet — desktop shows the
+                  image in its own column instead, so this stays hidden
+                  from lg up. Tinted with the slide's own gradient so it
+                  still reads as the same themed slide, just with the
+                  photo visible behind the text. */}
+              <div className="absolute inset-0 lg:hidden">
+                <Image
+                  src={slide.image}
+                  alt={slide.heading.join(" ")}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  priority={slide.id === slides[0].id}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(135deg, ${slide.gradientFrom}, ${slide.gradientTo})`,
+                    opacity: 0.55,
+                  }}
+                />
+              </div>
+
               {/* Ghost watermark text */}
               <span
                 aria-hidden

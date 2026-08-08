@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ListTree, Images, ScrollText, ChevronRight } from "lucide-react";
+import { ListTree, Images, ScrollText, HelpCircle, ChevronRight } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
@@ -15,6 +15,12 @@ const SECTIONS = [
     description: "Privacy, terms, and other policy pages.",
     href: "/dashboard/content/policies",
     icon: ScrollText,
+  },
+  {
+    title: "FAQs",
+    description: "Questions and answers shown on your storefront's FAQ page.",
+    href: "/dashboard/content/faqs",
+    icon: HelpCircle,
   },
   {
     title: "Media",

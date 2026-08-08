@@ -61,6 +61,7 @@ const NAV_ITEMS = [
     children: [
       { title: "Menus", href: "/dashboard/content/menus" },
       { title: "Policies", href: "/dashboard/content/policies" },
+      { title: "FAQs", href: "/dashboard/content/faqs" },
       { title: "Media", href: "/dashboard/content/media" },
     ],
   },

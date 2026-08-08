@@ -167,6 +167,7 @@ const FALLBACK_FOOTER_LINKS: { title: string; links: { label: string; href: stri
   {
     title: "Support",
     links: [
+      { label: "FAQ", href: "/faq" },
       { label: "Help Center", href: "/help" },
       { label: "Track Order", href: "/track-order" },
       { label: "Shipping & Returns", href: "/shipping-returns" },
