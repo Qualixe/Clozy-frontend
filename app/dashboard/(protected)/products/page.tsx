@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { FolderTree } from "lucide-react";
+import { FolderTree, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ProductsTable } from "@/components/dashboard/products-table";
-import { ProductDialog } from "@/components/dashboard/add-product-dialog";
 import type { Product } from "@/components/product-card";
 
 async function getProducts(): Promise<Product[]> {
@@ -38,7 +37,16 @@ export default async function DashboardProductsPage() {
               </Link>
             }
           />
-          <ProductDialog />
+          <Button
+            size="sm"
+            nativeButton={false}
+            render={
+              <Link href="/dashboard/products/new">
+                <Plus className="h-4 w-4" />
+                Add Product
+              </Link>
+            }
+          />
         </div>
       </div>
 

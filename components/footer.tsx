@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUp, Mail } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -201,7 +202,13 @@ const PAYMENT_METHODS = [
 // Footer
 // ---------------------------------------------------------------------------
 
-export function SiteFooter({ menu }: { menu: Menu | null }) {
+export function SiteFooter({
+  menu,
+  logoUrl,
+}: {
+  menu: Menu | null;
+  logoUrl?: string | null;
+}) {
   const year = new Date().getFullYear();
   const [currency, setCurrency] = React.useState("us-en-usd");
 
@@ -261,12 +268,24 @@ export function SiteFooter({ menu }: { menu: Menu | null }) {
             </span>
             <div className="relative">
               <Link href="/" className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-                  C
-                </span>
-                <span className="text-lg font-semibold tracking-tight">
-                  Clozy
-                </span>
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt="Clozy"
+                    width={128}
+                    height={32}
+                    className="h-8 w-auto object-contain"
+                  />
+                ) : (
+                  <>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
+                      C
+                    </span>
+                    <span className="text-lg font-semibold tracking-tight">
+                      Clozy
+                    </span>
+                  </>
+                )}
               </Link>
               <p className="mt-4 max-w-xs text-sm text-muted-foreground">
                 Considered essentials, made to last. Designed in-house, shipped worldwide.

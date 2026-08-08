@@ -4,6 +4,8 @@ export type StoreSettings = {
   googleTagManagerId: string | null;
   tiktokPixelId: string | null;
   aiChatEnabled: boolean;
+  logoUrl: string | null;
+  faviconUrl: string | null;
 };
 
 export async function getSettings(): Promise<StoreSettings> {

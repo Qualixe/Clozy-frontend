@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   User,
@@ -70,7 +71,13 @@ const FALLBACK_LINKS: MenuLink[] = navData.links.map((link) => ({
 // Header
 // ---------------------------------------------------------------------------
 
-export function SiteHeader({ menu }: { menu: NavMenu | null }) {
+export function SiteHeader({
+  menu,
+  logoUrl,
+}: {
+  menu: NavMenu | null;
+  logoUrl?: string | null;
+}) {
   const [isDark, setIsDark] = React.useState(false);
   const router = useRouter();
   const { user, ready, logout } = useAuth();
@@ -95,12 +102,25 @@ export function SiteHeader({ menu }: { menu: NavMenu | null }) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-            C
-          </span>
-          <span className="text-lg font-semibold tracking-tight text-foreground">
-            Clozy
-          </span>
+          {logoUrl ? (
+            <Image
+              src={logoUrl}
+              alt="Clozy"
+              width={128}
+              height={32}
+              className="h-8 w-auto object-contain"
+              priority
+            />
+          ) : (
+            <>
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
+                C
+              </span>
+              <span className="text-lg font-semibold tracking-tight text-foreground">
+                Clozy
+              </span>
+            </>
+          )}
         </Link>
 
         {/* Desktop nav */}

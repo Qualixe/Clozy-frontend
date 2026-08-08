@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check } from "lucide-react";
+import { Check, ImageOff, X } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { MediaPickerDialog } from "@/components/dashboard/media-picker-dialog";
 import { useAuth } from "@/lib/auth-context";
 import type { AdminStoreSettings } from "@/lib/get-settings";
 
@@ -41,6 +42,8 @@ type SettingsState = {
   smsOrderCancelledTemplate: string;
   smsPromotionalEnabled: boolean;
   anthropicApiKey: string;
+  logoUrl: string;
+  faviconUrl: string;
 };
 
 const DEFAULT_CONFIRMATION_TEMPLATE =
@@ -95,10 +98,14 @@ export function SettingsForm({
       initialSettings.smsOrderCancelledTemplate ?? DEFAULT_CANCELLED_TEMPLATE,
     smsPromotionalEnabled: initialSettings.smsPromotionalEnabled,
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
+    logoUrl: initialSettings.logoUrl ?? "",
+    faviconUrl: initialSettings.faviconUrl ?? "",
   });
   const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState(false);
+  const [logoPickerOpen, setLogoPickerOpen] = React.useState(false);
+  const [faviconPickerOpen, setFaviconPickerOpen] = React.useState(false);
 
   function update<K extends keyof SettingsState>(key: K, value: SettingsState[K]) {
     setSettings((s) => ({ ...s, [key]: value }));
@@ -134,6 +141,8 @@ export function SettingsForm({
           smsOrderCancelledTemplate: settings.smsOrderCancelledTemplate || null,
           smsPromotionalEnabled: settings.smsPromotionalEnabled,
           anthropicApiKey: settings.anthropicApiKey || null,
+          logoUrl: settings.logoUrl || null,
+          faviconUrl: settings.faviconUrl || null,
         }),
       });
 
@@ -157,6 +166,7 @@ export function SettingsForm({
       <Tabs defaultValue="general">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="shipping">Shipping</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="pixels">Pixels</TabsTrigger>
@@ -204,6 +214,108 @@ export function SettingsForm({
               onChange={(e) => update("storeDescription", e.target.value)}
             />
           </div>
+        </TabsContent>
+
+        <TabsContent value="branding" className="mt-6 max-w-xl space-y-5">
+          <div>
+            <p className="text-sm font-medium text-foreground">Logo</p>
+            <p className="text-xs text-muted-foreground">
+              Shown in the storefront header and footer, in place of the
+              default Clozy wordmark. Leave empty to use the default.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setLogoPickerOpen(true)}
+              className="group relative flex h-16 w-40 items-center justify-center overflow-hidden rounded-lg border border-dashed border-input bg-muted text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+            >
+              {settings.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={settings.logoUrl}
+                  alt=""
+                  className="h-full w-full object-contain p-2"
+                />
+              ) : (
+                <ImageOff className="h-5 w-5" />
+              )}
+              <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-xs font-medium text-transparent transition-colors group-hover:bg-black/40 group-hover:text-white">
+                {settings.logoUrl ? "Change" : "Choose image"}
+              </span>
+            </button>
+
+            {settings.logoUrl && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => update("logoUrl", "")}
+              >
+                <X className="h-3.5 w-3.5" />
+                Remove
+              </Button>
+            )}
+          </div>
+
+          <MediaPickerDialog
+            open={logoPickerOpen}
+            onOpenChange={setLogoPickerOpen}
+            multiple={false}
+            onSelect={([url]) => url && update("logoUrl", url)}
+          />
+
+          <Separator />
+
+          <div>
+            <p className="text-sm font-medium text-foreground">Favicon</p>
+            <p className="text-xs text-muted-foreground">
+              The small icon shown in browser tabs. A square image works
+              best. Leave empty to use the default.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setFaviconPickerOpen(true)}
+              className="group relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-dashed border-input bg-muted text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+            >
+              {settings.faviconUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={settings.faviconUrl}
+                  alt=""
+                  className="h-full w-full object-contain p-2"
+                />
+              ) : (
+                <ImageOff className="h-5 w-5" />
+              )}
+              <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-xs font-medium text-transparent transition-colors group-hover:bg-black/40 group-hover:text-white">
+                {settings.faviconUrl ? "Change" : "Choose"}
+              </span>
+            </button>
+
+            {settings.faviconUrl && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => update("faviconUrl", "")}
+              >
+                <X className="h-3.5 w-3.5" />
+                Remove
+              </Button>
+            )}
+          </div>
+
+          <MediaPickerDialog
+            open={faviconPickerOpen}
+            onOpenChange={setFaviconPickerOpen}
+            multiple={false}
+            onSelect={([url]) => url && update("faviconUrl", url)}
+          />
         </TabsContent>
 
         <TabsContent value="shipping" className="mt-6 max-w-xl space-y-5">
