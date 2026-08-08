@@ -63,7 +63,7 @@ export function ProductsSection() {
     <section className="w-full bg-background pt-4 pb-16 sm:pt-6 sm:pb-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Tabs defaultValue="featured">
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-8 flex flex-col flex-wrap gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
                 Shop
@@ -72,7 +72,7 @@ export function ProductsSection() {
                 Our Products
               </h2>
             </div>
-            <TabsList>
+            <TabsList className="shrink-0">
               {TABS.map((tab) => (
                 <TabsTrigger key={tab.value} value={tab.value}>
                   {tab.label}
@@ -82,7 +82,7 @@ export function ProductsSection() {
           </div>
 
           {status === "loading" && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
               ))}

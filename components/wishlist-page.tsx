@@ -56,7 +56,7 @@ export function WishlistPage() {
           </p>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
             <div key={item.id} className="group">
               <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-muted">

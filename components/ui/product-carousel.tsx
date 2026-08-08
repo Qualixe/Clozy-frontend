@@ -173,7 +173,7 @@ function ProductCarouselContent({
       className="overflow-hidden"
       data-slot="product-carousel-content"
     >
-      <div className={cn("-ml-4 flex sm:-ml-6", className)} {...props} />
+      <div className={cn("-ml-3 flex", className)} {...props} />
     </div>
   )
 }
@@ -188,7 +188,7 @@ function ProductCarouselItem({
       aria-roledescription="slide"
       data-slot="product-carousel-item"
       className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full pl-4 sm:pl-6",
+        "min-w-0 shrink-0 grow-0 basis-full pl-3",
         className
       )}
       {...props}
@@ -216,7 +216,12 @@ function ProductCarouselPrevious({
   style,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { scrollPrev, canScrollPrev, mediaHeight } = useProductCarousel()
+  const { scrollPrev, canScrollPrev, canScrollNext, mediaHeight } = useProductCarousel()
+
+  // Nothing to page through at all (e.g. fewer items than fit in one view)
+  // — render nothing rather than a disabled button stranded far from the
+  // visible cards.
+  if (!canScrollPrev && !canScrollNext) return null
 
   return (
     <Button
@@ -245,7 +250,12 @@ function ProductCarouselNext({
   style,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { scrollNext, canScrollNext, mediaHeight } = useProductCarousel()
+  const { scrollNext, canScrollPrev, canScrollNext, mediaHeight } = useProductCarousel()
+
+  // Nothing to page through at all (e.g. fewer items than fit in one view)
+  // — render nothing rather than a disabled button stranded far from the
+  // visible cards.
+  if (!canScrollPrev && !canScrollNext) return null
 
   return (
     <Button
