@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ImageUploader } from "@/components/dashboard/image-uploader";
+import { CategoryProducts } from "@/components/dashboard/category-products";
 import { useAuth } from "@/lib/auth-context";
 
 export type Category = {
@@ -187,6 +188,15 @@ export function CategoryDialog({
                 />
               </div>
             </section>
+
+            {isEditing && (
+              <>
+                <Separator />
+                <section>
+                  <CategoryProducts categoryId={category.id} />
+                </section>
+              </>
+            )}
 
             <Separator />
 

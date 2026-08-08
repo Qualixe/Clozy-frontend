@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import {
   User,
   Menu,
@@ -78,9 +79,19 @@ export function SiteHeader({
   menu: NavMenu | null;
   logoUrl?: string | null;
 }) {
-  const [isDark, setIsDark] = React.useState(false);
   const router = useRouter();
   const { user, ready, logout } = useAuth();
+  const { resolvedTheme, setTheme } = useTheme();
+  // Avoid a hydration mismatch: resolvedTheme is undefined on the server and
+  // on the client's first render, and only becomes accurate once next-themes
+  // reads localStorage/system preference after mount. This client-only
+  // "second render" is the pattern React's own docs recommend for content
+  // that must differ between server and client — see
+  // https://react.dev/reference/react-dom/client/hydrateRoot#handling-different-client-and-server-content
+  const [mounted, setMounted] = React.useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional client-only mount flag, not derived state
+  React.useEffect(() => setMounted(true), []);
+  const isDark = mounted && resolvedTheme === "dark";
 
   const navLinks = menu?.items.length ? menu.items : FALLBACK_LINKS;
 
@@ -91,10 +102,7 @@ export function SiteHeader({
   }
 
   function toggleTheme() {
-    // Demo-only toggle. If the project already uses next-themes,
-    // swap this for useTheme()'s setTheme("dark" | "light") instead.
-    document.documentElement.classList.toggle("dark");
-    setIsDark((d) => !d);
+    setTheme(isDark ? "light" : "dark");
   }
 
   return (
