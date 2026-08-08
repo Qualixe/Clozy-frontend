@@ -15,7 +15,7 @@ export function NewArrivalsSection({ data }: { data: NewArrivalsData }) {
   if (!data.enabled || data.products.length === 0) return null;
 
   return (
-    <section className="w-full bg-muted/30 py-16 sm:py-20">
+    <section className="w-full bg-muted/30 py-4 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>

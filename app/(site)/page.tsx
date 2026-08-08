@@ -37,7 +37,7 @@ export default async function Home() {
 
       <ProductsSection />
       <CategoryBanners categories={categories} />
-      <NewArrivalsSection data={newArrivals} />
+      
       <SingleBanner
         image="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop"
         imageAlt="Seasonal sale"
@@ -47,6 +47,7 @@ export default async function Home() {
         ctaLabel="Shop the Sale"
         ctaHref="/shop"
       />
+      <NewArrivalsSection data={newArrivals} />
       <CategoryGridBanners categories={categories} />
       <VideoSection data={videoSection} />
       {/* <ImageTextSection

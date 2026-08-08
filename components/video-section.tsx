@@ -4,6 +4,13 @@ import * as React from "react";
 import { X } from "lucide-react";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 
 export type VideoSectionItem = {
   id: string;
@@ -36,35 +43,44 @@ export function VideoSection({ data }: { data: VideoSectionData }) {
           {data.heading}
         </h2>
 
-        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
-          {data.items.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setOpenId(item.id)}
-              aria-label={item.caption ? `Play video: ${item.caption}` : "Play video"}
-              className="relative aspect-[9/16] w-[65%] shrink-0 snap-start overflow-hidden rounded-2xl bg-muted text-left sm:w-[38%] lg:w-[19%]"
-            >
-              <video
-                src={item.videoUrl}
-                poster={item.posterUrl ?? undefined}
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="h-full w-full object-cover"
-              />
-              {item.caption && (
-                <>
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <p className="absolute inset-x-3 bottom-3 text-sm font-medium text-white">
-                    {item.caption}
-                  </p>
-                </>
-              )}
-            </button>
-          ))}
-        </div>
+        <Carousel opts={{ align: "start" }} className="group/carousel">
+          <CarouselContent>
+            {data.items.map((item) => (
+              <CarouselItem
+                key={item.id}
+                className="basis-[65%] sm:basis-[38%] lg:basis-1/5"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenId(item.id)}
+                  aria-label={item.caption ? `Play video: ${item.caption}` : "Play video"}
+                  className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl bg-muted text-left"
+                >
+                  <video
+                    src={item.videoUrl}
+                    poster={item.posterUrl ?? undefined}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="h-full w-full object-cover"
+                  />
+                  {item.caption && (
+                    <>
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                      <p className="absolute inset-x-3 bottom-3 text-sm font-medium text-white">
+                        {item.caption}
+                      </p>
+                    </>
+                  )}
+                </button>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+
+          <CarouselPrevious className="left-2 lg:-left-12" />
+          <CarouselNext className="right-2 lg:-right-12" />
+        </Carousel>
       </div>
 
       <Dialog open={active !== null} onOpenChange={(open) => !open && setOpenId(null)}>
