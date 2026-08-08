@@ -3,15 +3,18 @@ import HeroSlider from "@/components/hero";
 import ProductsSection from "@/components/products";
 import { NewArrivalsSection } from "@/components/new-arrivals";
 import { CategoryBanners } from "@/components/category-banners";
+import { CategoryGridBanners } from "@/components/category-grid-banners";
 import { SingleBanner } from "@/components/single-banner";
+import { VideoSection } from "@/components/video-section";
 import { getCategories } from "@/lib/get-categories";
 import { getHeroSlides } from "@/lib/get-hero-slides";
 import { getNewArrivals } from "@/lib/get-new-arrivals";
+import { getVideoSection } from "@/lib/get-video-section";
 
 export default async function Home() {
   // A backend hiccup shouldn't take the homepage down — fall back to an
   // empty list rather than throwing.
-  const [categories, heroSlides, newArrivals] = await Promise.all([
+  const [categories, heroSlides, newArrivals, videoSection] = await Promise.all([
     getCategories().catch(() => []),
     getHeroSlides().catch(() => []),
     getNewArrivals().catch(() => ({
@@ -19,6 +22,11 @@ export default async function Home() {
       eyebrow: "",
       heading: "",
       products: [],
+    })),
+    getVideoSection().catch(() => ({
+      enabled: false,
+      heading: "",
+      items: [],
     })),
   ]);
 
@@ -39,6 +47,8 @@ export default async function Home() {
         ctaLabel="Shop the Sale"
         ctaHref="/shop"
       />
+      <CategoryGridBanners categories={categories} />
+      <VideoSection data={videoSection} />
       {/* <ImageTextSection
         image="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1200&auto=format&fit=crop"
         imageAlt="Considered essentials, made to last"

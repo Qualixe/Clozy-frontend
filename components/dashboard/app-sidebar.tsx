@@ -70,6 +70,7 @@ const NAV_ITEMS = [
     children: [
       { title: "Hero", href: "/dashboard/theme/hero" },
       { title: "New Arrivals", href: "/dashboard/theme/new-arrivals" },
+      { title: "Video Section", href: "/dashboard/theme/video-section" },
     ],
   },
   {

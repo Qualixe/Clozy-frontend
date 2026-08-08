@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Heart,
   Minus,
   Plus,
   Star,
@@ -43,7 +42,6 @@ import { WriteReviewDialog } from "@/components/write-review-dialog";
 import type { Product } from "@/components/product-card";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
-import { useWishlist } from "@/lib/wishlist-context";
 
 // ---------------------------------------------------------------------------
 // Data shape — populated from the Laravel API (`GET /products/{id}`)
@@ -105,8 +103,6 @@ export function ProductPage({ product }: { product: ProductDetail }) {
   const [selectedSize, setSelectedSize] = React.useState<string | null>(null);
   const [quantity, setQuantity] = React.useState(1);
   const { addItem } = useCart();
-  const { isWishlisted, toggle: toggleWishlist } = useWishlist();
-  const wishlisted = isWishlisted(product.id);
 
   // The variant matching whatever color/size is currently selected — used to
   // show that combination's actual price rather than the product's base price.
@@ -404,32 +400,6 @@ export function ProductPage({ product }: { product: ProductDetail }) {
                 onClick={handleAddToCart}
               >
                 {selectedSize ? "Add to Cart" : "Select a size"}
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-11 w-11 shrink-0"
-                onClick={() =>
-                  toggleWishlist({
-                    id: product.id,
-                    slug: product.slug,
-                    name: product.name,
-                    price: displayPrice,
-                    originalPrice: displayOriginalPrice ?? undefined,
-                    image: product.images[0],
-                  })
-                }
-                aria-label={
-                  wishlisted ? "Remove from wishlist" : "Add to wishlist"
-                }
-              >
-                <Heart
-                  className={cn(
-                    "h-[18px] w-[18px]",
-                    wishlisted && "fill-destructive text-destructive"
-                  )}
-                />
               </Button>
             </div>
 

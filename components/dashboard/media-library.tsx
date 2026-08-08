@@ -153,13 +153,21 @@ export function MediaLibrary({ media }: { media: UploadedMedia[] }) {
           {media.map((item) => (
             <div key={item.id} className="group relative space-y-1.5">
               <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-border bg-muted">
-                <Image
-                  src={item.url}
-                  alt={item.filename}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                  className="object-cover"
-                />
+                {item.mimeType.startsWith("video/") ? (
+                  <video
+                    src={item.url}
+                    muted
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={item.url}
+                    alt={item.filename}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    className="object-cover"
+                  />
+                )}
                 <div className="absolute inset-0 flex items-start justify-end gap-1 bg-black/0 p-1.5 opacity-0 transition-opacity group-hover:bg-black/20 group-hover:opacity-100">
                   <Button
                     type="button"

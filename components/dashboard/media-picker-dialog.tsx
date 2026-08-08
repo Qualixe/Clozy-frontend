@@ -129,8 +129,10 @@ export function MediaPickerDialog({
     onOpenChange(false);
   }
 
-  const filtered = media.filter((item) =>
-    item.filename.toLowerCase().includes(search.trim().toLowerCase())
+  const filtered = media.filter(
+    (item) =>
+      item.mimeType.startsWith("image/") &&
+      item.filename.toLowerCase().includes(search.trim().toLowerCase())
   );
 
   return (

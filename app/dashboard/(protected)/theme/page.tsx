@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GalleryHorizontal, Sparkles, ChevronRight } from "lucide-react";
+import { GalleryHorizontal, Sparkles, Clapperboard, ChevronRight } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
@@ -15,6 +15,12 @@ const SECTIONS = [
     description: "Pick which products show in the homepage's New Arrivals section.",
     href: "/dashboard/theme/new-arrivals",
     icon: Sparkles,
+  },
+  {
+    title: "Video Section",
+    description: "Upload the portrait video carousel shown on the homepage.",
+    href: "/dashboard/theme/video-section",
+    icon: Clapperboard,
   },
 ];
 

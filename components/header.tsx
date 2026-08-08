@@ -9,7 +9,6 @@ import {
   User,
   Menu,
   Package,
-  Heart,
   LogOut,
   Settings,
   LayoutDashboard,
@@ -286,14 +285,6 @@ export function SiteHeader({
                       <Link href="/account/orders">
                         <Package className="mr-2 h-4 w-4" />
                         Orders
-                      </Link>
-                    }
-                  />
-                  <DropdownMenuItem
-                    render={
-                      <Link href="/account/wishlist">
-                        <Heart className="mr-2 h-4 w-4" />
-                        Wishlist
                       </Link>
                     }
                   />

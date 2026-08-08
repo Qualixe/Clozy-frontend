@@ -36,7 +36,7 @@ export function SingleBanner({
   priority = false,
 }: SingleBannerProps) {
   return (
-    <section className={cn("w-full bg-background py-16 sm:py-20", className)}>
+    <section className={cn("w-full bg-background py-8 sm:py-10", className)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
           className={cn(
