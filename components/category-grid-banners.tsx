@@ -3,16 +3,21 @@ import Image from "next/image";
 
 import type { Category } from "@/components/category-card";
 
+export type CategoryGridBannerData = {
+  enabled: boolean;
+  categories: Category[];
+};
+
 /**
  * Four equal-width category banners — image with a bottom gradient overlay,
  * heading, and short description. Distinct from `CategoryBanners`' 1-large
  * + 2-stacked promo layout and from `CategoryShowcase`'s plain image+name
- * grid.
+ * grid. Dashboard-managed at Theme > Category Banners.
  */
-export function CategoryGridBanners({ categories }: { categories: Category[] }) {
-  const items = categories.filter((c) => c.image).slice(0, 4);
+export function CategoryGridBanners({ data }: { data: CategoryGridBannerData }) {
+  const items = data.categories.filter((c) => c.image).slice(0, 4);
 
-  if (items.length === 0) return null;
+  if (!data.enabled || items.length === 0) return null;
 
   return (
     <section className="w-full bg-background py-8 sm:py-10">

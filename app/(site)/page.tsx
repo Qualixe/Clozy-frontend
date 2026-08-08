@@ -7,28 +7,41 @@ import { CategoryGridBanners } from "@/components/category-grid-banners";
 import { SingleBanner } from "@/components/single-banner";
 import { VideoSection } from "@/components/video-section";
 import { getCategories } from "@/lib/get-categories";
+import { getCategoryGridBanner } from "@/lib/get-category-grid-banner";
 import { getHeroSlides } from "@/lib/get-hero-slides";
 import { getNewArrivals } from "@/lib/get-new-arrivals";
+import { getPromoBanner } from "@/lib/get-promo-banner";
 import { getVideoSection } from "@/lib/get-video-section";
 
 export default async function Home() {
   // A backend hiccup shouldn't take the homepage down — fall back to an
   // empty list rather than throwing.
-  const [categories, heroSlides, newArrivals, videoSection] = await Promise.all([
-    getCategories().catch(() => []),
-    getHeroSlides().catch(() => []),
-    getNewArrivals().catch(() => ({
-      enabled: false,
-      eyebrow: "",
-      heading: "",
-      products: [],
-    })),
-    getVideoSection().catch(() => ({
-      enabled: false,
-      heading: "",
-      items: [],
-    })),
-  ]);
+  const [categories, heroSlides, newArrivals, videoSection, categoryGridBanner, promoBanner] =
+    await Promise.all([
+      getCategories().catch(() => []),
+      getHeroSlides().catch(() => []),
+      getNewArrivals().catch(() => ({
+        enabled: false,
+        eyebrow: "",
+        heading: "",
+        products: [],
+      })),
+      getVideoSection().catch(() => ({
+        enabled: false,
+        heading: "",
+        items: [],
+      })),
+      getCategoryGridBanner().catch(() => ({ enabled: false, categories: [] })),
+      getPromoBanner().catch(() => ({
+        enabled: false,
+        image: null,
+        eyebrow: null,
+        heading: null,
+        body: null,
+        ctaLabel: null,
+        ctaHref: null,
+      })),
+    ]);
 
   return (
     <>
@@ -37,18 +50,20 @@ export default async function Home() {
 
       <ProductsSection />
       <CategoryBanners categories={categories} />
-      
-      <SingleBanner
-        image="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop"
-        imageAlt="Seasonal sale"
-        eyebrow="Limited Time"
-        heading="Up to 40% off selected styles"
-        body="Considered essentials at a considered price — while stocks last."
-        ctaLabel="Shop the Sale"
-        ctaHref="/shop"
-      />
+
+      {promoBanner.enabled && promoBanner.image && promoBanner.heading && (
+        <SingleBanner
+          image={promoBanner.image}
+          imageAlt={promoBanner.heading}
+          eyebrow={promoBanner.eyebrow ?? undefined}
+          heading={promoBanner.heading}
+          body={promoBanner.body ?? undefined}
+          ctaLabel={promoBanner.ctaLabel ?? undefined}
+          ctaHref={promoBanner.ctaHref ?? undefined}
+        />
+      )}
       <NewArrivalsSection data={newArrivals} />
-      <CategoryGridBanners categories={categories} />
+      <CategoryGridBanners data={categoryGridBanner} />
       <VideoSection data={videoSection} />
       {/* <ImageTextSection
         image="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1200&auto=format&fit=crop"

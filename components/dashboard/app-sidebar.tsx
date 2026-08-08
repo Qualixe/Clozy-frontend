@@ -60,6 +60,7 @@ const NAV_ITEMS = [
     icon: FileText,
     children: [
       { title: "Menus", href: "/dashboard/content/menus" },
+      { title: "Policies", href: "/dashboard/content/policies" },
       { title: "Media", href: "/dashboard/content/media" },
     ],
   },
@@ -70,6 +71,8 @@ const NAV_ITEMS = [
     children: [
       { title: "Hero", href: "/dashboard/theme/hero" },
       { title: "New Arrivals", href: "/dashboard/theme/new-arrivals" },
+      { title: "Promo Banner", href: "/dashboard/theme/promo-banner" },
+      { title: "Category Banners", href: "/dashboard/theme/category-banners" },
       { title: "Video Section", href: "/dashboard/theme/video-section" },
     ],
   },

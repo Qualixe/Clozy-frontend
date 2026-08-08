@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { GalleryHorizontal, Sparkles, Clapperboard, ChevronRight } from "lucide-react";
+import {
+  GalleryHorizontal,
+  Sparkles,
+  Clapperboard,
+  Image as ImageIcon,
+  LayoutGrid,
+  ChevronRight,
+} from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
@@ -15,6 +22,18 @@ const SECTIONS = [
     description: "Pick which products show in the homepage's New Arrivals section.",
     href: "/dashboard/theme/new-arrivals",
     icon: Sparkles,
+  },
+  {
+    title: "Promo Banner",
+    description: "Edit the full-width promotional banner shown on the homepage.",
+    href: "/dashboard/theme/promo-banner",
+    icon: ImageIcon,
+  },
+  {
+    title: "Category Banners",
+    description: "Pick which categories show in the homepage's 4-up category grid.",
+    href: "/dashboard/theme/category-banners",
+    icon: LayoutGrid,
   },
   {
     title: "Video Section",
