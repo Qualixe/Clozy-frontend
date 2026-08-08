@@ -6,23 +6,20 @@ import { NewArrivalsSection } from "@/components/new-arrivals";
 import { CategoryBanners } from "@/components/category-banners";
 import { getCategories } from "@/lib/get-categories";
 import { getHeroSlides } from "@/lib/get-hero-slides";
-import type { Product } from "@/components/product-card";
-
-async function getProducts(): Promise<Product[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
-  return res.json();
-}
+import { getNewArrivals } from "@/lib/get-new-arrivals";
 
 export default async function Home() {
   // A backend hiccup shouldn't take the homepage down — fall back to an
   // empty list rather than throwing.
-  const [categories, heroSlides, products] = await Promise.all([
+  const [categories, heroSlides, newArrivals] = await Promise.all([
     getCategories().catch(() => []),
     getHeroSlides().catch(() => []),
-    getProducts().catch(() => []),
+    getNewArrivals().catch(() => ({
+      enabled: false,
+      eyebrow: "",
+      heading: "",
+      products: [],
+    })),
   ]);
 
   return (
@@ -32,7 +29,7 @@ export default async function Home() {
 
       <ProductsSection />
       <CategoryBanners categories={categories} />
-      <NewArrivalsSection products={products} />
+      <NewArrivalsSection data={newArrivals} />
       <ImageTextSection
         image="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1200&auto=format&fit=crop"
         imageAlt="Considered essentials, made to last"

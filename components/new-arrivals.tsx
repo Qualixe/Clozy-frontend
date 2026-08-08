@@ -4,10 +4,15 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard, type Product } from "@/components/product-card";
 
-export function NewArrivalsSection({ products }: { products: Product[] }) {
-  const items = products.filter((p) => p.tabs.includes("new")).slice(0, 8);
+export type NewArrivalsData = {
+  enabled: boolean;
+  eyebrow: string;
+  heading: string;
+  products: Product[];
+};
 
-  if (items.length === 0) return null;
+export function NewArrivalsSection({ data }: { data: NewArrivalsData }) {
+  if (!data.enabled || data.products.length === 0) return null;
 
   return (
     <section className="w-full bg-muted/30 py-16 sm:py-20">
@@ -15,10 +20,10 @@ export function NewArrivalsSection({ products }: { products: Product[] }) {
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Just In
+              {data.eyebrow}
             </p>
             <h2 className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              New Arrivals
+              {data.heading}
             </h2>
           </div>
           <Button
@@ -34,7 +39,7 @@ export function NewArrivalsSection({ products }: { products: Product[] }) {
         </div>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-          {items.map((product) => (
+          {data.products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GalleryHorizontal, ChevronRight } from "lucide-react";
+import { GalleryHorizontal, Sparkles, ChevronRight } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
@@ -9,6 +9,12 @@ const SECTIONS = [
     description: "The homepage's top banner — slides, images, and buttons.",
     href: "/dashboard/theme/hero",
     icon: GalleryHorizontal,
+  },
+  {
+    title: "New Arrivals",
+    description: "Pick which products show in the homepage's New Arrivals section.",
+    href: "/dashboard/theme/new-arrivals",
+    icon: Sparkles,
   },
 ];
 
