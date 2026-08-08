@@ -30,7 +30,7 @@ export default async function Home() {
       <ProductsSection />
       <CategoryBanners categories={categories} />
       <NewArrivalsSection data={newArrivals} />
-      <ImageTextSection
+      {/* <ImageTextSection
         image="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1200&auto=format&fit=crop"
         imageAlt="Considered essentials, made to last"
         eyebrow="Our Story"
@@ -39,7 +39,7 @@ export default async function Home() {
         ctaLabel="Learn more"
         ctaHref="/about-us"
         imagePosition="left"
-      />
+      /> */}
     </>
   );
 }

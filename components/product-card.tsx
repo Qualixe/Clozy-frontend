@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -112,32 +112,12 @@ export function ProductCard({
       </MediaWrapper>
 
       <div className="mt-3">
-        {product.categorySlug ? (
-          <Link
-            href={`/collections/${product.categorySlug}`}
-            className="text-xs text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
-          >
-            {product.category}
-          </Link>
-        ) : (
-          <p className="text-xs text-muted-foreground">{product.category}</p>
-        )}
         <Link
           href={`/products/${product.slug}`}
-          className="mt-0.5 block text-sm font-medium text-foreground hover:underline underline-offset-4"
+          className="block text-sm font-medium text-foreground hover:underline underline-offset-4"
         >
           {product.name}
         </Link>
-
-        <div className="mt-1 flex items-center gap-1">
-          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-          <span className="text-xs font-medium text-foreground">
-            {product.rating}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            ({product.reviews})
-          </span>
-        </div>
 
         <div className="mt-1.5 flex items-center gap-2">
           <span className="text-sm font-semibold text-foreground">
