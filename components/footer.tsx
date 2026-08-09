@@ -8,13 +8,6 @@ import { ArrowUp, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { Menu } from "@/lib/get-menu";
 
 // ---------------------------------------------------------------------------
@@ -211,7 +204,6 @@ export function SiteFooter({
   logoUrl?: string | null;
 }) {
   const year = new Date().getFullYear();
-  const [currency, setCurrency] = React.useState("us-en-usd");
 
   const footerColumns = menu?.items.length
     ? menu.items.map((column) => ({
@@ -336,37 +328,14 @@ export function SiteFooter({
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center gap-4 py-6 text-sm text-muted-foreground sm:flex-row sm:justify-between">
-          <p className="order-3 sm:order-1">
-            © {year} Clozy, Inc. All rights reserved.
-          </p>
+          <p>© {year} Clozy, Inc. All rights reserved.</p>
 
-          <div className="order-1 flex flex-wrap items-center justify-center gap-2 sm:order-2">
-            {PAYMENT_METHODS.map(({ label, icon: Icon, className }) => (
-              <Icon key={label} className={`${className} text-foreground`} />
-            ))}
-          </div>
-
-          <div className="order-2 flex items-center gap-3 sm:order-3">
-            <Select
-              value={currency}
-              onValueChange={(value) => {
-                if (value) setCurrency(value);
-              }}
-            >
-              <SelectTrigger size="sm" className="h-8 w-20 text-xs">
-                <SelectValue placeholder="Currency">
-                  {(value: string | null) =>
-                    value ? value.split("-").pop()?.toUpperCase() : "Currency"
-                  }
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent align="end" className="w-56">
-                <SelectItem value="us-en-usd">United States · $ USD</SelectItem>
-                <SelectItem value="uk-en-gbp">United Kingdom · £ GBP</SelectItem>
-                <SelectItem value="eu-en-eur">Europe · € EUR</SelectItem>
-                <SelectItem value="bd-en-bdt">Bangladesh · ৳ BDT</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {PAYMENT_METHODS.map(({ label, icon: Icon, className }) => (
+                <Icon key={label} className={`${className} text-foreground`} />
+              ))}
+            </div>
 
             <Button
               variant="outline"
