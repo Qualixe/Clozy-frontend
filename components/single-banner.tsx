@@ -69,7 +69,7 @@ export function SingleBanner({
               {heading}
             </h2>
             {body && (
-              <p className="mt-3 max-w-md text-sm text-white/90 sm:text-base">
+              <p className="mt-3 max-w-md text-sm text-[#462c22]  sm:text-base">
                 {body}
               </p>
             )}
