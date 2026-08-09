@@ -52,7 +52,7 @@ export function SingleBanner({
             priority={priority}
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute inset-0" />
 
           <div
             className={cn(
@@ -61,7 +61,7 @@ export function SingleBanner({
             )}
           >
             {eyebrow && (
-              <p className="text-sm font-medium uppercase tracking-wide text-white/80">
+              <p className="text-sm font-medium uppercase tracking-wide text-[#2C1810]">
                 {eyebrow}
               </p>
             )}
