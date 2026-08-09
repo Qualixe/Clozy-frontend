@@ -16,8 +16,8 @@ export function NewArrivalsSection({ data }: { data: NewArrivalsData }) {
 
   return (
     <section className="w-full bg-muted/30 py-4 sm:py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-row items-end justify-between gap-4">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
               {data.eyebrow}

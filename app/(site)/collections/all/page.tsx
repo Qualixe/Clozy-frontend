@@ -13,7 +13,7 @@ export default async function Page() {
 
   return (
     <main className="w-full bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-2.5 py-10 sm:px-6 lg:px-8">
         <div>
           <p className="text-sm font-medium text-muted-foreground">Browse</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">

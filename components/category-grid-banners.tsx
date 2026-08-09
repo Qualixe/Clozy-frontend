@@ -21,7 +21,7 @@ export function CategoryGridBanners({ data }: { data: CategoryGridBannerData }) 
 
   return (
     <section className="w-full bg-background py-8 sm:py-10">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {items.map((category, i) => (
             <Link

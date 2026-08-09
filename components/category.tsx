@@ -21,7 +21,7 @@ export function CategoryCarousel({ categories }: { categories: Category[] }) {
 
   return (
     <section className="w-full bg-background pt-12 pb-4 sm:pt-16 sm:pb-6">
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-0 sm:px-6 lg:px-8">
         <Carousel
           opts={{ align: "start", dragFree: true, containScroll: "trimSnaps" }}
           className="group/carousel"

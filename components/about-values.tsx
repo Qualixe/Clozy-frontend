@@ -36,7 +36,7 @@ export function AboutValues({ data }: { data: AboutPageData }) {
 
   return (
     <section className="w-full border-t border-border bg-muted/30 py-16 sm:py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
         <div className="max-w-xl">
           {data.valuesEyebrow && (
             <p className="text-sm font-medium text-muted-foreground">

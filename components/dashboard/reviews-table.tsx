@@ -33,6 +33,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Can } from "@/components/can";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 
@@ -225,47 +227,61 @@ export function ReviewsTable({ reviews }: { reviews: Review[] }) {
                   {review.body}
                 </TableCell>
                 <TableCell>
-                  <Select
-                    value={review.status}
-                    disabled={updatingId === review.id}
-                    onValueChange={(value) => {
-                      if (value) changeStatus(review, value as ReviewStatus);
-                    }}
+                  <Can
+                    permission="manage_reviews"
+                    fallback={
+                      <Badge
+                        variant="secondary"
+                        className={STATUS_TRIGGER_STYLES[review.status]}
+                      >
+                        {STATUS_OPTIONS.find((o) => o.value === review.status)?.label}
+                      </Badge>
+                    }
                   >
-                    <SelectTrigger
-                      size="sm"
-                      className={cn(
-                        "w-[120px]",
-                        STATUS_TRIGGER_STYLES[review.status]
-                      )}
+                    <Select
+                      value={review.status}
+                      disabled={updatingId === review.id}
+                      onValueChange={(value) => {
+                        if (value) changeStatus(review, value as ReviewStatus);
+                      }}
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUS_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        size="sm"
+                        className={cn(
+                          "w-[120px]",
+                          STATUS_TRIGGER_STYLES[review.status]
+                        )}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUS_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Can>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {review.date}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label={`Delete review by ${review.author}`}
-                    onClick={() => {
-                      setDeleteError(null);
-                      setPendingDelete(review);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <Can permission="manage_reviews">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="text-muted-foreground hover:text-destructive"
+                      aria-label={`Delete review by ${review.author}`}
+                      onClick={() => {
+                        setDeleteError(null);
+                        setPendingDelete(review);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </Can>
                 </TableCell>
               </TableRow>
             ))}

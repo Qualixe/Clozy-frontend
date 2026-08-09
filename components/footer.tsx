@@ -221,7 +221,7 @@ export function SiteFooter({
 
   return (
     <footer className="relative w-full border-t border-border bg-background text-foreground">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
         {/* Newsletter band */}
         <div className="flex flex-col gap-6 border-b border-border py-10 md:flex-row md:items-center md:justify-between">
           <div>

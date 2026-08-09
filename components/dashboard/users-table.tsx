@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Trash2 } from "lucide-react";
+import { Search, Trash2, Pencil } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,18 +26,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { UserDialog, type ManagedUser } from "@/components/dashboard/user-dialog";
+import { type ManagedUser } from "@/components/dashboard/user-dialog";
 import { useAuth } from "@/lib/auth-context";
 
 const ROLE_STYLES: Record<ManagedUser["role"], string> = {
+  owner: "bg-foreground text-background",
   admin: "bg-foreground text-background",
-  editor: "bg-muted text-foreground",
+  staff: "bg-muted text-foreground",
   user: "border-transparent bg-secondary text-secondary-foreground",
 };
 
 const ROLE_LABELS: Record<ManagedUser["role"], string> = {
+  owner: "Owner",
   admin: "Admin",
-  editor: "Editor",
+  staff: "Staff",
   user: "Customer",
 };
 
@@ -133,7 +136,17 @@ export function UsersTable({ users }: { users: ManagedUser[] }) {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <UserDialog user={u} />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          nativeButton={false}
+                          render={
+                            <Link href={`/dashboard/users/${u.id}/edit`} aria-label={`Edit ${u.name}`}>
+                              <Pencil className="h-4 w-4" />
+                            </Link>
+                          }
+                        />
                         <Button
                           variant="ghost"
                           size="icon"

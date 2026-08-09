@@ -7,7 +7,7 @@ export function AboutStory({ data }: { data: AboutPageData }) {
 
   return (
     <section className="w-full bg-background py-16 sm:py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div className="relative order-2 aspect-[4/5] w-full overflow-hidden rounded-xl border border-border bg-muted lg:order-1">
             <Image

@@ -56,7 +56,7 @@ function DashboardLoginForm() {
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-semibold text-foreground">Dashboard sign in</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Restricted to admin and editor accounts.
+          Restricted to owner, admin, and staff accounts.
         </p>
       </div>
 

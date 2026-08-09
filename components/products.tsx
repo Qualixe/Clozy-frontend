@@ -61,7 +61,7 @@ export function ProductsSection() {
 
   return (
     <section className="w-full bg-background pt-4 pb-16 sm:pt-6 sm:pb-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
         <Tabs defaultValue="featured">
           <div className="mb-8 flex flex-col flex-wrap gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>

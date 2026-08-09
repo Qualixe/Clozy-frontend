@@ -1,8 +1,12 @@
+import type { Permission, Role } from "@/lib/permissions";
+
 export type AuthUser = {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "editor" | "user";
+  role: Role;
+  roles: Role[];
+  permissions: Permission[];
 };
 
 export type AuthSession = {
@@ -44,5 +48,5 @@ export function clearAuthCookie() {
 }
 
 export function canAccessDashboard(user: Pick<AuthUser, "role"> | null | undefined): boolean {
-  return !!user && (user.role === "admin" || user.role === "editor");
+  return !!user && (user.role === "owner" || user.role === "admin" || user.role === "staff");
 }

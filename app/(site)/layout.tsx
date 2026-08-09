@@ -4,6 +4,7 @@ import SiteHeader from "@/components/header";
 import SiteFooter from "@/components/footer";
 import { Pixels } from "@/components/pixels";
 import { ChatWidget } from "@/components/chat-widget";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { CartProvider } from "@/lib/cart-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { getMenuByHandle } from "@/lib/get-menu";
@@ -43,9 +44,12 @@ export default async function SiteLayout({
       <WishlistProvider>
         <Pixels settings={settings} />
         <SiteHeader menu={menu} logoUrl={settings.logoUrl} />
-        {children}
-        <SiteFooter menu={footerMenu} logoUrl={settings.logoUrl} />
+        <div className="pb-16 md:pb-0">
+          {children}
+          <SiteFooter menu={footerMenu} logoUrl={settings.logoUrl} />
+        </div>
         <ChatWidget enabled={settings.aiChatEnabled} />
+        <MobileBottomNav menu={menu} />
       </WishlistProvider>
     </CartProvider>
   );

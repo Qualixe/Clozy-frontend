@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,12 +25,14 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth-context";
 import type { AuthUser } from "@/lib/auth-cookie";
+import type { Permission } from "@/lib/permissions";
 
 export type ManagedUser = {
   id: string;
   name: string;
   email: string;
   role: AuthUser["role"];
+  permissions: Permission[];
   createdAt: string | null;
 };
 
@@ -43,17 +45,16 @@ type UserForm = {
 
 const EMPTY_FORM: UserForm = { name: "", email: "", role: "user", password: "" };
 
-export function UserDialog({ user }: { user?: ManagedUser }) {
+/**
+ * "Add User" only — editing (including per-user permission checkboxes)
+ * happens on its own page at /dashboard/users/[id]/edit.
+ */
+export function UserDialog() {
   const router = useRouter();
   const { token } = useAuth();
-  const isEditing = !!user;
 
   const [open, setOpen] = React.useState(false);
-  const [form, setForm] = React.useState<UserForm>(
-    user
-      ? { name: user.name, email: user.email, role: user.role, password: "" }
-      : EMPTY_FORM
-  );
+  const [form, setForm] = React.useState<UserForm>(EMPTY_FORM);
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -62,11 +63,7 @@ export function UserDialog({ user }: { user?: ManagedUser }) {
     if (!next) {
       setError(null);
       setSubmitting(false);
-      setForm(
-        user
-          ? { name: user.name, email: user.email, role: user.role, password: "" }
-          : EMPTY_FORM
-      );
+      setForm(EMPTY_FORM);
     }
   }
 
@@ -81,7 +78,7 @@ export function UserDialog({ user }: { user?: ManagedUser }) {
       setError("Name and email are required.");
       return;
     }
-    if (!isEditing && form.password.length < 8) {
+    if (form.password.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
     }
@@ -90,24 +87,18 @@ export function UserDialog({ user }: { user?: ManagedUser }) {
     setError(null);
 
     try {
-      const url = isEditing
-        ? `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/users`;
-
-      const payload: Record<string, string> = {
-        name: form.name,
-        email: form.email,
-        role: form.role,
-      };
-      if (form.password) payload.password = form.password;
-
-      const res = await fetch(url, {
-        method: isEditing ? "PUT" : "POST",
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          role: form.role,
+          password: form.password,
+        }),
       });
 
       if (!res.ok) {
@@ -133,26 +124,19 @@ export function UserDialog({ user }: { user?: ManagedUser }) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          isEditing ? (
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Pencil className="h-4 w-4" />
-            </Button>
-          ) : (
-            <Button size="sm">
-              <Plus className="h-4 w-4" />
-              Add User
-            </Button>
-          )
+          <Button size="sm">
+            <Plus className="h-4 w-4" />
+            Add User
+          </Button>
         }
       />
       <DialogContent className="sm:max-w-sm">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{isEditing ? "Edit User" : "Add User"}</DialogTitle>
+            <DialogTitle>Add User</DialogTitle>
             <DialogDescription>
-              {isEditing
-                ? "Update this account's details and role."
-                : "Create a new admin, editor, or customer account."}
+              Create a new admin, staff, or customer account. Fine-tune their
+              exact permissions afterward from the Users list.
             </DialogDescription>
           </DialogHeader>
 
@@ -187,22 +171,19 @@ export function UserDialog({ user }: { user?: ManagedUser }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="staff">Staff</SelectItem>
                   <SelectItem value="user">Customer</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="user-password">
-                {isEditing ? "New password (optional)" : "Password"}
-              </Label>
+              <Label htmlFor="user-password">Password</Label>
               <Input
                 id="user-password"
                 type="password"
                 value={form.password}
                 onChange={(e) => update("password", e.target.value)}
-                placeholder={isEditing ? "Leave blank to keep current password" : undefined}
               />
             </div>
 
@@ -218,7 +199,7 @@ export function UserDialog({ user }: { user?: ManagedUser }) {
               Cancel
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving…" : isEditing ? "Save Changes" : "Create User"}
+              {submitting ? "Saving…" : "Create User"}
             </Button>
           </DialogFooter>
         </form>

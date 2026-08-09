@@ -37,10 +37,10 @@ export function SingleBanner({
 }: SingleBannerProps) {
   return (
     <section className={cn("w-full bg-background py-8 sm:py-10", className)}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
         <div
           className={cn(
-            "relative flex min-h-[22rem] w-full items-end overflow-hidden rounded-2xl bg-muted sm:min-h-[26rem]",
+            "relative flex min-h-[300px] w-full items-end overflow-hidden rounded-2xl bg-muted sm:min-h-[300px]",
             align === "center" && "items-center justify-center text-center"
           )}
         >

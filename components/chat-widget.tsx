@@ -88,7 +88,7 @@ export function ChatWidget({ enabled }: { enabled: boolean }) {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-5 z-50 flex flex-col items-end gap-3 md:bottom-5">
       {open && (
         <div className="flex h-[32rem] w-[22rem] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">

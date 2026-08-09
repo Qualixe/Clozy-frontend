@@ -34,7 +34,7 @@ export default async function DashboardUsersPage() {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Users</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {users.length} accounts — admins and editors can access the dashboard.
+            {users.length} accounts — owners, admins, and staff can access the dashboard.
           </p>
         </div>
         <UserDialog />

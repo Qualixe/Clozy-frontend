@@ -102,29 +102,10 @@ export function HeaderSearch() {
     close();
   }
 
-  const showPanel = open && query.trim().length >= MIN_QUERY_LENGTH;
+  const showResults = query.trim().length >= MIN_QUERY_LENGTH;
 
   return (
     <div ref={containerRef} className="relative flex items-center">
-      <div
-        className={cn(
-          "overflow-hidden transition-all duration-300 ease-in-out",
-          open ? "w-40 sm:w-64 opacity-100" : "w-0 opacity-0"
-        )}
-      >
-        <Input
-          ref={inputRef}
-          type="search"
-          placeholder="Search products…"
-          className="h-9"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") close();
-            if (e.key === "Enter") goToResults();
-          }}
-        />
-      </div>
       <Button
         variant="ghost"
         size="icon"
@@ -135,8 +116,26 @@ export function HeaderSearch() {
         {open ? <X className="h-[18px] w-[18px]" /> : <Search className="h-[18px] w-[18px]" />}
       </Button>
 
-      {showPanel && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-xl bg-popover p-2 text-sm text-popover-foreground shadow ring-1 ring-foreground/10">
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl bg-popover p-2 text-sm text-popover-foreground shadow-lg ring-1 ring-foreground/10 sm:w-96">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              ref={inputRef}
+              type="search"
+              placeholder="Search products…"
+              className="h-9 pl-8"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") close();
+                if (e.key === "Enter") goToResults();
+              }}
+            />
+          </div>
+
+          {showResults && (
+          <div className="mt-2">
           {status === "loading" && (
             <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -194,6 +193,8 @@ export function HeaderSearch() {
             >
               View all results for &quot;{query.trim()}&quot;
             </button>
+          )}
+          </div>
           )}
         </div>
       )}

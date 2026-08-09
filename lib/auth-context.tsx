@@ -8,6 +8,8 @@ import {
   writeAuthCookie,
   type AuthUser,
 } from "@/lib/auth-cookie";
+import { useAuthStore } from "@/lib/auth-store";
+import { getMe } from "@/lib/get-me";
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -49,6 +51,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (session) {
       setUser(session.user);
       setToken(session.token);
+      useAuthStore.getState().setFromUser(session.user);
+
+      // Refresh roles/permissions in case they changed since this session's
+      // last login (e.g. an owner updated this account's role elsewhere).
+      getMe(session.token)
+        .then((freshUser) => {
+          writeAuthCookie({ token: session.token, user: freshUser });
+          setUser(freshUser);
+          useAuthStore.getState().setFromUser(freshUser);
+        })
+        .catch(() => {
+          // Stale cached session data is better than none — leave it as-is.
+        });
     }
     setReady(true);
   }, []);
@@ -64,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     writeAuthCookie({ token: data.token, user: data.user });
     setUser(data.user);
     setToken(data.token);
+    useAuthStore.getState().setFromUser(data.user);
   }, []);
 
   const register = React.useCallback(
@@ -88,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       writeAuthCookie({ token: data.token, user: data.user });
       setUser(data.user);
       setToken(data.token);
+      useAuthStore.getState().setFromUser(data.user);
     },
     []
   );
@@ -97,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearAuthCookie();
     setUser(null);
     setToken(null);
+    useAuthStore.getState().clear();
     if (currentToken) {
       try {
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {

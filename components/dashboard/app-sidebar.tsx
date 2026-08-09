@@ -17,6 +17,7 @@ import {
   MessageCircle,
   Settings,
   LogOut,
+  type LucideIcon,
 } from "lucide-react";
 
 import {
@@ -39,68 +40,31 @@ import {
   AvatarFallback,
 } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
+import { useAuthStore } from "@/lib/auth-store";
+import { ACCOUNT_SIDEBAR_ITEMS, SIDEBAR_ITEMS } from "@/lib/sidebar-items";
 
-const NAV_ITEMS = [
-  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  {
-    title: "Products",
-    href: "/dashboard/products",
-    icon: Package,
-    children: [
-      { title: "Categories", href: "/dashboard/products/categories" },
-    ],
-  },
-  { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
-  { title: "Discounts", href: "/dashboard/discounts", icon: Percent },
-  { title: "Reviews", href: "/dashboard/reviews", icon: MessageSquareText },
-  { title: "Customers", href: "/dashboard/customers", icon: Users },
-  { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  {
-    title: "Content",
-    href: "/dashboard/content",
-    icon: FileText,
-    children: [
-      { title: "Menus", href: "/dashboard/content/menus" },
-      { title: "Media", href: "/dashboard/content/media" },
-    ],
-  },
-  {
-    title: "CMS",
-    href: "/dashboard/cms",
-    icon: LayoutTemplate,
-    children: [
-      { title: "About Page", href: "/dashboard/cms/about-page" },
-      { title: "Policies", href: "/dashboard/cms/policies" },
-      { title: "FAQs", href: "/dashboard/cms/faqs" },
-    ],
-  },
-  {
-    title: "Theme",
-    href: "/dashboard/theme",
-    icon: Palette,
-    children: [
-      { title: "Hero", href: "/dashboard/theme/hero" },
-      { title: "New Arrivals", href: "/dashboard/theme/new-arrivals" },
-      { title: "Promo Banner", href: "/dashboard/theme/promo-banner" },
-      { title: "Category Banners", href: "/dashboard/theme/category-banners" },
-      { title: "Video Section", href: "/dashboard/theme/video-section" },
-    ],
-  },
-  {
-    title: "SMS",
-    href: "/dashboard/sms",
-    icon: MessageCircle,
-    children: [
-      { title: "Promotional", href: "/dashboard/sms/promotional" },
-      { title: "Logs", href: "/dashboard/sms/logs" },
-    ],
-  },
-];
+/** Icons live here (UI-only), keyed by the matching config href — `sidebar-items.ts` stays edge-safe/serializable. */
+const ICONS: Record<string, LucideIcon> = {
+  "/dashboard": LayoutDashboard,
+  "/dashboard/products": Package,
+  "/dashboard/orders": ShoppingCart,
+  "/dashboard/discounts": Percent,
+  "/dashboard/reviews": MessageSquareText,
+  "/dashboard/customers": Users,
+  "/dashboard/analytics": BarChart3,
+  "/dashboard/content": FileText,
+  "/dashboard/cms": LayoutTemplate,
+  "/dashboard/theme": Palette,
+  "/dashboard/sms": MessageCircle,
+  "/dashboard/users": Users,
+  "/dashboard/settings": Settings,
+};
 
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const hasPermission = useAuthStore((s) => s.hasPermission);
 
   async function handleSignOut() {
     await logout();
@@ -115,6 +79,20 @@ export function AppSidebar() {
         .join("")
         .toUpperCase()
     : "?";
+
+  const navItems = SIDEBAR_ITEMS.map((item) => ({
+    ...item,
+    children: item.children?.filter(
+      (child) => !child.permissions || hasPermission(child.permissions)
+    ),
+  })).filter(
+    (item) =>
+      !item.permissions || hasPermission(item.permissions) || (item.children?.length ?? 0) > 0
+  );
+
+  const accountItems = ACCOUNT_SIDEBAR_ITEMS.filter(
+    (item) => !item.permissions || hasPermission(item.permissions)
+  );
 
   return (
     <Sidebar collapsible="icon">
@@ -134,36 +112,39 @@ export function AppSidebar() {
           <SidebarGroupLabel>Store</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    tooltip={item.title}
-                    render={
-                      <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    }
-                  />
-                  {item.children && (
-                    <SidebarMenuSub>
-                      {item.children.map((child) => (
-                        <SidebarMenuSubItem key={child.href}>
-                          <SidebarMenuSubButton
-                            isActive={pathname === child.href}
-                            render={
-                              <Link href={child.href}>
-                                <span>{child.title}</span>
-                              </Link>
-                            }
-                          />
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  )}
-                </SidebarMenuItem>
-              ))}
+              {navItems.map((item) => {
+                const Icon = ICONS[item.href] ?? LayoutDashboard;
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      isActive={pathname === item.href}
+                      tooltip={item.title}
+                      render={
+                        <Link href={item.href}>
+                          <Icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      }
+                    />
+                    {item.children && item.children.length > 0 && (
+                      <SidebarMenuSub>
+                        {item.children.map((child) => (
+                          <SidebarMenuSubItem key={child.href}>
+                            <SidebarMenuSubButton
+                              isActive={pathname === child.href}
+                              render={
+                                <Link href={child.href}>
+                                  <span>{child.title}</span>
+                                </Link>
+                              }
+                            />
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    )}
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -172,32 +153,23 @@ export function AppSidebar() {
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {user?.role === "admin" && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={pathname === "/dashboard/users"}
-                    tooltip="Users"
-                    render={
-                      <Link href="/dashboard/users">
-                        <Users />
-                        <span>Users</span>
-                      </Link>
-                    }
-                  />
-                </SidebarMenuItem>
-              )}
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={pathname === "/dashboard/settings"}
-                  tooltip="Settings"
-                  render={
-                    <Link href="/dashboard/settings">
-                      <Settings />
-                      <span>Settings</span>
-                    </Link>
-                  }
-                />
-              </SidebarMenuItem>
+              {accountItems.map((item) => {
+                const Icon = ICONS[item.href] ?? Settings;
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      isActive={pathname === item.href}
+                      tooltip={item.title}
+                      render={
+                        <Link href={item.href}>
+                          <Icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      }
+                    />
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

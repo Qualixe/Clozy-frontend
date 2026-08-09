@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/pagination";
 import { OrderDetailSheet } from "@/components/dashboard/order-detail-sheet";
 import { CreateOrderDialog } from "@/components/dashboard/create-order-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Can } from "@/components/can";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/data/orders";
@@ -178,32 +180,44 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                   {order.payment}
                 </TableCell>
                 <TableCell>
-                  <Select
-                    value={order.status.toLowerCase()}
-                    disabled={updatingId === order.id}
-                    onValueChange={(value) => {
-                      if (value) {
-                        changeStatus(order, value as Lowercase<OrderStatus>);
-                      }
-                    }}
+                  <Can
+                    permission="manage_orders"
+                    fallback={
+                      <Badge
+                        variant="secondary"
+                        className={STATUS_TRIGGER_STYLES[order.status]}
+                      >
+                        {order.status}
+                      </Badge>
+                    }
                   >
-                    <SelectTrigger
-                      size="sm"
-                      className={cn(
-                        "w-[120px]",
-                        STATUS_TRIGGER_STYLES[order.status]
-                      )}
+                    <Select
+                      value={order.status.toLowerCase()}
+                      disabled={updatingId === order.id}
+                      onValueChange={(value) => {
+                        if (value) {
+                          changeStatus(order, value as Lowercase<OrderStatus>);
+                        }
+                      }}
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUS_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        size="sm"
+                        className={cn(
+                          "w-[120px]",
+                          STATUS_TRIGGER_STYLES[order.status]
+                        )}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUS_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Can>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {order.date}

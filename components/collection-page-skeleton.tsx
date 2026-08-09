@@ -6,7 +6,7 @@ import { ProductGridSkeleton } from "@/components/product-grid-skeleton";
 export function CollectionPageSkeleton() {
   return (
     <main className="w-full bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-2.5 py-10 sm:px-6 lg:px-8">
         <div>
           <Skeleton className="h-4 w-16" />
           <Skeleton className="mt-2 h-9 w-64" />

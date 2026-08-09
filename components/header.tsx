@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
   User,
-  Menu,
   Package,
   LogOut,
   Settings,
@@ -33,13 +32,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { CartDrawer } from "@/components/cart-drawer";
 import { HeaderSearch } from "@/components/header-search";
@@ -47,25 +39,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { canAccessDashboard } from "@/lib/auth-cookie";
 import { MENU_ICONS } from "@/lib/menu-icons";
-import type { Menu as NavMenu, MenuLink } from "@/lib/get-menu";
-import navData from "@/data/nav.json";
-
-// ---------------------------------------------------------------------------
-// Data
-// ---------------------------------------------------------------------------
-// Top-level nav links come from the "main-menu" Menu (editable at
-// /dashboard/content/menus), with `data/nav.json`'s `links` as a fallback if
-// that menu is missing/unreachable.
-
-const FALLBACK_LINKS: MenuLink[] = navData.links.map((link) => ({
-  id: link.href,
-  label: link.label,
-  url: link.href,
-  type: "custom",
-  displayStyle: "link",
-  icon: null,
-  children: [],
-}));
+import { getNavLinks, type Menu as NavMenu } from "@/lib/get-menu";
 
 // ---------------------------------------------------------------------------
 // Header
@@ -92,7 +66,7 @@ export function SiteHeader({
   React.useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
 
-  const navLinks = menu?.items.length ? menu.items : FALLBACK_LINKS;
+  const navLinks = getNavLinks(menu);
 
   async function handleSignOut() {
     await logout();
@@ -106,7 +80,7 @@ export function SiteHeader({
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-2.5 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2">
           {logoUrl ? (
@@ -226,7 +200,7 @@ export function SiteHeader({
 
         {/* Right side actions */}
         <div className="flex items-center gap-1">
-          {/* Expandable AJAX search */}
+          {/* Search icon opens a floating dropdown input + results panel, on every breakpoint */}
           <HeaderSearch />
 
           {/* Theme toggle */}
@@ -244,14 +218,14 @@ export function SiteHeader({
             )}
           </Button>
 
-          {/* Account dropdown */}
+          {/* Account dropdown — desktop only; mobile uses the bottom nav's Account tab */}
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9"
+                  className="hidden h-9 w-9 md:inline-flex"
                   aria-label="Account"
                 >
                   <User className="h-[18px] w-[18px]" />
@@ -326,67 +300,9 @@ export function SiteHeader({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Cart drawer */}
+          {/* Cart drawer — kept visible on mobile alongside the theme toggle;
+              all other nav/account access moves to the bottom nav there. */}
           <CartDrawer />
-
-          {/* Mobile menu (Sheet) */}
-          <Sheet>
-            <SheetTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 md:hidden"
-                  aria-label="Open menu"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              }
-            />
-            <SheetContent side="left" className="w-72">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4 flex flex-col gap-1 px-1">
-                {navLinks.map((link) => (
-                  <React.Fragment key={link.id}>
-                    <Link
-                      href={link.url}
-                      className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                    {link.children.map((child) =>
-                      child.children.length > 0 ? (
-                        <React.Fragment key={child.id}>
-                          <span className="px-3 pt-2 pb-1 pl-6 text-xs font-medium text-muted-foreground">
-                            {child.label}
-                          </span>
-                          {child.children.map((leaf) => (
-                            <Link
-                              key={leaf.id}
-                              href={leaf.url}
-                              className="rounded-md px-3 py-2 pl-9 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                            >
-                              {leaf.label}
-                            </Link>
-                          ))}
-                        </React.Fragment>
-                      ) : (
-                        <Link
-                          key={child.id}
-                          href={child.url}
-                          className="rounded-md px-3 py-2 pl-6 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        >
-                          {child.label}
-                        </Link>
-                      )
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
     </header>
