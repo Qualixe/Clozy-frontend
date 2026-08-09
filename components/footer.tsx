@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { Menu } from "@/lib/get-menu";
+import type { StoreSettings } from "@/lib/get-settings";
 
 // ---------------------------------------------------------------------------
 // Brand icons
@@ -179,11 +180,15 @@ const FALLBACK_FOOTER_LINKS: { title: string; links: { label: string; href: stri
   },
 ];
 
-const SOCIALS = [
-  { label: "Instagram", href: "https://instagram.com", icon: InstagramIcon },
-  { label: "Twitter", href: "https://twitter.com", icon: TwitterIcon },
-  { label: "Facebook", href: "https://facebook.com", icon: FacebookIcon },
-  { label: "YouTube", href: "https://youtube.com", icon: YoutubeIcon },
+const DEFAULT_TAGLINE =
+  "Considered essentials, made to last. Designed in-house, shipped worldwide.";
+
+/** Order mirrors the dashboard's Branding > Footer form. Hidden entirely when left blank there. */
+const SOCIAL_ICONS = [
+  { key: "footerInstagramUrl" as const, label: "Instagram", icon: InstagramIcon },
+  { key: "footerTwitterUrl" as const, label: "Twitter", icon: TwitterIcon },
+  { key: "footerFacebookUrl" as const, label: "Facebook", icon: FacebookIcon },
+  { key: "footerYoutubeUrl" as const, label: "YouTube", icon: YoutubeIcon },
 ];
 
 const PAYMENT_METHODS = [
@@ -199,11 +204,21 @@ const PAYMENT_METHODS = [
 export function SiteFooter({
   menu,
   logoUrl,
+  settings,
 }: {
   menu: Menu | null;
   logoUrl?: string | null;
+  settings?: Pick<
+    StoreSettings,
+    "footerTagline" | "footerInstagramUrl" | "footerTwitterUrl" | "footerFacebookUrl" | "footerYoutubeUrl"
+  >;
 }) {
   const year = new Date().getFullYear();
+  const tagline = settings?.footerTagline || DEFAULT_TAGLINE;
+  const socials = SOCIAL_ICONS.filter((s) => settings?.[s.key]).map((s) => ({
+    ...s,
+    href: settings![s.key] as string,
+  }));
 
   const footerColumns = menu?.items.length
     ? menu.items.map((column) => ({
@@ -281,24 +296,26 @@ export function SiteFooter({
                 )}
               </Link>
               <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-                Considered essentials, made to last. Designed in-house, shipped worldwide.
+                {tagline}
               </p>
-              <div className="mt-5 flex items-center gap-1">
-                {SOCIALS.map(({ label, href, icon: Icon }) => (
-                  <Button
-                    key={label}
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 text-muted-foreground hover:text-foreground"
-                    nativeButton={false}
-                    render={
-                      <Link href={href} aria-label={label} target="_blank" rel="noreferrer">
-                        <Icon className="h-[18px] w-[18px]" />
-                      </Link>
-                    }
-                  />
-                ))}
-              </div>
+              {socials.length > 0 && (
+                <div className="mt-5 flex items-center gap-1">
+                  {socials.map(({ label, href, icon: Icon }) => (
+                    <Button
+                      key={label}
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                      nativeButton={false}
+                      render={
+                        <Link href={href} aria-label={label} target="_blank" rel="noreferrer">
+                          <Icon className="h-[18px] w-[18px]" />
+                        </Link>
+                      }
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

@@ -75,7 +75,7 @@ export function SingleBanner({
             )}
             {ctaLabel && ctaHref && (
               <Button
-                className="mt-6 bg-white text-foreground hover:bg-white/90"
+                className="mt-6 bg-[#2C1810] text-white hover:bg-white/90 hover:text-[#2C1810]"
                 nativeButton={false}
                 render={
                   <Link href={ctaHref}>

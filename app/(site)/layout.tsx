@@ -36,6 +36,11 @@ export default async function SiteLayout({
       aiChatEnabled: false,
       logoUrl: null,
       faviconUrl: null,
+      footerTagline: null,
+      footerInstagramUrl: null,
+      footerTwitterUrl: null,
+      footerFacebookUrl: null,
+      footerYoutubeUrl: null,
     })),
   ]);
 
@@ -46,7 +51,7 @@ export default async function SiteLayout({
         <SiteHeader menu={menu} logoUrl={settings.logoUrl} />
         <div className="pb-16 md:pb-0">
           {children}
-          <SiteFooter menu={footerMenu} logoUrl={settings.logoUrl} />
+          <SiteFooter menu={footerMenu} logoUrl={settings.logoUrl} settings={settings} />
         </div>
         <ChatWidget enabled={settings.aiChatEnabled} />
         <MobileBottomNav menu={menu} />

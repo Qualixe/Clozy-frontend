@@ -6,6 +6,11 @@ export type StoreSettings = {
   aiChatEnabled: boolean;
   logoUrl: string | null;
   faviconUrl: string | null;
+  footerTagline: string | null;
+  footerInstagramUrl: string | null;
+  footerTwitterUrl: string | null;
+  footerFacebookUrl: string | null;
+  footerYoutubeUrl: string | null;
 };
 
 export async function getSettings(): Promise<StoreSettings> {

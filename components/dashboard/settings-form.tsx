@@ -45,6 +45,11 @@ type SettingsState = {
   anthropicApiKey: string;
   logoUrl: string;
   faviconUrl: string;
+  footerTagline: string;
+  footerInstagramUrl: string;
+  footerTwitterUrl: string;
+  footerFacebookUrl: string;
+  footerYoutubeUrl: string;
 };
 
 const TAB_VALUES = [
@@ -120,6 +125,11 @@ export function SettingsForm({
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
+    footerTagline: initialSettings.footerTagline ?? "",
+    footerInstagramUrl: initialSettings.footerInstagramUrl ?? "",
+    footerTwitterUrl: initialSettings.footerTwitterUrl ?? "",
+    footerFacebookUrl: initialSettings.footerFacebookUrl ?? "",
+    footerYoutubeUrl: initialSettings.footerYoutubeUrl ?? "",
   });
   const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState<string | null>(null);
@@ -163,6 +173,11 @@ export function SettingsForm({
           anthropicApiKey: settings.anthropicApiKey || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
+          footerTagline: settings.footerTagline || null,
+          footerInstagramUrl: settings.footerInstagramUrl || null,
+          footerTwitterUrl: settings.footerTwitterUrl || null,
+          footerFacebookUrl: settings.footerFacebookUrl || null,
+          footerYoutubeUrl: settings.footerYoutubeUrl || null,
         }),
       });
 
@@ -345,6 +360,66 @@ export function SettingsForm({
             multiple={false}
             onSelect={([url]) => url && update("faviconUrl", url)}
           />
+
+          <Separator />
+
+          <div>
+            <p className="text-sm font-medium text-foreground">Footer</p>
+            <p className="text-xs text-muted-foreground">
+              The tagline and social links shown in the footer&apos;s brand
+              column. Leave a social link empty to hide that icon.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="footerTagline">Tagline</Label>
+            <Textarea
+              id="footerTagline"
+              rows={2}
+              placeholder="Considered essentials, made to last. Designed in-house, shipped worldwide."
+              value={settings.footerTagline}
+              onChange={(e) => update("footerTagline", e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="footerInstagramUrl">Instagram URL</Label>
+              <Input
+                id="footerInstagramUrl"
+                placeholder="https://instagram.com/yourstore"
+                value={settings.footerInstagramUrl}
+                onChange={(e) => update("footerInstagramUrl", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="footerTwitterUrl">Twitter / X URL</Label>
+              <Input
+                id="footerTwitterUrl"
+                placeholder="https://x.com/yourstore"
+                value={settings.footerTwitterUrl}
+                onChange={(e) => update("footerTwitterUrl", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="footerFacebookUrl">Facebook URL</Label>
+              <Input
+                id="footerFacebookUrl"
+                placeholder="https://facebook.com/yourstore"
+                value={settings.footerFacebookUrl}
+                onChange={(e) => update("footerFacebookUrl", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="footerYoutubeUrl">YouTube URL</Label>
+              <Input
+                id="footerYoutubeUrl"
+                placeholder="https://youtube.com/@yourstore"
+                value={settings.footerYoutubeUrl}
+                onChange={(e) => update("footerYoutubeUrl", e.target.value)}
+              />
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="shipping" className="max-w-xl space-y-5">
