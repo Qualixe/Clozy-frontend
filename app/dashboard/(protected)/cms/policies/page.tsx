@@ -22,11 +22,11 @@ export default async function DashboardPoliciesPage() {
     <div className="flex flex-col gap-6">
       <div>
         <Link
-          href="/dashboard/content"
+          href="/dashboard/cms"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Content
+          CMS
         </Link>
       </div>
 
@@ -41,7 +41,7 @@ export default async function DashboardPoliciesPage() {
           size="sm"
           nativeButton={false}
           render={
-            <Link href="/dashboard/content/policies/new">
+            <Link href="/dashboard/cms/policies/new">
               <Plus className="h-4 w-4" />
               Add Policy
             </Link>

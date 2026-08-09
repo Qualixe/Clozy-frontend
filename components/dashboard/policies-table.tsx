@@ -91,7 +91,7 @@ export function PoliciesTable({ policies }: { policies: PolicySummary[] }) {
               <TableRow key={policy.id}>
                 <TableCell className="font-medium text-foreground">
                   <Link
-                    href={`/dashboard/content/policies/${policy.id}`}
+                    href={`/dashboard/cms/policies/${policy.id}`}
                     className="hover:underline underline-offset-4"
                   >
                     {policy.title}
@@ -113,7 +113,7 @@ export function PoliciesTable({ policies }: { policies: PolicySummary[] }) {
                       aria-label={`Edit ${policy.title}`}
                       nativeButton={false}
                       render={
-                        <Link href={`/dashboard/content/policies/${policy.id}`}>
+                        <Link href={`/dashboard/cms/policies/${policy.id}`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
                       }

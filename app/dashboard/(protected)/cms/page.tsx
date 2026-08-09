@@ -1,30 +1,36 @@
 import Link from "next/link";
-import { ListTree, Images, ChevronRight } from "lucide-react";
+import { Info, ScrollText, HelpCircle, ChevronRight } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const SECTIONS = [
   {
-    title: "Menus",
-    description: "The navigation shown in your storefront header.",
-    href: "/dashboard/content/menus",
-    icon: ListTree,
+    title: "About Page",
+    description: "The hero, story, values, and CTA on your About page.",
+    href: "/dashboard/cms/about-page",
+    icon: Info,
   },
   {
-    title: "Media",
-    description: "Every image currently in use across products and categories.",
-    href: "/dashboard/content/media",
-    icon: Images,
+    title: "Policies",
+    description: "Privacy, terms, and other policy pages.",
+    href: "/dashboard/cms/policies",
+    icon: ScrollText,
+  },
+  {
+    title: "FAQs",
+    description: "Questions and answers shown on your storefront's FAQ page.",
+    href: "/dashboard/cms/faqs",
+    icon: HelpCircle,
   },
 ];
 
-export default function DashboardContentPage() {
+export default function DashboardCmsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Content</h1>
+        <h1 className="text-2xl font-semibold text-foreground">CMS</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage your storefront's navigation and media.
+          Manage your storefront's standalone pages.
         </p>
       </div>
 

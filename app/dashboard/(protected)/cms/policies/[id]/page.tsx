@@ -31,7 +31,7 @@ export default async function EditPolicyPage({
     <div className="flex flex-col gap-6">
       <div>
         <Link
-          href="/dashboard/content/policies"
+          href="/dashboard/cms/policies"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />

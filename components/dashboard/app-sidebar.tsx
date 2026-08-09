@@ -10,6 +10,7 @@ import {
   Users,
   BarChart3,
   FileText,
+  LayoutTemplate,
   Palette,
   Percent,
   MessageSquareText,
@@ -60,9 +61,17 @@ const NAV_ITEMS = [
     icon: FileText,
     children: [
       { title: "Menus", href: "/dashboard/content/menus" },
-      { title: "Policies", href: "/dashboard/content/policies" },
-      { title: "FAQs", href: "/dashboard/content/faqs" },
       { title: "Media", href: "/dashboard/content/media" },
+    ],
+  },
+  {
+    title: "CMS",
+    href: "/dashboard/cms",
+    icon: LayoutTemplate,
+    children: [
+      { title: "About Page", href: "/dashboard/cms/about-page" },
+      { title: "Policies", href: "/dashboard/cms/policies" },
+      { title: "FAQs", href: "/dashboard/cms/faqs" },
     ],
   },
   {

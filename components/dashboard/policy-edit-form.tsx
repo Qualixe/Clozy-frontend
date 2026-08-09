@@ -17,9 +17,9 @@ export function PolicyEditForm({
     <PolicyForm
       policyId={policyId}
       initialValue={initialValue}
-      onCancel={() => router.push("/dashboard/content/policies")}
+      onCancel={() => router.push("/dashboard/cms/policies")}
       onSuccess={() => {
-        router.push("/dashboard/content/policies");
+        router.push("/dashboard/cms/policies");
         router.refresh();
       }}
     />
