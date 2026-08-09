@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import type { AuthUser } from "@/lib/auth-cookie";
 import {
+  PERMISSIONS,
   PERMISSION_GROUPS,
   PERMISSION_LABELS,
   defaultPermissionsForRole,
@@ -56,6 +57,26 @@ export function UserEditForm({ user }: { user: ManagedUser }) {
       const next = new Set(current);
       if (next.has(permission)) next.delete(permission);
       else next.add(permission);
+      return next;
+    });
+    setSaved(false);
+  }
+
+  const allPermissionsSelected = PERMISSIONS.every((p) => permissions.has(p));
+
+  function toggleSelectAll() {
+    setPermissions(new Set(allPermissionsSelected ? [] : PERMISSIONS));
+    setSaved(false);
+  }
+
+  function toggleGroup(groupPermissions: Permission[]) {
+    const allSelected = groupPermissions.every((p) => permissions.has(p));
+    setPermissions((current) => {
+      const next = new Set(current);
+      for (const p of groupPermissions) {
+        if (allSelected) next.delete(p);
+        else next.add(p);
+      }
       return next;
     });
     setSaved(false);
@@ -175,15 +196,28 @@ export function UserEditForm({ user }: { user: ManagedUser }) {
       <Separator />
 
       <div className="space-y-4">
-        <div>
-          <p className="text-sm font-medium text-foreground">Permissions</p>
-          <p className="text-xs text-muted-foreground">
-            {isOwnerRow
-              ? "The owner has full access to everything — permissions can't be restricted."
-              : isSelf
-                ? "You can't change your own permissions — ask another owner or admin."
-                : "Exactly what this account can do, independent of its role's usual defaults."}
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">Permissions</p>
+            <p className="text-xs text-muted-foreground">
+              {isOwnerRow
+                ? "The owner has full access to everything — permissions can't be restricted."
+                : isSelf
+                  ? "You can't change your own permissions — ask another owner or admin."
+                  : "Exactly what this account can do, independent of its role's usual defaults."}
+            </p>
+          </div>
+          {!roleAndPermissionsLocked && role !== "user" && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              onClick={toggleSelectAll}
+            >
+              {allPermissionsSelected ? "Deselect All" : "Select All"}
+            </Button>
+          )}
         </div>
 
         {role === "user" && !roleAndPermissionsLocked ? (
@@ -192,9 +226,20 @@ export function UserEditForm({ user }: { user: ManagedUser }) {
           </p>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2">
-            {PERMISSION_GROUPS.map((group) => (
+            {PERMISSION_GROUPS.map((group) => {
+              const groupAllSelected = group.permissions.every((p) => permissions.has(p));
+              const groupSomeSelected = group.permissions.some((p) => permissions.has(p));
+              return (
               <div key={group.title} className="space-y-2.5">
-                <p className="text-xs font-medium text-muted-foreground">{group.title}</p>
+                <label className="flex items-center gap-2.5 text-xs font-medium text-muted-foreground">
+                  <Checkbox
+                    checked={isOwnerRow ? true : groupAllSelected}
+                    indeterminate={!isOwnerRow && groupSomeSelected && !groupAllSelected}
+                    disabled={roleAndPermissionsLocked}
+                    onCheckedChange={() => toggleGroup(group.permissions)}
+                  />
+                  {group.title}
+                </label>
                 <div className="space-y-2">
                   {group.permissions.map((permission) => (
                     <label
@@ -213,7 +258,8 @@ export function UserEditForm({ user }: { user: ManagedUser }) {
                   ))}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

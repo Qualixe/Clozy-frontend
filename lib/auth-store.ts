@@ -26,12 +26,19 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
   hasPermission: (permission) => {
     const required = Array.isArray(permission) ? permission : [permission];
     if (required.length === 0) return true;
-    return required.some((p) => get().permissions.includes(p));
+    const granted = get().permissions ?? [];
+    return required.some((p) => granted.includes(p));
   },
   hasRole: (role) => {
     const required = Array.isArray(role) ? role : [role];
-    return required.some((r) => get().roles.includes(r));
+    const granted = get().roles ?? [];
+    return required.some((r) => granted.includes(r));
   },
-  setFromUser: (user) => set({ user, roles: user.roles, permissions: user.permissions }),
+  // Defensive against a stale cookie written before `roles`/`permissions`
+  // existed on the session, or any other malformed session data — falls
+  // back to "no access" rather than crashing until the mount-time `/me`
+  // refresh (see AuthContext) replaces it with fresh data.
+  setFromUser: (user) =>
+    set({ user, roles: user.roles ?? [], permissions: user.permissions ?? [] }),
   clear: () => set({ user: null, roles: [], permissions: [] }),
 }));

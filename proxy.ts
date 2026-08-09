@@ -26,11 +26,13 @@ export function proxy(request: NextRequest) {
   }
 
   const requiredPermissions = permissionsForPath(pathname);
+  // Defensive against a stale cookie written before `permissions` existed
+  // on the session — treated as "no permissions" (redirects below) rather
+  // than crashing the whole proxy.
+  const grantedPermissions = session!.user.permissions ?? [];
   const hasAccess =
     !requiredPermissions ||
-    requiredPermissions.some((permission) =>
-      session!.user.permissions.includes(permission)
-    );
+    requiredPermissions.some((permission) => grantedPermissions.includes(permission));
 
   if (!hasAccess) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
