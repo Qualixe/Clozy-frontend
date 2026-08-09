@@ -16,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getOrders } from "@/lib/get-orders";
+import { NoAccess } from "@/components/dashboard/no-access";
+import { getOrdersOrForbidden } from "@/lib/get-orders";
 import type { OrderStatus } from "@/data/orders";
 
 const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
@@ -26,7 +27,17 @@ const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
 };
 
 export default async function DashboardPage() {
-  const orders = await getOrders();
+  const result = await getOrdersOrForbidden();
+
+  if (result.forbidden) {
+    return (
+      <div className="flex flex-col gap-6">
+        <NoAccess message="You don't have access to order data — ask an owner or admin to grant it." />
+      </div>
+    );
+  }
+
+  const orders = result.orders;
   const recentOrders = orders.slice(0, 5);
   const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
 

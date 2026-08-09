@@ -10,7 +10,8 @@ import {
 import { RevenueChart, type RevenuePoint } from "@/components/dashboard/revenue-chart";
 import { StatusChart, type StatusPoint } from "@/components/dashboard/status-chart";
 import { AiInsightsCard } from "@/components/dashboard/ai-insights-card";
-import { getOrders } from "@/lib/get-orders";
+import { NoAccess } from "@/components/dashboard/no-access";
+import { getOrdersOrForbidden } from "@/lib/get-orders";
 import type { Order, OrderStatus } from "@/data/orders";
 
 function getRevenueByDay(orders: Order[]): RevenuePoint[] {
@@ -39,7 +40,23 @@ function getStatusBreakdown(orders: Order[]): StatusPoint[] {
 }
 
 export default async function DashboardAnalyticsPage() {
-  const orders = await getOrders();
+  const result = await getOrdersOrForbidden();
+
+  if (result.forbidden) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Analytics</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Store performance based on recent orders.
+          </p>
+        </div>
+        <NoAccess message="You don't have access to order data — ask an owner or admin to grant it." />
+      </div>
+    );
+  }
+
+  const orders = result.orders;
   const revenueByDay = getRevenueByDay(orders);
   const statusBreakdown = getStatusBreakdown(orders);
 

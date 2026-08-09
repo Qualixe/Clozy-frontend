@@ -2,7 +2,8 @@ import {
   CustomersTable,
   type Customer,
 } from "@/components/dashboard/customers-table";
-import { getOrders } from "@/lib/get-orders";
+import { NoAccess } from "@/components/dashboard/no-access";
+import { getOrdersOrForbidden } from "@/lib/get-orders";
 import type { Order } from "@/data/orders";
 
 function toCustomers(orders: Order[]): Customer[] {
@@ -36,19 +37,23 @@ function toCustomers(orders: Order[]): Customer[] {
 }
 
 export default async function DashboardCustomersPage() {
-  const orders = await getOrders();
-  const customers = toCustomers(orders);
+  const result = await getOrdersOrForbidden();
+  const customers = result.forbidden ? [] : toCustomers(result.orders);
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Customers</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {customers.length} customers on record.
+          {result.forbidden ? "—" : `${customers.length} customers on record.`}
         </p>
       </div>
 
-      <CustomersTable customers={customers} />
+      {result.forbidden ? (
+        <NoAccess message="You don't have access to customer data — ask an owner or admin to grant it." />
+      ) : (
+        <CustomersTable customers={customers} />
+      )}
     </div>
   );
 }
