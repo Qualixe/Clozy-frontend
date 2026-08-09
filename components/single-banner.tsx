@@ -65,7 +65,7 @@ export function SingleBanner({
                 {eyebrow}
               </p>
             )}
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#2C1810] sm:text-4xl">
               {heading}
             </h2>
             {body && (
