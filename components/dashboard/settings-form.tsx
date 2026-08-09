@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Check, ImageOff, X } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,16 @@ type SettingsState = {
   faviconUrl: string;
 };
 
+const TAB_VALUES = [
+  "general",
+  "branding",
+  "shipping",
+  "payment",
+  "pixels",
+  "sms",
+  "ai",
+] as const;
+
 const DEFAULT_CONFIRMATION_TEMPLATE =
   "Hi {customer_name}, your order {order_number} has been confirmed. Total: {total}. Thank you for shopping with us!";
 const DEFAULT_CANCELLED_TEMPLATE =
@@ -77,10 +88,19 @@ const INITIAL_SETTINGS: Pick<
 
 export function SettingsForm({
   initialSettings,
+  activeTab,
 }: {
   initialSettings: AdminStoreSettings;
+  activeTab?: string;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const { token } = useAuth();
+  const [tab, setTab] = React.useState<(typeof TAB_VALUES)[number]>(
+    TAB_VALUES.includes(activeTab as (typeof TAB_VALUES)[number])
+      ? (activeTab as (typeof TAB_VALUES)[number])
+      : "general"
+  );
   const [settings, setSettings] = React.useState<SettingsState>({
     ...INITIAL_SETTINGS,
     facebookPixelId: initialSettings.facebookPixelId ?? "",
@@ -163,8 +183,17 @@ export function SettingsForm({
 
   return (
     <form onSubmit={handleSave} className="space-y-6">
-      <Tabs defaultValue="general">
-        <TabsList>
+      <Tabs
+        orientation="vertical"
+        value={tab}
+        onValueChange={(value) => {
+          if (!value || !TAB_VALUES.includes(value as (typeof TAB_VALUES)[number])) return;
+          setTab(value as (typeof TAB_VALUES)[number]);
+          router.replace(`${pathname}?tab=${value}`, { scroll: false });
+        }}
+        className="flex-col gap-6 sm:flex-row sm:items-start"
+      >
+        <TabsList className="w-full shrink-0 sm:w-48">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="shipping">Shipping</TabsTrigger>
@@ -174,7 +203,7 @@ export function SettingsForm({
           <TabsTrigger value="ai">AI</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="general" className="mt-6 max-w-xl space-y-5">
+        <TabsContent value="general" className="max-w-xl space-y-5">
           <div className="space-y-1.5">
             <Label htmlFor="storeName">Store Name</Label>
             <Input
@@ -216,7 +245,7 @@ export function SettingsForm({
           </div>
         </TabsContent>
 
-        <TabsContent value="branding" className="mt-6 max-w-xl space-y-5">
+        <TabsContent value="branding" className="max-w-xl space-y-5">
           <div>
             <p className="text-sm font-medium text-foreground">Logo</p>
             <p className="text-xs text-muted-foreground">
@@ -318,7 +347,7 @@ export function SettingsForm({
           />
         </TabsContent>
 
-        <TabsContent value="shipping" className="mt-6 max-w-xl space-y-5">
+        <TabsContent value="shipping" className="max-w-xl space-y-5">
           <p className="text-sm text-muted-foreground">
             Flat shipping rates applied at checkout, based on the customer's
             district.
@@ -351,7 +380,7 @@ export function SettingsForm({
           </div>
         </TabsContent>
 
-        <TabsContent value="payment" className="mt-6 max-w-xl space-y-5">
+        <TabsContent value="payment" className="max-w-xl space-y-5">
           <div className="flex items-center justify-between rounded-lg border border-border p-4">
             <div>
               <p className="text-sm font-medium text-foreground">
@@ -401,7 +430,7 @@ export function SettingsForm({
           </div>
         </TabsContent>
 
-        <TabsContent value="pixels" className="mt-6 max-w-xl space-y-5">
+        <TabsContent value="pixels" className="max-w-xl space-y-5">
           <p className="text-sm text-muted-foreground">
             Add tracking IDs to fire the matching pixel on every storefront
             page. Leave a field blank to skip that provider.
@@ -452,7 +481,7 @@ export function SettingsForm({
           </div>
         </TabsContent>
 
-        <TabsContent value="sms" className="mt-6 max-w-xl space-y-6">
+        <TabsContent value="sms" className="max-w-xl space-y-6">
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-foreground">Gateway</p>
@@ -589,7 +618,7 @@ export function SettingsForm({
           </div>
         </TabsContent>
 
-        <TabsContent value="ai" className="mt-6 max-w-xl space-y-5">
+        <TabsContent value="ai" className="max-w-xl space-y-5">
           <div>
             <p className="text-sm font-medium text-foreground">
               Claude API Key

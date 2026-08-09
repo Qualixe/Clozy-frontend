@@ -11,8 +11,12 @@ async function getAdminSettings(): Promise<AdminStoreSettings> {
   return res.json();
 }
 
-export default async function DashboardSettingsPage() {
-  const settings = await getAdminSettings();
+export default async function DashboardSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const [settings, { tab }] = await Promise.all([getAdminSettings(), searchParams]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -23,7 +27,7 @@ export default async function DashboardSettingsPage() {
         </p>
       </div>
 
-      <SettingsForm initialSettings={settings} />
+      <SettingsForm initialSettings={settings} activeTab={tab} />
     </div>
   );
 }
