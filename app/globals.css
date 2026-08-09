@@ -119,6 +119,33 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/*
+ * tw-animate-css's accordion-down/up keyframes animate to
+ * --radix-accordion-content-height (and other libraries' equivalents), none
+ * of which Base UI sets — it exposes the panel height as
+ * --accordion-panel-height instead. Without a match the keyframe's "to"
+ * height falls through to `auto`, which can't be smoothly animated, so the
+ * accordion just snaps open instead of growing. Redefining the keyframes
+ * here (after the tw-animate-css import) makes them target the right
+ * variable.
+ */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--accordion-panel-height);
+  }
+}
+@keyframes accordion-up {
+  from {
+    height: var(--accordion-panel-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
