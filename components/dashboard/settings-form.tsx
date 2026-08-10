@@ -42,6 +42,9 @@ type SettingsState = {
   smsOrderCancelledEnabled: boolean;
   smsOrderCancelledTemplate: string;
   smsPromotionalEnabled: boolean;
+  steadfastEnabled: boolean;
+  steadfastApiKey: string;
+  steadfastSecretKey: string;
   anthropicApiKey: string;
   logoUrl: string;
   faviconUrl: string;
@@ -128,6 +131,9 @@ export function SettingsForm({
     smsOrderCancelledTemplate:
       initialSettings.smsOrderCancelledTemplate ?? DEFAULT_CANCELLED_TEMPLATE,
     smsPromotionalEnabled: initialSettings.smsPromotionalEnabled,
+    steadfastEnabled: initialSettings.steadfastEnabled,
+    steadfastApiKey: initialSettings.steadfastApiKey ?? "",
+    steadfastSecretKey: initialSettings.steadfastSecretKey ?? "",
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
@@ -180,6 +186,9 @@ export function SettingsForm({
           smsOrderCancelledEnabled: settings.smsOrderCancelledEnabled,
           smsOrderCancelledTemplate: settings.smsOrderCancelledTemplate || null,
           smsPromotionalEnabled: settings.smsPromotionalEnabled,
+          steadfastEnabled: settings.steadfastEnabled,
+          steadfastApiKey: settings.steadfastApiKey || null,
+          steadfastSecretKey: settings.steadfastSecretKey || null,
           anthropicApiKey: settings.anthropicApiKey || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
@@ -466,6 +475,54 @@ export function SettingsForm({
                 }
               />
             </div>
+          </div>
+
+          <Separator />
+
+          <div className="rounded-lg border border-border p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  Steadfast Courier
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Send fulfilled orders to Steadfast for delivery straight
+                  from the Orders page.
+                </p>
+              </div>
+              <Switch
+                checked={settings.steadfastEnabled}
+                onCheckedChange={(checked) => update("steadfastEnabled", checked)}
+              />
+            </div>
+            {settings.steadfastEnabled && (
+              <>
+                <Separator className="my-4" />
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="steadfastApiKey">API Key</Label>
+                    <Input
+                      id="steadfastApiKey"
+                      type="password"
+                      value={settings.steadfastApiKey}
+                      onChange={(e) => update("steadfastApiKey", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="steadfastSecretKey">Secret Key</Label>
+                    <Input
+                      id="steadfastSecretKey"
+                      type="password"
+                      value={settings.steadfastSecretKey}
+                      onChange={(e) => update("steadfastSecretKey", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Found under your Steadfast merchant panel's API settings.
+                </p>
+              </>
+            )}
           </div>
         </TabsContent>
 

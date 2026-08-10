@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Truck, MapPin, Phone, Mail, CreditCard } from "lucide-react";
+import { Truck, MapPin, Phone, Mail, CreditCard, Send, RefreshCw } from "lucide-react";
 
 import {
   Sheet,
@@ -11,7 +11,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Can } from "@/components/can";
 import { useAuth } from "@/lib/auth-context";
 import type { Order, OrderDetail, OrderStatus } from "@/data/orders";
 
@@ -32,6 +34,9 @@ export function OrderDetailSheet({
   const [detail, setDetail] = React.useState<OrderDetail | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [shipping, setShipping] = React.useState(false);
+  const [shipError, setShipError] = React.useState<string | null>(null);
+  const [refreshing, setRefreshing] = React.useState(false);
 
   React.useEffect(() => {
     if (!order) {
@@ -41,6 +46,7 @@ export function OrderDetailSheet({
 
     setLoading(true);
     setError(null);
+    setShipError(null);
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
@@ -52,6 +58,51 @@ export function OrderDetailSheet({
       .catch(() => setError("Could not load this order."))
       .finally(() => setLoading(false));
   }, [order, token]);
+
+  async function shipOrder() {
+    if (!order) return;
+    setShipping(true);
+    setShipError(null);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/ship`,
+        {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+      );
+      const body = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(body?.message ?? `Request failed with status ${res.status}`);
+      setDetail((d) => (d ? { ...d, ...body } : d));
+    } catch (err) {
+      setShipError(err instanceof Error ? err.message : "Could not send to Steadfast.");
+    } finally {
+      setShipping(false);
+    }
+  }
+
+  async function refreshTracking() {
+    if (!order) return;
+    setRefreshing(true);
+    setShipError(null);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/tracking`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+      );
+      const body = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(body?.message ?? `Request failed with status ${res.status}`);
+      setDetail((d) => (d ? { ...d, ...body } : d));
+    } catch (err) {
+      setShipError(err instanceof Error ? err.message : "Could not refresh tracking status.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   return (
     <Sheet open={order !== null} onOpenChange={onOpenChange}>
@@ -117,6 +168,61 @@ export function OrderDetailSheet({
                 </span>
               </div>
             </div>
+
+            <Separator />
+
+            <Can permission="manage_orders">
+              <div className="rounded-lg border border-border p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      Steadfast Courier
+                    </p>
+                    {detail.steadfastTrackingCode ? (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {detail.steadfastConsignmentId} · {detail.steadfastTrackingCode}
+                      </p>
+                    ) : (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Not sent yet
+                      </p>
+                    )}
+                  </div>
+
+                  {detail.steadfastTrackingCode ? (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="capitalize">
+                        {detail.steadfastStatus?.replace(/_/g, " ") ?? "unknown"}
+                      </Badge>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        aria-label="Refresh tracking status"
+                        disabled={refreshing}
+                        onClick={refreshTracking}
+                      >
+                        <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={shipping}
+                      onClick={shipOrder}
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      {shipping ? "Sending…" : "Send to Steadfast"}
+                    </Button>
+                  )}
+                </div>
+                {shipError && (
+                  <p className="mt-2 text-xs text-destructive">{shipError}</p>
+                )}
+              </div>
+            </Can>
 
             <Separator />
 

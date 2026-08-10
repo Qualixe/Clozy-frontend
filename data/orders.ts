@@ -31,5 +31,8 @@ export type OrderDetail = Order & {
   discountCode: string | null;
   discountAmount: number;
   bkashNumber: string | null;
+  steadfastConsignmentId: string | null;
+  steadfastTrackingCode: string | null;
+  steadfastStatus: string | null;
   items: OrderItem[];
 };

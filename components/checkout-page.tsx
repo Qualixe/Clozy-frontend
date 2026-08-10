@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, Truck, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Truck, ShieldCheck, Copy, Check, AlertTriangle } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -103,6 +103,14 @@ export function CheckoutPage() {
   const [orderPlaced, setOrderPlaced] = React.useState(false);
   const [confirmedTotal, setConfirmedTotal] = React.useState(0);
   const [confirmedOrderNumber, setConfirmedOrderNumber] = React.useState("");
+  const [orderIdCopied, setOrderIdCopied] = React.useState(false);
+
+  function copyOrderId() {
+    navigator.clipboard.writeText(confirmedOrderNumber).then(() => {
+      setOrderIdCopied(true);
+      setTimeout(() => setOrderIdCopied(false), 1500);
+    });
+  }
 
   const [discountCode, setDiscountCode] = React.useState("");
   const [appliedDiscount, setAppliedDiscount] =
@@ -292,6 +300,36 @@ export function CheckoutPage() {
             ? "Pay in cash when it arrives."
             : "We'll send a bKash payment request shortly."}
         </p>
+
+        <div className="mt-3 flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-2.5">
+          <span className="text-sm text-muted-foreground">Order ID:</span>
+          <span className="font-mono text-sm font-semibold text-foreground">
+            {confirmedOrderNumber}
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 shrink-0"
+            aria-label="Copy order ID"
+            onClick={copyOrderId}
+          >
+            {orderIdCopied ? (
+              <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-500" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
+          </Button>
+        </div>
+
+        <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-left">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-500" />
+          <p className="text-xs text-amber-800 dark:text-amber-400">
+            Please save this order ID — you'll need it along with your email
+            to track your order later.
+          </p>
+        </div>
+
         <p className="mt-2 text-sm font-medium text-foreground">
           Total paid: ${confirmedTotal}
         </p>

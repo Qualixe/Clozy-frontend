@@ -37,6 +37,9 @@ export type AdminStoreSettings = StoreSettings & {
   smsOrderCancelledEnabled: boolean;
   smsOrderCancelledTemplate: string | null;
   smsPromotionalEnabled: boolean;
+  steadfastEnabled: boolean;
+  steadfastApiKey: string | null;
+  steadfastSecretKey: string | null;
   anthropicApiKey: string | null;
   anthropicConfigured: boolean;
 };
