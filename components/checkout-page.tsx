@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, Truck } from "lucide-react";
+import { CheckCircle2, Truck, ShieldCheck } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,19 +65,23 @@ type AppliedDiscount = {
   freeShipping: boolean;
 };
 
-function validate(form: FormState) {
+const PHONE_PATTERN = /^01[3-9]\d{8}$/;
+
+function validate(form: FormState, phoneVerified: boolean) {
   const errors: Partial<Record<keyof FormState, string>> = {};
 
   if (!form.name.trim()) errors.name = "Name is required.";
-  if (!/^01[3-9]\d{8}$/.test(form.phone.trim())) {
+  if (!PHONE_PATTERN.test(form.phone.trim())) {
     errors.phone = "Enter a valid 11-digit BD phone number (e.g. 017XXXXXXXX).";
+  } else if (!phoneVerified) {
+    errors.phone = "Please verify your phone number before placing the order.";
   }
   if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
     errors.email = "Enter a valid email address.";
   }
   if (!form.address.trim()) errors.address = "Address is required.";
   if (!form.district) errors.district = "Select a district.";
-  if (form.paymentMethod === "bkash" && !/^01[3-9]\d{8}$/.test(form.bkashNumber.trim())) {
+  if (form.paymentMethod === "bkash" && !PHONE_PATTERN.test(form.bkashNumber.trim())) {
     errors.bkashNumber = "Enter the bKash number you'll pay from.";
   }
 
@@ -105,6 +109,66 @@ export function CheckoutPage() {
     React.useState<AppliedDiscount | null>(null);
   const [applyingDiscount, setApplyingDiscount] = React.useState(false);
   const [discountError, setDiscountError] = React.useState<string | null>(null);
+
+  // Phone OTP — fake-order protection. Verification is tied to the exact
+  // phone value it was requested for; editing the number afterward voids it
+  // (see updateField below).
+  const [verifiedPhone, setVerifiedPhone] = React.useState<string | null>(null);
+  const [otpSent, setOtpSent] = React.useState(false);
+  const [otpCode, setOtpCode] = React.useState("");
+  const [sendingOtp, setSendingOtp] = React.useState(false);
+  const [verifyingOtp, setVerifyingOtp] = React.useState(false);
+  const [otpError, setOtpError] = React.useState<string | null>(null);
+  const phoneVerified = verifiedPhone !== null && verifiedPhone === form.phone.trim();
+
+  async function sendOtp() {
+    const phone = form.phone.trim();
+    if (!PHONE_PATTERN.test(phone)) return;
+
+    setSendingOtp(true);
+    setOtpError(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/checkout/phone/send-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(body?.message ?? "Could not send a verification code.");
+      setOtpSent(true);
+      setOtpCode("");
+    } catch (err) {
+      setOtpError(err instanceof Error ? err.message : "Could not send a verification code.");
+    } finally {
+      setSendingOtp(false);
+    }
+  }
+
+  async function verifyOtp() {
+    const phone = form.phone.trim();
+    if (otpCode.trim().length !== 6) return;
+
+    setVerifyingOtp(true);
+    setOtpError(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/checkout/phone/verify-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code: otpCode.trim() }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(body?.message ?? "Incorrect code.");
+      setVerifiedPhone(phone);
+      setOtpSent(false);
+      setErrors((e) => ({ ...e, phone: undefined }));
+    } catch (err) {
+      setOtpError(err instanceof Error ? err.message : "Incorrect code.");
+    } finally {
+      setVerifyingOtp(false);
+    }
+  }
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shippingCost = getShippingCost(form.district);
@@ -151,12 +215,19 @@ export function CheckoutPage() {
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
+    // A changed number needs its own fresh code — the OTP box (and any
+    // error) belonged to whatever number was previously typed.
+    if (key === "phone") {
+      setOtpSent(false);
+      setOtpCode("");
+      setOtpError(null);
+    }
   }
 
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
 
-    const validationErrors = validate(form);
+    const validationErrors = validate(form, phoneVerified);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
 
@@ -302,16 +373,71 @@ export function CheckoutPage() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="01XXXXXXXXX"
-                    value={form.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
-                    aria-invalid={!!errors.phone}
-                  />
+                  <div className="flex gap-2">
+                    <div className="flex flex-1 items-stretch">
+                      <span className="flex shrink-0 items-center rounded-l-lg border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
+                        +880
+                      </span>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="01XXXXXXXXX"
+                        value={form.phone}
+                        onChange={(e) => updateField("phone", e.target.value)}
+                        aria-invalid={!!errors.phone}
+                        className="rounded-l-none"
+                      />
+                    </div>
+                    {phoneVerified ? (
+                      <span className="flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-600/30 bg-emerald-600/10 px-3 text-xs font-medium text-emerald-700 dark:text-emerald-500">
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        Verified
+                      </span>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="shrink-0"
+                        disabled={!PHONE_PATTERN.test(form.phone.trim()) || sendingOtp}
+                        onClick={sendOtp}
+                      >
+                        {sendingOtp ? "Sending…" : otpSent ? "Resend code" : "Verify"}
+                      </Button>
+                    )}
+                  </div>
                   {errors.phone && (
                     <p className="text-xs text-destructive">{errors.phone}</p>
+                  )}
+
+                  {otpSent && !phoneVerified && (
+                    <div className="flex gap-2 pt-1">
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="6-digit code"
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="shrink-0"
+                        disabled={otpCode.trim().length !== 6 || verifyingOtp}
+                        onClick={verifyOtp}
+                      >
+                        {verifyingOtp ? "Checking…" : "Confirm"}
+                      </Button>
+                    </div>
+                  )}
+                  {otpError && (
+                    <p className="text-xs text-destructive">{otpError}</p>
+                  )}
+                  {otpSent && !phoneVerified && !otpError && (
+                    <p className="text-xs text-muted-foreground">
+                      We sent a 6-digit code to {form.phone.trim()}.
+                    </p>
                   )}
                 </div>
 
@@ -438,14 +564,20 @@ export function CheckoutPage() {
               {form.paymentMethod === "bkash" && (
                 <div className="mt-3 space-y-1.5">
                   <Label htmlFor="bkashNumber">Your bKash Number</Label>
-                  <Input
-                    id="bkashNumber"
-                    type="tel"
-                    placeholder="01XXXXXXXXX"
-                    value={form.bkashNumber}
-                    onChange={(e) => updateField("bkashNumber", e.target.value)}
-                    aria-invalid={!!errors.bkashNumber}
-                  />
+                  <div className="flex items-stretch">
+                    <span className="flex shrink-0 items-center rounded-l-lg border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
+                      +880
+                    </span>
+                    <Input
+                      id="bkashNumber"
+                      type="tel"
+                      placeholder="01XXXXXXXXX"
+                      value={form.bkashNumber}
+                      onChange={(e) => updateField("bkashNumber", e.target.value)}
+                      aria-invalid={!!errors.bkashNumber}
+                      className="rounded-l-none"
+                    />
+                  </div>
                   {errors.bkashNumber ? (
                     <p className="text-xs text-destructive">
                       {errors.bkashNumber}
@@ -595,8 +727,16 @@ export function CheckoutPage() {
               <p className="mt-3 text-sm text-destructive">{submitError}</p>
             )}
 
-            <Button type="submit" className="mt-3 w-full" disabled={submitting}>
-              {submitting ? "Placing order…" : "Place Order"}
+            <Button
+              type="submit"
+              className="mt-3 w-full"
+              disabled={submitting || !phoneVerified}
+            >
+              {submitting
+                ? "Placing order…"
+                : !phoneVerified
+                  ? "Verify your phone to continue"
+                  : "Place Order"}
             </Button>
           </div>
         </form>
