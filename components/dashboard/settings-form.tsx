@@ -45,6 +45,9 @@ type SettingsState = {
   anthropicApiKey: string;
   logoUrl: string;
   faviconUrl: string;
+  emailLogoUrl: string;
+  emailAccentColor: string;
+  emailFooterText: string;
   footerTagline: string;
   footerInstagramUrl: string;
   footerTwitterUrl: string;
@@ -59,8 +62,11 @@ const TAB_VALUES = [
   "payment",
   "pixels",
   "sms",
+  "email",
   "ai",
 ] as const;
+
+const DEFAULT_ACCENT_COLOR = "#111827";
 
 const DEFAULT_CONFIRMATION_TEMPLATE =
   "Hi {customer_name}, your order {order_number} has been confirmed. Total: {total}. Thank you for shopping with us!";
@@ -125,6 +131,9 @@ export function SettingsForm({
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
+    emailLogoUrl: initialSettings.emailLogoUrl ?? "",
+    emailAccentColor: initialSettings.emailAccentColor ?? DEFAULT_ACCENT_COLOR,
+    emailFooterText: initialSettings.emailFooterText ?? "",
     footerTagline: initialSettings.footerTagline ?? "",
     footerInstagramUrl: initialSettings.footerInstagramUrl ?? "",
     footerTwitterUrl: initialSettings.footerTwitterUrl ?? "",
@@ -136,6 +145,7 @@ export function SettingsForm({
   const [saved, setSaved] = React.useState(false);
   const [logoPickerOpen, setLogoPickerOpen] = React.useState(false);
   const [faviconPickerOpen, setFaviconPickerOpen] = React.useState(false);
+  const [emailLogoPickerOpen, setEmailLogoPickerOpen] = React.useState(false);
 
   function update<K extends keyof SettingsState>(key: K, value: SettingsState[K]) {
     setSettings((s) => ({ ...s, [key]: value }));
@@ -173,6 +183,9 @@ export function SettingsForm({
           anthropicApiKey: settings.anthropicApiKey || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
+          emailLogoUrl: settings.emailLogoUrl || null,
+          emailAccentColor: settings.emailAccentColor || null,
+          emailFooterText: settings.emailFooterText || null,
           footerTagline: settings.footerTagline || null,
           footerInstagramUrl: settings.footerInstagramUrl || null,
           footerTwitterUrl: settings.footerTwitterUrl || null,
@@ -215,6 +228,7 @@ export function SettingsForm({
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="pixels">Pixels</TabsTrigger>
           <TabsTrigger value="sms">SMS</TabsTrigger>
+          <TabsTrigger value="email">Email</TabsTrigger>
           <TabsTrigger value="ai">AI</TabsTrigger>
         </TabsList>
 
@@ -689,6 +703,100 @@ export function SettingsForm({
               onCheckedChange={(checked) =>
                 update("smsPromotionalEnabled", checked)
               }
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="email" className="max-w-xl space-y-5">
+          <div>
+            <p className="text-sm font-medium text-foreground">Logo</p>
+            <p className="text-xs text-muted-foreground">
+              Shown at the top of transactional emails (e.g. email
+              verification). Independent from the site logo, so you can use a
+              version sized or colored for email clients. Leave empty to show
+              the store name as text instead.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setEmailLogoPickerOpen(true)}
+              className="group relative flex h-16 w-40 items-center justify-center overflow-hidden rounded-lg border border-dashed border-input bg-muted text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+            >
+              {settings.emailLogoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={settings.emailLogoUrl}
+                  alt=""
+                  className="h-full w-full object-contain p-2"
+                />
+              ) : (
+                <ImageOff className="h-5 w-5" />
+              )}
+              <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-xs font-medium text-transparent transition-colors group-hover:bg-black/40 group-hover:text-white">
+                {settings.emailLogoUrl ? "Change" : "Choose image"}
+              </span>
+            </button>
+
+            {settings.emailLogoUrl && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => update("emailLogoUrl", "")}
+              >
+                <X className="h-3.5 w-3.5" />
+                Remove
+              </Button>
+            )}
+          </div>
+
+          <MediaPickerDialog
+            open={emailLogoPickerOpen}
+            onOpenChange={setEmailLogoPickerOpen}
+            multiple={false}
+            onSelect={([url]) => url && update("emailLogoUrl", url)}
+          />
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <Label htmlFor="emailAccentColor">Accent Color</Label>
+            <p className="text-xs text-muted-foreground">
+              Used for the button and links in transactional emails.
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                id="emailAccentColor"
+                type="color"
+                value={settings.emailAccentColor || DEFAULT_ACCENT_COLOR}
+                onChange={(e) => update("emailAccentColor", e.target.value)}
+                className="h-9 w-12 cursor-pointer rounded-md border border-input bg-transparent p-1"
+              />
+              <Input
+                value={settings.emailAccentColor}
+                placeholder={DEFAULT_ACCENT_COLOR}
+                onChange={(e) => update("emailAccentColor", e.target.value)}
+                className="max-w-32"
+              />
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <Label htmlFor="emailFooterText">Footer Text</Label>
+            <p className="text-xs text-muted-foreground">
+              Shown at the bottom of every transactional email. Leave empty
+              to show a default copyright line.
+            </p>
+            <Textarea
+              id="emailFooterText"
+              rows={2}
+              placeholder={`© ${new Date().getFullYear()} Clozy. All rights reserved.`}
+              value={settings.emailFooterText}
+              onChange={(e) => update("emailFooterText", e.target.value)}
             />
           </div>
         </TabsContent>

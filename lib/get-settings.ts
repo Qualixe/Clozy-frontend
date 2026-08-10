@@ -26,6 +26,9 @@ export async function getSettings(): Promise<StoreSettings> {
 
 /** Admin-only shape — adds the SMS gateway credentials, never sent publicly. */
 export type AdminStoreSettings = StoreSettings & {
+  emailLogoUrl: string | null;
+  emailAccentColor: string | null;
+  emailFooterText: string | null;
   smsGatewayUrl: string | null;
   smsApiKey: string | null;
   smsSenderId: string | null;
