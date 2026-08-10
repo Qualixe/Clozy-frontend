@@ -24,7 +24,7 @@ export async function getServerAuthHeaders(): Promise<Record<string, string>> {
 export function assertDashboardFetchOk(res: Response): void {
   if (res.ok) return;
   if (res.status === 401) {
-    redirect("/dashboard/login");
+    redirect("/login");
   }
   throw new Error(`Request failed with status ${res.status}`);
 }

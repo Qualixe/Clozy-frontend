@@ -24,6 +24,8 @@ type AuthContextValue = {
     passwordConfirmation: string
   ) => Promise<void>;
   logout: () => Promise<void>;
+  /** Applies a freshly-saved user object (e.g. from `PUT /me`) to the cookie, context, and permission store. */
+  updateUser: (user: AuthUser) => void;
 };
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
@@ -109,6 +111,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const updateUser = React.useCallback(
+    (nextUser: AuthUser) => {
+      if (!token) return;
+      writeAuthCookie({ token, user: nextUser });
+      setUser(nextUser);
+      useAuthStore.getState().setFromUser(nextUser);
+    },
+    [token]
+  );
+
   const logout = React.useCallback(async () => {
     const currentToken = token;
     clearAuthCookie();
@@ -128,8 +140,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [token]);
 
   const value = React.useMemo(
-    () => ({ user, token, ready, login, register, logout }),
-    [user, token, ready, login, register, logout]
+    () => ({ user, token, ready, login, register, logout, updateUser }),
+    [user, token, ready, login, register, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -7,6 +7,7 @@ export type AuthUser = {
   role: Role;
   roles: Role[];
   permissions: Permission[];
+  emailVerified: boolean;
 };
 
 export type AuthSession = {

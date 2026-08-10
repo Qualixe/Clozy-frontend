@@ -66,7 +66,7 @@ export function MobileBottomNav({ menu }: { menu: NavMenu | null }) {
     {
       label: "Account",
       icon: User,
-      href: user ? "/account/orders" : "/login",
+      href: user ? "/account" : "/login",
       isActive: (p) => p.startsWith("/account") && !p.startsWith("/account/wishlist"),
     },
   ];

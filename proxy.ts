@@ -13,14 +13,10 @@ import { permissionsForPath } from "@/lib/sidebar-items";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/dashboard/login") {
-    return NextResponse.next();
-  }
-
   const session = decodeAuthCookie(request.cookies.get(AUTH_COOKIE)?.value);
 
   if (!canAccessDashboard(session?.user)) {
-    const loginUrl = new URL("/dashboard/login", request.url);
+    const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }

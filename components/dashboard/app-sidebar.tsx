@@ -68,7 +68,7 @@ export function AppSidebar() {
 
   async function handleSignOut() {
     await logout();
-    router.push("/dashboard/login");
+    router.push("/login");
   }
 
   const initials = user
