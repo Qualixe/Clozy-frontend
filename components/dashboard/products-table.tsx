@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/lib/auth-context";
+import { formatCurrency } from "@/lib/currency";
 import type { Product } from "@/components/product-card";
 
 export function ProductsTable({ products }: { products: Product[] }) {
@@ -120,10 +121,10 @@ export function ProductsTable({ products }: { products: Product[] }) {
                   {product.category}
                 </TableCell>
                 <TableCell>
-                  <span className="text-foreground">${product.price}</span>
+                  <span className="text-foreground">{formatCurrency(product.price)}</span>
                   {product.originalPrice && (
                     <span className="ml-1.5 text-xs text-muted-foreground line-through">
-                      ${product.originalPrice}
+                      {formatCurrency(product.originalPrice)}
                     </span>
                   )}
                 </TableCell>

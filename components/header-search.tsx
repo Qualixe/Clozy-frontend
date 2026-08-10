@@ -9,6 +9,7 @@ import { Search, X, Loader2, ImageOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 import type { Product } from "@/components/product-card";
 
 const DEBOUNCE_MS = 300;
@@ -177,7 +178,7 @@ export function HeaderSearch() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium text-foreground">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">${product.price}</p>
+                      <p className="text-xs text-muted-foreground">{formatCurrency(product.price)}</p>
                     </div>
                   </Link>
                 </li>

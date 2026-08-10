@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatCurrency } from "@/lib/currency";
 
 export type Customer = {
   name: string;
@@ -84,7 +85,7 @@ export function CustomersTable({ customers }: { customers: Customer[] }) {
                   {customer.orders}
                 </TableCell>
                 <TableCell className="text-foreground">
-                  ${customer.totalSpent}
+                  {formatCurrency(customer.totalSpent)}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {customer.lastOrderDate}

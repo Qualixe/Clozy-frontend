@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { formatCurrency } from "@/lib/currency";
 import {
   Carousel,
   CarouselContent,
@@ -277,11 +278,11 @@ export function ProductPage({ product }: { product: ProductDetail }) {
 
             <div className="mt-4 flex items-center gap-3">
               <span className="text-2xl font-semibold text-foreground">
-                ${displayPrice}
+                {formatCurrency(displayPrice)}
               </span>
               {displayOriginalPrice && (
                 <span className="text-base text-muted-foreground line-through">
-                  ${displayOriginalPrice}
+                  {formatCurrency(displayOriginalPrice)}
                 </span>
               )}
             </div>
@@ -421,7 +422,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
             {/* Trust badges */}
             <div className="grid grid-cols-3 gap-3 text-center">
               {[
-                { icon: Truck, label: "Free shipping over $75" },
+                { icon: Truck, label: "Free shipping over ৳75" },
                 { icon: RotateCcw, label: "30-day returns" },
                 { icon: ShieldCheck, label: "Secure checkout" },
               ].map(({ icon: Icon, label }) => (
@@ -452,7 +453,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
               <AccordionItem value="shipping">
                 <AccordionTrigger>Shipping &amp; Returns</AccordionTrigger>
                 <AccordionContent className="text-sm text-muted-foreground">
-                  Free standard shipping on orders over $75. Returns accepted
+                  Free standard shipping on orders over ৳75. Returns accepted
                   within 30 days of delivery, unworn and with original tags.
                 </AccordionContent>
               </AccordionItem>

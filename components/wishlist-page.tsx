@@ -7,6 +7,7 @@ import { Heart, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 import { useWishlist, type WishlistItem } from "@/lib/wishlist-context";
+import { formatCurrency } from "@/lib/currency";
 
 export function WishlistPage() {
   const { items, removeItem } = useWishlist();
@@ -97,11 +98,11 @@ export function WishlistPage() {
                 </Link>
                 <div className="mt-1.5 flex items-center gap-2">
                   <span className="text-sm font-semibold text-foreground">
-                    ${item.price}
+                    {formatCurrency(item.price)}
                   </span>
                   {item.originalPrice && (
                     <span className="text-xs text-muted-foreground line-through">
-                      ${item.originalPrice}
+                      {formatCurrency(item.originalPrice)}
                     </span>
                   )}
                 </div>

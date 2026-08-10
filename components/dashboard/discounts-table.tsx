@@ -27,13 +27,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { DiscountDialog, type Discount } from "@/components/dashboard/discount-dialog";
 import { useAuth } from "@/lib/auth-context";
+import { formatCurrency } from "@/lib/currency";
 
 function typeLabel(discount: Discount): string {
   switch (discount.type) {
     case "percentage":
       return `${discount.value}% off`;
     case "fixed":
-      return `$${discount.value} off`;
+      return `${formatCurrency(discount.value)} off`;
     case "free_shipping":
       return "Free shipping";
   }
@@ -119,7 +120,7 @@ export function DiscountsTable({ discounts }: { discounts: Discount[] }) {
                   {typeLabel(discount)}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {discount.minSubtotal != null ? `$${discount.minSubtotal}` : "—"}
+                  {discount.minSubtotal != null ? formatCurrency(discount.minSubtotal) : "—"}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {discount.usedCount}

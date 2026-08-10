@@ -45,7 +45,13 @@ function Banner({
   );
 }
 
-export function CategoryBanners({ categories }: { categories: Category[] }) {
+export function CategoryBanners({
+  categories,
+  heading,
+}: {
+  categories: Category[];
+  heading?: string | null;
+}) {
   const items = categories.filter((c) => c.image).slice(0, 3);
 
   if (items.length === 0) return null;
@@ -55,6 +61,9 @@ export function CategoryBanners({ categories }: { categories: Category[] }) {
   return (
     <section className="w-full bg-background py-6 sm:py-8">
       <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
+        <h2 className="mb-6 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          {heading || "Shop by Category"}
+        </h2>
         <div className="grid grid-cols-1 gap-4 lg:h-[34rem] lg:grid-cols-3">
           <Banner
             category={large}

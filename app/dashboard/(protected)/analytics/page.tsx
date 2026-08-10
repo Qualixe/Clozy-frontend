@@ -12,6 +12,7 @@ import { StatusChart, type StatusPoint } from "@/components/dashboard/status-cha
 import { AiInsightsCard } from "@/components/dashboard/ai-insights-card";
 import { NoAccess } from "@/components/dashboard/no-access";
 import { getOrdersOrForbidden } from "@/lib/get-orders";
+import { formatCurrency } from "@/lib/currency";
 import type { Order, OrderStatus } from "@/data/orders";
 
 function getRevenueByDay(orders: Order[]): RevenuePoint[] {
@@ -69,9 +70,9 @@ export default async function DashboardAnalyticsPage() {
       : 0;
 
   const stats = [
-    { label: "Total Revenue", value: `$${totalRevenue}`, icon: DollarSign },
+    { label: "Total Revenue", value: formatCurrency(totalRevenue), icon: DollarSign },
     { label: "Total Orders", value: `${totalOrders}`, icon: ShoppingBag },
-    { label: "Avg Order Value", value: `$${avgOrderValue}`, icon: Receipt },
+    { label: "Avg Order Value", value: formatCurrency(avgOrderValue), icon: Receipt },
     { label: "Fulfilled Rate", value: `${fulfilledRate}%`, icon: CheckCircle2 },
   ];
 

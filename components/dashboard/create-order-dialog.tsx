@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/lib/auth-context";
+import { formatCurrency } from "@/lib/currency";
 import type { Product } from "@/components/product-card";
 
 type CartLine = {
@@ -205,7 +206,7 @@ export function CreateOrderDialog({
                     <span className="flex-1 truncate text-foreground">
                       {product.name}
                     </span>
-                    <span className="text-muted-foreground">${product.price}</span>
+                    <span className="text-muted-foreground">{formatCurrency(product.price)}</span>
                   </button>
                 ))}
               </div>
@@ -342,7 +343,7 @@ export function CreateOrderDialog({
 
           <div className="flex items-center justify-between text-base font-semibold text-foreground">
             <span>Total</span>
-            <span>${subtotal}</span>
+            <span>{formatCurrency(subtotal)}</span>
           </div>
 
           {submitError && <p className="text-sm text-destructive">{submitError}</p>}

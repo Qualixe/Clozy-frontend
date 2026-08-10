@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/cart-context";
+import { formatCurrency } from "@/lib/currency";
 
 // ---------------------------------------------------------------------------
 // Cart drawer
@@ -100,7 +101,7 @@ export function CartDrawer() {
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
                     <span className="font-medium text-foreground">
-                      ${item.price * item.qty}
+                      {formatCurrency(item.price * item.qty)}
                     </span>
                     <Button
                       variant="ghost"
@@ -120,7 +121,7 @@ export function CartDrawer() {
         <SheetFooter className="border-t border-border">
           <div className="mb-1 flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
-            <span className="font-medium text-foreground">${subtotal}</span>
+            <span className="font-medium text-foreground">{formatCurrency(subtotal)}</span>
           </div>
           <Button
             className="w-full"

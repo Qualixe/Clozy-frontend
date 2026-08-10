@@ -6,6 +6,7 @@ export type StoreSettings = {
   aiChatEnabled: boolean;
   logoUrl: string | null;
   faviconUrl: string | null;
+  categoryShowcaseHeading: string | null;
   footerTagline: string | null;
   footerInstagramUrl: string | null;
   footerTwitterUrl: string | null;

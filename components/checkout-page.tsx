@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle2, Truck, ShieldCheck, Copy, Check, AlertTriangle } from "lucide-react";
 
+import { formatCurrency } from "@/lib/currency";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -331,7 +333,7 @@ export function CheckoutPage() {
         </div>
 
         <p className="mt-2 text-sm font-medium text-foreground">
-          Total paid: ${confirmedTotal}
+          Total paid: {formatCurrency(confirmedTotal)}
         </p>
         <div className="mt-4 flex items-center gap-3">
           <Button
@@ -547,7 +549,7 @@ export function CheckoutPage() {
                     <Truck className="h-4 w-4" />
                     {form.district ? (
                       <span className="text-foreground">
-                        ${shippingCost}{" "}
+                        {formatCurrency(shippingCost)}{" "}
                         <span className="text-muted-foreground">
                           ({form.district === "Dhaka" ? "Inside" : "Outside"}{" "}
                           Dhaka)
@@ -661,7 +663,7 @@ export function CheckoutPage() {
                       </span>
                     </div>
                     <span className="font-medium text-foreground">
-                      ${item.price * item.qty}
+                      {formatCurrency(item.price * item.qty)}
                     </span>
                   </div>
                 </li>
@@ -681,7 +683,7 @@ export function CheckoutPage() {
                       ? "Free shipping applied"
                       : appliedDiscount.type === "percentage"
                         ? `${appliedDiscount.value}% off applied`
-                        : `$${appliedDiscount.value} off applied`}
+                        : `${formatCurrency(appliedDiscount.value)} off applied`}
                   </p>
                 </div>
                 <button
@@ -727,7 +729,7 @@ export function CheckoutPage() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="text-foreground">${subtotal}</span>
+                <span className="text-foreground">{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Shipping</span>
@@ -735,12 +737,12 @@ export function CheckoutPage() {
                   {appliedDiscount?.freeShipping && form.district ? (
                     <>
                       <span className="mr-1.5 text-muted-foreground line-through">
-                        ${shippingCost}
+                        {formatCurrency(shippingCost)}
                       </span>
-                      $0
+                      {formatCurrency(0)}
                     </>
                   ) : form.district ? (
-                    `$${effectiveShipping}`
+                    formatCurrency(effectiveShipping)
                   ) : (
                     "—"
                   )}
@@ -749,7 +751,7 @@ export function CheckoutPage() {
               {discountAmount > 0 && (
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Discount</span>
-                  <span className="text-foreground">-${discountAmount}</span>
+                  <span className="text-foreground">-{formatCurrency(discountAmount)}</span>
                 </div>
               )}
             </div>
@@ -758,7 +760,7 @@ export function CheckoutPage() {
 
             <div className="flex items-center justify-between text-base font-semibold text-foreground">
               <span>Total</span>
-              <span>${total}</span>
+              <span>{formatCurrency(total)}</span>
             </div>
 
             {submitError && (

@@ -7,6 +7,7 @@ import { MessageCircle, X, Send, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -144,7 +145,7 @@ export function ChatWidget({ enabled }: { enabled: boolean }) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-medium text-foreground">{p.name}</p>
-                      <p className="text-xs text-muted-foreground">${p.price}</p>
+                      <p className="text-xs text-muted-foreground">{formatCurrency(p.price)}</p>
                     </div>
                   </Link>
                 ))}

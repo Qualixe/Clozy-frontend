@@ -36,6 +36,7 @@ export default async function SiteLayout({
       aiChatEnabled: false,
       logoUrl: null,
       faviconUrl: null,
+      categoryShowcaseHeading: null,
       footerTagline: null,
       footerInstagramUrl: null,
       footerTwitterUrl: null,

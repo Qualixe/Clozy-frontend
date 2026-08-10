@@ -11,12 +11,13 @@ import { getCategoryGridBanner } from "@/lib/get-category-grid-banner";
 import { getHeroSlides } from "@/lib/get-hero-slides";
 import { getNewArrivals } from "@/lib/get-new-arrivals";
 import { getPromoBanner } from "@/lib/get-promo-banner";
+import { getSettings } from "@/lib/get-settings";
 import { getVideoSection } from "@/lib/get-video-section";
 
 export default async function Home() {
   // A backend hiccup shouldn't take the homepage down — fall back to an
   // empty list rather than throwing.
-  const [categories, heroSlides, newArrivals, videoSection, categoryGridBanner, promoBanner] =
+  const [categories, heroSlides, newArrivals, videoSection, categoryGridBanner, promoBanner, settings] =
     await Promise.all([
       getCategories().catch(() => []),
       getHeroSlides().catch(() => []),
@@ -41,6 +42,21 @@ export default async function Home() {
         ctaLabel: null,
         ctaHref: null,
       })),
+      getSettings().catch(() => ({
+        facebookPixelId: null,
+        googleAnalyticsId: null,
+        googleTagManagerId: null,
+        tiktokPixelId: null,
+        aiChatEnabled: false,
+        logoUrl: null,
+        faviconUrl: null,
+        categoryShowcaseHeading: null,
+        footerTagline: null,
+        footerInstagramUrl: null,
+        footerTwitterUrl: null,
+        footerFacebookUrl: null,
+        footerYoutubeUrl: null,
+      })),
     ]);
 
   return (
@@ -49,7 +65,10 @@ export default async function Home() {
       <CategoryShowcase categories={categories} />
 
       <ProductsSection />
-      <CategoryBanners categories={categories} />
+      <CategoryBanners
+        categories={categories}
+        heading={settings.categoryShowcaseHeading}
+      />
 
       {promoBanner.enabled && promoBanner.image && promoBanner.heading && (
         <SingleBanner

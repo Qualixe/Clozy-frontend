@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
+import { formatCurrency } from "@/lib/currency";
 
 export type Product = {
   id: string;
@@ -90,11 +91,11 @@ export function ProductCard({
 
         <div className="mt-1.5 flex items-center gap-2">
           <span className="text-sm font-semibold text-foreground">
-            ${product.price}
+            {formatCurrency(product.price)}
           </span>
           {product.originalPrice && (
             <span className="text-xs text-muted-foreground line-through">
-              ${product.originalPrice}
+              {formatCurrency(product.originalPrice)}
             </span>
           )}
         </div>

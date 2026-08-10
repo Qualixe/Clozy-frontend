@@ -2,6 +2,8 @@
 
 import * as React from "react";
 
+import { formatCurrency } from "@/lib/currency";
+
 export type RevenuePoint = { date: string; revenue: number };
 
 const WIDTH = 600;
@@ -89,7 +91,7 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
               dominantBaseline="middle"
               className="fill-muted-foreground text-[9px]"
             >
-              ${tick}
+              ৳{tick}
             </text>
           </g>
         ))}
@@ -177,7 +179,7 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
             {formatShortDate(hovered.date)}
           </p>
           <p className="text-sm font-semibold text-foreground">
-            ${hovered.revenue}
+            {formatCurrency(hovered.revenue)}
           </p>
         </div>
       )}

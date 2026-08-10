@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 import type { OrderDetail, OrderStatus } from "@/data/orders";
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -235,7 +236,7 @@ export function TrackOrderPage() {
                         </p>
                       </div>
                       <span className="font-medium text-foreground">
-                        ${(item.price * item.qty).toFixed(2)}
+                        {formatCurrency(item.price * item.qty)}
                       </span>
                     </div>
                   </li>
@@ -248,11 +249,11 @@ export function TrackOrderPage() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="text-foreground">${order.subtotal}</span>
+                <span className="text-foreground">{formatCurrency(order.subtotal)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Shipping</span>
-                <span className="text-foreground">${order.shippingCost}</span>
+                <span className="text-foreground">{formatCurrency(order.shippingCost)}</span>
               </div>
               {order.discountAmount > 0 && (
                 <div className="flex items-center justify-between">
@@ -260,13 +261,13 @@ export function TrackOrderPage() {
                     Discount{order.discountCode ? ` (${order.discountCode})` : ""}
                   </span>
                   <span className="text-foreground">
-                    -${order.discountAmount}
+                    -{formatCurrency(order.discountAmount)}
                   </span>
                 </div>
               )}
               <div className="flex items-center justify-between text-base font-semibold">
                 <span className="text-foreground">Total</span>
-                <span className="text-foreground">${order.total}</span>
+                <span className="text-foreground">{formatCurrency(order.total)}</span>
               </div>
             </div>
 

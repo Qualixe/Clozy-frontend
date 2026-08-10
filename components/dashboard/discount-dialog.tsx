@@ -224,7 +224,7 @@ export function DiscountDialog({
               {form.type !== "free_shipping" && (
                 <div className="space-y-1.5">
                   <Label htmlFor="discount-value">
-                    {form.type === "percentage" ? "Percent off" : "Amount off ($)"}
+                    {form.type === "percentage" ? "Percent off" : "Amount off (৳)"}
                   </Label>
                   <Input
                     id="discount-value"
@@ -242,7 +242,7 @@ export function DiscountDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="discount-min">Minimum order ($)</Label>
+                <Label htmlFor="discount-min">Minimum order (৳)</Label>
                 <Input
                   id="discount-min"
                   type="number"

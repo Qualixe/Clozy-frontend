@@ -15,6 +15,7 @@ import {
   type PickerProduct,
 } from "@/components/dashboard/product-picker-dialog";
 import { useAuth } from "@/lib/auth-context";
+import { formatCurrency } from "@/lib/currency";
 import type { NewArrivalsData } from "@/components/new-arrivals";
 
 type ListProduct = {
@@ -197,7 +198,7 @@ export function ThemeNewArrivalsForm({ initial }: { initial: NewArrivalsData }) 
                 <span className="flex-1 truncate text-foreground">
                   {product.name}
                 </span>
-                <span className="text-muted-foreground">${product.price}</span>
+                <span className="text-muted-foreground">{formatCurrency(product.price)}</span>
                 <div className="flex items-center gap-0.5">
                   <Button
                     type="button"

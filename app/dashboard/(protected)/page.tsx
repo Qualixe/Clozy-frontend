@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { NoAccess } from "@/components/dashboard/no-access";
 import { getOrdersOrForbidden } from "@/lib/get-orders";
+import { formatCurrency } from "@/lib/currency";
 import type { OrderStatus } from "@/data/orders";
 
 const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
@@ -46,7 +47,7 @@ export default async function DashboardPage() {
   const stats = [
     {
       label: "Total Revenue",
-      value: `$${totalRevenue.toLocaleString()}`,
+      value: formatCurrency(totalRevenue),
       icon: DollarSign,
     },
     {
@@ -120,7 +121,7 @@ export default async function DashboardPage() {
                       {order.date}
                     </TableCell>
                     <TableCell className="text-right">
-                      ${order.total}
+                      {formatCurrency(order.total)}
                     </TableCell>
                   </TableRow>
                 ))}

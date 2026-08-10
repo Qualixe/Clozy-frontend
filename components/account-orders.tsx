@@ -6,6 +6,7 @@ import { Loader2, Package } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth-context";
+import { formatCurrency } from "@/lib/currency";
 import type { Order, OrderStatus } from "@/data/orders";
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -93,7 +94,7 @@ export function AccountOrders() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium text-foreground">
-                    ${order.total}
+                    {formatCurrency(order.total)}
                   </span>
                   <Badge variant="secondary" className={STATUS_STYLES[order.status]}>
                     {order.status}

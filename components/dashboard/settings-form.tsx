@@ -48,6 +48,7 @@ type SettingsState = {
   anthropicApiKey: string;
   logoUrl: string;
   faviconUrl: string;
+  categoryShowcaseHeading: string;
   emailLogoUrl: string;
   emailAccentColor: string;
   emailFooterText: string;
@@ -70,6 +71,7 @@ const TAB_VALUES = [
 ] as const;
 
 const DEFAULT_ACCENT_COLOR = "#111827";
+const DEFAULT_CATEGORY_SHOWCASE_HEADING = "Shop by Category";
 
 const DEFAULT_CONFIRMATION_TEMPLATE =
   "Hi {customer_name}, your order {order_number} has been confirmed. Total: {total}. Thank you for shopping with us!";
@@ -137,6 +139,8 @@ export function SettingsForm({
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
+    categoryShowcaseHeading:
+      initialSettings.categoryShowcaseHeading ?? DEFAULT_CATEGORY_SHOWCASE_HEADING,
     emailLogoUrl: initialSettings.emailLogoUrl ?? "",
     emailAccentColor: initialSettings.emailAccentColor ?? DEFAULT_ACCENT_COLOR,
     emailFooterText: initialSettings.emailFooterText ?? "",
@@ -192,6 +196,7 @@ export function SettingsForm({
           anthropicApiKey: settings.anthropicApiKey || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
+          categoryShowcaseHeading: settings.categoryShowcaseHeading || null,
           emailLogoUrl: settings.emailLogoUrl || null,
           emailAccentColor: settings.emailAccentColor || null,
           emailFooterText: settings.emailFooterText || null,
@@ -387,6 +392,28 @@ export function SettingsForm({
           <Separator />
 
           <div>
+            <p className="text-sm font-medium text-foreground">
+              Category Banners
+            </p>
+            <p className="text-xs text-muted-foreground">
+              The heading shown above the large category image banners on
+              the homepage.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="categoryShowcaseHeading">Heading</Label>
+            <Input
+              id="categoryShowcaseHeading"
+              placeholder={DEFAULT_CATEGORY_SHOWCASE_HEADING}
+              value={settings.categoryShowcaseHeading}
+              onChange={(e) => update("categoryShowcaseHeading", e.target.value)}
+            />
+          </div>
+
+          <Separator />
+
+          <div>
             <p className="text-sm font-medium text-foreground">Footer</p>
             <p className="text-xs text-muted-foreground">
               The tagline and social links shown in the footer&apos;s brand
@@ -452,7 +479,7 @@ export function SettingsForm({
           </p>
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="insideDhaka">Inside Dhaka ($)</Label>
+              <Label htmlFor="insideDhaka">Inside Dhaka (৳)</Label>
               <Input
                 id="insideDhaka"
                 type="number"
@@ -464,7 +491,7 @@ export function SettingsForm({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="outsideDhaka">Outside Dhaka ($)</Label>
+              <Label htmlFor="outsideDhaka">Outside Dhaka (৳)</Label>
               <Input
                 id="outsideDhaka"
                 type="number"

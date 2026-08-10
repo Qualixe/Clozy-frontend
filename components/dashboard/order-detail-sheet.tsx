@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Can } from "@/components/can";
 import { useAuth } from "@/lib/auth-context";
+import { formatCurrency } from "@/lib/currency";
 import type { Order, OrderDetail, OrderStatus } from "@/data/orders";
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -255,7 +256,7 @@ export function OrderDetailSheet({
                         </p>
                       </div>
                       <span className="font-medium text-foreground">
-                        ${(item.price * item.qty).toFixed(2)}
+                        {formatCurrency(item.price * item.qty)}
                       </span>
                     </div>
                   </li>
@@ -268,18 +269,18 @@ export function OrderDetailSheet({
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="text-foreground">${detail.subtotal}</span>
+                <span className="text-foreground">{formatCurrency(detail.subtotal)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-muted-foreground">
                   <Truck className="h-3.5 w-3.5" />
                   Shipping
                 </span>
-                <span className="text-foreground">${detail.shippingCost}</span>
+                <span className="text-foreground">{formatCurrency(detail.shippingCost)}</span>
               </div>
               <div className="flex items-center justify-between text-base font-semibold">
                 <span className="text-foreground">Total</span>
-                <span className="text-foreground">${detail.total}</span>
+                <span className="text-foreground">{formatCurrency(detail.total)}</span>
               </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/currency";
 
 export type FiltersState = {
   categories: string[];
@@ -88,8 +89,8 @@ export function ProductFilters({
             }
           />
           <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-            <span>${filters.priceRange[0]}</span>
-            <span>${filters.priceRange[1]}</span>
+            <span>{formatCurrency(filters.priceRange[0])}</span>
+            <span>{formatCurrency(filters.priceRange[1])}</span>
           </div>
         </div>
       </div>

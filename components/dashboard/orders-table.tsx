@@ -36,6 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Can } from "@/components/can";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 import type { Order, OrderStatus } from "@/data/orders";
 
 const PAGE_SIZE = 8;
@@ -223,7 +224,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                   {order.date}
                 </TableCell>
                 <TableCell className="text-right text-foreground">
-                  ${order.total}
+                  {formatCurrency(order.total)}
                 </TableCell>
                 <TableCell>
                   <Button
