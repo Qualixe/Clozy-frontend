@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Check, ChevronDown, ChevronUp, ImageOff, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -26,6 +27,7 @@ export function ThemeCategoryBannersForm({ initial }: { initial: CategoryGridBan
   const { token } = useAuth();
 
   const [enabled, setEnabled] = React.useState(initial.enabled);
+  const [heading, setHeading] = React.useState(initial.heading ?? "");
   const [categories, setCategories] = React.useState<ListCategory[]>(
     initial.categories.map((c) => ({ id: c.id, name: c.name, image: c.image }))
   );
@@ -75,6 +77,7 @@ export function ThemeCategoryBannersForm({ initial }: { initial: CategoryGridBan
         },
         body: JSON.stringify({
           enabled,
+          heading: heading.trim() || null,
           categoryIds: categories.map((c) => c.id),
         }),
       });
@@ -108,6 +111,19 @@ export function ThemeCategoryBannersForm({ initial }: { initial: CategoryGridBan
           checked={enabled}
           onCheckedChange={(checked) => {
             setEnabled(checked);
+            setSaved(false);
+          }}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="categoryGridBannerHeading">Heading</Label>
+        <Input
+          id="categoryGridBannerHeading"
+          placeholder="Shop by Category"
+          value={heading}
+          onChange={(e) => {
+            setHeading(e.target.value);
             setSaved(false);
           }}
         />

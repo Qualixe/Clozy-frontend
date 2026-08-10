@@ -32,7 +32,7 @@ export default async function Home() {
         heading: "",
         items: [],
       })),
-      getCategoryGridBanner().catch(() => ({ enabled: false, categories: [] })),
+      getCategoryGridBanner().catch(() => ({ enabled: false, heading: null, categories: [] })),
       getPromoBanner().catch(() => ({
         enabled: false,
         image: null,
