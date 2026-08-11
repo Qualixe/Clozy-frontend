@@ -1,4 +1,6 @@
 export type StoreSettings = {
+  insideDhakaRate: number;
+  outsideDhakaRate: number;
   facebookPixelId: string | null;
   googleAnalyticsId: string | null;
   googleTagManagerId: string | null;
@@ -48,6 +50,12 @@ export type AdminStoreSettings = StoreSettings & {
   pathaoUsername: string | null;
   pathaoPassword: string | null;
   pathaoStoreId: string | null;
+  bkashGatewayEnabled: boolean;
+  bkashBaseUrl: string | null;
+  bkashAppKey: string | null;
+  bkashAppSecret: string | null;
+  bkashUsername: string | null;
+  bkashPassword: string | null;
   anthropicApiKey: string | null;
   anthropicConfigured: boolean;
 };

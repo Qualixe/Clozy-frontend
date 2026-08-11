@@ -9,6 +9,7 @@ export type Order = {
   email: string | null;
   status: OrderStatus;
   payment: PaymentMethod;
+  paymentStatus: "pending" | "paid" | "failed" | null;
   total: number;
   date: string;
 };

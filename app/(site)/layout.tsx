@@ -29,6 +29,8 @@ export default async function SiteLayout({
     getMenuByHandle("footer-menu"),
     // A backend hiccup shouldn't take the storefront down over analytics.
     getSettings().catch(() => ({
+      insideDhakaRate: 3,
+      outsideDhakaRate: 6,
       facebookPixelId: null,
       googleAnalyticsId: null,
       googleTagManagerId: null,

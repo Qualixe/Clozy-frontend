@@ -35,8 +35,12 @@ type SettingsState = {
   insideDhakaRate: number;
   outsideDhakaRate: number;
   codEnabled: boolean;
-  bkashEnabled: boolean;
-  bkashMerchantNumber: string;
+  bkashGatewayEnabled: boolean;
+  bkashBaseUrl: string;
+  bkashAppKey: string;
+  bkashAppSecret: string;
+  bkashUsername: string;
+  bkashPassword: string;
   facebookPixelId: string;
   googleAnalyticsId: string;
   googleTagManagerId: string;
@@ -98,22 +102,14 @@ const INITIAL_SETTINGS: Pick<
   | "supportEmail"
   | "supportPhone"
   | "storeDescription"
-  | "insideDhakaRate"
-  | "outsideDhakaRate"
   | "codEnabled"
-  | "bkashEnabled"
-  | "bkashMerchantNumber"
 > = {
   storeName: "Clozy",
   supportEmail: "hello@clozy.com",
   supportPhone: "+880 1234 567890",
   storeDescription:
     "Considered essentials, made to last. Designed in-house, shipped worldwide.",
-  insideDhakaRate: 3,
-  outsideDhakaRate: 6,
   codEnabled: true,
-  bkashEnabled: true,
-  bkashMerchantNumber: "01700000000",
 };
 
 export function SettingsForm({
@@ -133,6 +129,8 @@ export function SettingsForm({
   );
   const [settings, setSettings] = React.useState<SettingsState>({
     ...INITIAL_SETTINGS,
+    insideDhakaRate: initialSettings.insideDhakaRate ?? 3,
+    outsideDhakaRate: initialSettings.outsideDhakaRate ?? 6,
     facebookPixelId: initialSettings.facebookPixelId ?? "",
     googleAnalyticsId: initialSettings.googleAnalyticsId ?? "",
     googleTagManagerId: initialSettings.googleTagManagerId ?? "",
@@ -157,6 +155,12 @@ export function SettingsForm({
     pathaoUsername: initialSettings.pathaoUsername ?? "",
     pathaoPassword: initialSettings.pathaoPassword ?? "",
     pathaoStoreId: initialSettings.pathaoStoreId ?? "",
+    bkashGatewayEnabled: initialSettings.bkashGatewayEnabled,
+    bkashBaseUrl: initialSettings.bkashBaseUrl ?? "https://tokenized.sandbox.bka.sh/v1.2.0-beta",
+    bkashAppKey: initialSettings.bkashAppKey ?? "",
+    bkashAppSecret: initialSettings.bkashAppSecret ?? "",
+    bkashUsername: initialSettings.bkashUsername ?? "",
+    bkashPassword: initialSettings.bkashPassword ?? "",
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
@@ -206,6 +210,17 @@ export function SettingsForm({
     setSaved(false);
   }
 
+  // Only one shipping courier can be active at a time, so enabling one
+  // always turns the other off — never both, never ambiguous.
+  function setCourierEnabled(courier: "steadfast" | "pathao", checked: boolean) {
+    setSettings((s) => ({
+      ...s,
+      steadfastEnabled: courier === "steadfast" ? checked : checked ? false : s.steadfastEnabled,
+      pathaoEnabled: courier === "pathao" ? checked : checked ? false : s.pathaoEnabled,
+    }));
+    setSaved(false);
+  }
+
   async function handleSave(e: React.SubmitEvent) {
     e.preventDefault();
 
@@ -213,8 +228,8 @@ export function SettingsForm({
     setSaveError(null);
 
     try {
-      // Only the Pixels and SMS tabs are backed by a real API right now —
-      // the rest of this form (store/shipping/payment) is still local-only.
+      // Store name/description/payment toggles are still local-only — no
+      // backend field exists for them yet.
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
         method: "PUT",
         headers: {
@@ -222,6 +237,8 @@ export function SettingsForm({
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
+          insideDhakaRate: settings.insideDhakaRate,
+          outsideDhakaRate: settings.outsideDhakaRate,
           facebookPixelId: settings.facebookPixelId || null,
           googleAnalyticsId: settings.googleAnalyticsId || null,
           googleTagManagerId: settings.googleTagManagerId || null,
@@ -244,6 +261,12 @@ export function SettingsForm({
           pathaoUsername: settings.pathaoUsername || null,
           pathaoPassword: settings.pathaoPassword || null,
           pathaoStoreId: settings.pathaoStoreId || null,
+          bkashGatewayEnabled: settings.bkashGatewayEnabled,
+          bkashBaseUrl: settings.bkashBaseUrl || null,
+          bkashAppKey: settings.bkashAppKey || null,
+          bkashAppSecret: settings.bkashAppSecret || null,
+          bkashUsername: settings.bkashUsername || null,
+          bkashPassword: settings.bkashPassword || null,
           anthropicApiKey: settings.anthropicApiKey || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
@@ -557,6 +580,11 @@ export function SettingsForm({
 
           <Separator />
 
+          <p className="text-xs text-muted-foreground">
+            Only one courier can be active at a time — enabling one turns
+            the other off.
+          </p>
+
           <div className="rounded-lg border border-border p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -570,7 +598,7 @@ export function SettingsForm({
               </div>
               <Switch
                 checked={settings.steadfastEnabled}
-                onCheckedChange={(checked) => update("steadfastEnabled", checked)}
+                onCheckedChange={(checked) => setCourierEnabled("steadfast", checked)}
               />
             </div>
             {settings.steadfastEnabled && (
@@ -616,7 +644,7 @@ export function SettingsForm({
               </div>
               <Switch
                 checked={settings.pathaoEnabled}
-                onCheckedChange={(checked) => update("pathaoEnabled", checked)}
+                onCheckedChange={(checked) => setCourierEnabled("pathao", checked)}
               />
             </div>
             {settings.pathaoEnabled && (
@@ -739,32 +767,77 @@ export function SettingsForm({
           <div className="rounded-lg border border-border p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-foreground">bKash</p>
+                <p className="text-sm font-medium text-foreground">
+                  bKash Payment Gateway
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  Accept payments through bKash.
+                  Customers pay through bKash&apos;s own hosted checkout page
+                  — no manual number collection needed.
                 </p>
               </div>
               <Switch
-                checked={settings.bkashEnabled}
-                onCheckedChange={(checked) => update("bkashEnabled", checked)}
+                checked={settings.bkashGatewayEnabled}
+                onCheckedChange={(checked) => update("bkashGatewayEnabled", checked)}
               />
             </div>
 
-            {settings.bkashEnabled && (
+            {settings.bkashGatewayEnabled && (
               <>
                 <Separator className="my-4" />
                 <div className="space-y-1.5">
-                  <Label htmlFor="bkashMerchantNumber">
-                    bKash Merchant Number
-                  </Label>
+                  <Label htmlFor="bkashBaseUrl">API Base URL</Label>
                   <Input
-                    id="bkashMerchantNumber"
-                    value={settings.bkashMerchantNumber}
-                    onChange={(e) =>
-                      update("bkashMerchantNumber", e.target.value)
-                    }
+                    id="bkashBaseUrl"
+                    placeholder="https://tokenized.sandbox.bka.sh/v1.2.0-beta"
+                    value={settings.bkashBaseUrl}
+                    onChange={(e) => update("bkashBaseUrl", e.target.value)}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Sandbox by default — switch to the production URL when
+                    you're ready to go live.
+                  </p>
                 </div>
+                <div className="mt-4 grid gap-5 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bkashAppKey">App Key</Label>
+                    <Input
+                      id="bkashAppKey"
+                      type="password"
+                      value={settings.bkashAppKey}
+                      onChange={(e) => update("bkashAppKey", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bkashAppSecret">App Secret</Label>
+                    <Input
+                      id="bkashAppSecret"
+                      type="password"
+                      value={settings.bkashAppSecret}
+                      onChange={(e) => update("bkashAppSecret", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bkashUsername">Username</Label>
+                    <Input
+                      id="bkashUsername"
+                      value={settings.bkashUsername}
+                      onChange={(e) => update("bkashUsername", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bkashPassword">Password</Label>
+                    <Input
+                      id="bkashPassword"
+                      type="password"
+                      value={settings.bkashPassword}
+                      onChange={(e) => update("bkashPassword", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Found in your bKash merchant/developer portal, under API
+                  credentials.
+                </p>
               </>
             )}
           </div>

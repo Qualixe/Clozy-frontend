@@ -24,18 +24,6 @@ import { useCart } from "@/lib/cart-context";
 import districts from "@/data/districts.json";
 
 // ---------------------------------------------------------------------------
-// Shipping
-// ---------------------------------------------------------------------------
-
-const INSIDE_DHAKA_SHIPPING = 3;
-const OUTSIDE_DHAKA_SHIPPING = 6;
-
-function getShippingCost(district: string) {
-  if (!district) return 0;
-  return district === "Dhaka" ? INSIDE_DHAKA_SHIPPING : OUTSIDE_DHAKA_SHIPPING;
-}
-
-// ---------------------------------------------------------------------------
 // Form state
 // ---------------------------------------------------------------------------
 
@@ -46,7 +34,6 @@ type FormState = {
   address: string;
   district: string;
   paymentMethod: "cod" | "bkash";
-  bkashNumber: string;
 };
 
 const INITIAL_FORM: FormState = {
@@ -56,7 +43,6 @@ const INITIAL_FORM: FormState = {
   address: "",
   district: "",
   paymentMethod: "cod",
-  bkashNumber: "",
 };
 
 type AppliedDiscount = {
@@ -83,9 +69,6 @@ function validate(form: FormState, phoneVerified: boolean) {
   }
   if (!form.address.trim()) errors.address = "Address is required.";
   if (!form.district) errors.district = "Select a district.";
-  if (form.paymentMethod === "bkash" && !PHONE_PATTERN.test(form.bkashNumber.trim())) {
-    errors.bkashNumber = "Enter the bKash number you'll pay from.";
-  }
 
   return errors;
 }
@@ -94,7 +77,13 @@ function validate(form: FormState, phoneVerified: boolean) {
 // Page
 // ---------------------------------------------------------------------------
 
-export function CheckoutPage() {
+export function CheckoutPage({
+  insideDhakaRate = 3,
+  outsideDhakaRate = 6,
+}: {
+  insideDhakaRate?: number;
+  outsideDhakaRate?: number;
+} = {}) {
   const { items, clear } = useCart();
   const [form, setForm] = React.useState<FormState>(INITIAL_FORM);
   const [errors, setErrors] = React.useState<
@@ -181,7 +170,11 @@ export function CheckoutPage() {
   }
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const shippingCost = getShippingCost(form.district);
+  const shippingCost = form.district
+    ? form.district === "Dhaka"
+      ? insideDhakaRate
+      : outsideDhakaRate
+    : 0;
   const effectiveShipping = appliedDiscount?.freeShipping ? 0 : shippingCost;
   const discountAmount = appliedDiscount?.amountOff ?? 0;
   const total = Math.max(0, subtotal + effectiveShipping - discountAmount);
@@ -255,7 +248,6 @@ export function CheckoutPage() {
           address: form.address,
           district: form.district,
           paymentMethod: form.paymentMethod,
-          bkashNumber: form.paymentMethod === "bkash" ? form.bkashNumber : null,
           shippingCost,
           discountCode: appliedDiscount?.code,
           items: items.map((item) => ({
@@ -275,6 +267,22 @@ export function CheckoutPage() {
       }
 
       const order = await res.json();
+
+      if (form.paymentMethod === "bkash") {
+        const paymentRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/bkash/create-payment`,
+          { method: "POST" }
+        );
+        const paymentBody = await paymentRes.json().catch(() => null);
+        if (!paymentRes.ok) {
+          throw new Error(paymentBody?.message ?? "Could not start bKash payment.");
+        }
+
+        clear();
+        window.location.href = paymentBody.bkashUrl;
+        return;
+      }
+
       setConfirmedOrderNumber(order.orderNumber ?? "");
       setConfirmedTotal(total);
       setOrderPlaced(true);
@@ -297,10 +305,7 @@ export function CheckoutPage() {
         </h1>
         <p className="text-sm text-muted-foreground">
           Thanks, {form.name.split(" ")[0]}. We'll call you at {form.phone} to
-          confirm your order.{" "}
-          {form.paymentMethod === "cod"
-            ? "Pay in cash when it arrives."
-            : "We'll send a bKash payment request shortly."}
+          confirm your order. Pay in cash when it arrives.
         </p>
 
         <div className="mt-3 flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-2.5">
@@ -602,33 +607,10 @@ export function CheckoutPage() {
               </RadioGroup>
 
               {form.paymentMethod === "bkash" && (
-                <div className="mt-3 space-y-1.5">
-                  <Label htmlFor="bkashNumber">Your bKash Number</Label>
-                  <div className="flex items-stretch">
-                    <span className="flex shrink-0 items-center rounded-l-lg border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
-                      +880
-                    </span>
-                    <Input
-                      id="bkashNumber"
-                      type="tel"
-                      placeholder="01XXXXXXXXX"
-                      value={form.bkashNumber}
-                      onChange={(e) => updateField("bkashNumber", e.target.value)}
-                      aria-invalid={!!errors.bkashNumber}
-                      className="rounded-l-none"
-                    />
-                  </div>
-                  {errors.bkashNumber ? (
-                    <p className="text-xs text-destructive">
-                      {errors.bkashNumber}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      We'll send a payment request to this number after you
-                      place the order.
-                    </p>
-                  )}
-                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  You'll be redirected to bKash to complete your payment
+                  securely after placing the order.
+                </p>
               )}
             </section>
           </div>

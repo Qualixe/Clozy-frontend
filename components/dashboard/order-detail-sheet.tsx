@@ -226,9 +226,23 @@ export function OrderDetailSheet({
               )}
               <div className="flex items-start gap-2.5">
                 <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-foreground">
+                <span className="flex items-center gap-1.5 text-foreground">
                   {detail.payment}
                   {detail.bkashNumber ? ` · ${detail.bkashNumber}` : ""}
+                  {detail.paymentStatus && (
+                    <Badge
+                      variant="secondary"
+                      className={
+                        detail.paymentStatus === "paid"
+                          ? "bg-emerald-600 text-white dark:bg-emerald-500"
+                          : detail.paymentStatus === "failed"
+                            ? "bg-destructive text-destructive-foreground"
+                            : undefined
+                      }
+                    >
+                      {detail.paymentStatus}
+                    </Badge>
+                  )}
                 </span>
               </div>
             </div>
