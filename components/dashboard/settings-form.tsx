@@ -11,6 +11,13 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Tabs,
   TabsContent,
   TabsList,
@@ -45,6 +52,13 @@ type SettingsState = {
   steadfastEnabled: boolean;
   steadfastApiKey: string;
   steadfastSecretKey: string;
+  pathaoEnabled: boolean;
+  pathaoBaseUrl: string;
+  pathaoClientId: string;
+  pathaoClientSecret: string;
+  pathaoUsername: string;
+  pathaoPassword: string;
+  pathaoStoreId: string;
   anthropicApiKey: string;
   logoUrl: string;
   faviconUrl: string;
@@ -136,6 +150,13 @@ export function SettingsForm({
     steadfastEnabled: initialSettings.steadfastEnabled,
     steadfastApiKey: initialSettings.steadfastApiKey ?? "",
     steadfastSecretKey: initialSettings.steadfastSecretKey ?? "",
+    pathaoEnabled: initialSettings.pathaoEnabled,
+    pathaoBaseUrl: initialSettings.pathaoBaseUrl ?? "",
+    pathaoClientId: initialSettings.pathaoClientId ?? "",
+    pathaoClientSecret: initialSettings.pathaoClientSecret ?? "",
+    pathaoUsername: initialSettings.pathaoUsername ?? "",
+    pathaoPassword: initialSettings.pathaoPassword ?? "",
+    pathaoStoreId: initialSettings.pathaoStoreId ?? "",
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
@@ -156,6 +177,29 @@ export function SettingsForm({
   const [logoPickerOpen, setLogoPickerOpen] = React.useState(false);
   const [faviconPickerOpen, setFaviconPickerOpen] = React.useState(false);
   const [emailLogoPickerOpen, setEmailLogoPickerOpen] = React.useState(false);
+  const [pathaoStores, setPathaoStores] = React.useState<
+    { storeId: number; storeName: string }[]
+  >([]);
+  const [fetchingStores, setFetchingStores] = React.useState(false);
+  const [storesError, setStoresError] = React.useState<string | null>(null);
+
+  async function fetchPathaoStores() {
+    setFetchingStores(true);
+    setStoresError(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courier/pathao/stores`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(body?.message ?? `Request failed with status ${res.status}`);
+      setPathaoStores(body.stores ?? []);
+    } catch (err) {
+      setStoresError(err instanceof Error ? err.message : "Could not fetch stores.");
+    } finally {
+      setFetchingStores(false);
+    }
+  }
 
   function update<K extends keyof SettingsState>(key: K, value: SettingsState[K]) {
     setSettings((s) => ({ ...s, [key]: value }));
@@ -193,6 +237,13 @@ export function SettingsForm({
           steadfastEnabled: settings.steadfastEnabled,
           steadfastApiKey: settings.steadfastApiKey || null,
           steadfastSecretKey: settings.steadfastSecretKey || null,
+          pathaoEnabled: settings.pathaoEnabled,
+          pathaoBaseUrl: settings.pathaoBaseUrl || null,
+          pathaoClientId: settings.pathaoClientId || null,
+          pathaoClientSecret: settings.pathaoClientSecret || null,
+          pathaoUsername: settings.pathaoUsername || null,
+          pathaoPassword: settings.pathaoPassword || null,
+          pathaoStoreId: settings.pathaoStoreId || null,
           anthropicApiKey: settings.anthropicApiKey || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
@@ -548,6 +599,122 @@ export function SettingsForm({
                 <p className="mt-2 text-xs text-muted-foreground">
                   Found under your Steadfast merchant panel's API settings.
                 </p>
+              </>
+            )}
+          </div>
+
+          <div className="rounded-lg border border-border p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  Pathao Courier
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Send fulfilled orders to Pathao for delivery straight from
+                  the Orders page.
+                </p>
+              </div>
+              <Switch
+                checked={settings.pathaoEnabled}
+                onCheckedChange={(checked) => update("pathaoEnabled", checked)}
+              />
+            </div>
+            {settings.pathaoEnabled && (
+              <>
+                <Separator className="my-4" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="pathaoBaseUrl">API Base URL</Label>
+                  <Input
+                    id="pathaoBaseUrl"
+                    placeholder="https://courier-api-sandbox.pathao.com"
+                    value={settings.pathaoBaseUrl}
+                    onChange={(e) => update("pathaoBaseUrl", e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Use the sandbox URL while testing, switch to the
+                    production URL when you're ready to go live.
+                  </p>
+                </div>
+                <div className="mt-4 grid gap-5 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pathaoClientId">Client ID</Label>
+                    <Input
+                      id="pathaoClientId"
+                      type="password"
+                      value={settings.pathaoClientId}
+                      onChange={(e) => update("pathaoClientId", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pathaoClientSecret">Client Secret</Label>
+                    <Input
+                      id="pathaoClientSecret"
+                      type="password"
+                      value={settings.pathaoClientSecret}
+                      onChange={(e) => update("pathaoClientSecret", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pathaoUsername">Username</Label>
+                    <Input
+                      id="pathaoUsername"
+                      value={settings.pathaoUsername}
+                      onChange={(e) => update("pathaoUsername", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pathaoPassword">Password</Label>
+                    <Input
+                      id="pathaoPassword"
+                      type="password"
+                      value={settings.pathaoPassword}
+                      onChange={(e) => update("pathaoPassword", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label>Store</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={fetchingStores}
+                      onClick={fetchPathaoStores}
+                    >
+                      {fetchingStores ? "Fetching…" : "Fetch stores"}
+                    </Button>
+                  </div>
+                  {pathaoStores.length > 0 ? (
+                    <Select
+                      value={settings.pathaoStoreId}
+                      onValueChange={(value) => update("pathaoStoreId", value ?? "")}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a store" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {pathaoStores.map((s) => (
+                          <SelectItem key={s.storeId} value={String(s.storeId)}>
+                            {s.storeName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      {settings.pathaoStoreId
+                        ? `Current store ID: ${settings.pathaoStoreId}`
+                        : "Save your credentials above, then click “Fetch stores” to pick your Pathao store."}
+                    </p>
+                  )}
+                  {storesError && (
+                    <p className="text-xs text-destructive">{storesError}</p>
+                  )}
+                </div>
               </>
             )}
           </div>

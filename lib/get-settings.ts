@@ -41,6 +41,13 @@ export type AdminStoreSettings = StoreSettings & {
   steadfastEnabled: boolean;
   steadfastApiKey: string | null;
   steadfastSecretKey: string | null;
+  pathaoEnabled: boolean;
+  pathaoBaseUrl: string | null;
+  pathaoClientId: string | null;
+  pathaoClientSecret: string | null;
+  pathaoUsername: string | null;
+  pathaoPassword: string | null;
+  pathaoStoreId: string | null;
   anthropicApiKey: string | null;
   anthropicConfigured: boolean;
 };

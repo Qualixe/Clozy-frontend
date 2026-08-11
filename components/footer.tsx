@@ -234,6 +234,39 @@ export function SiteFooter({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  const [subscribeEmail, setSubscribeEmail] = React.useState("");
+  const [subscribing, setSubscribing] = React.useState(false);
+  const [subscribeError, setSubscribeError] = React.useState<string | null>(null);
+  const [subscribed, setSubscribed] = React.useState(false);
+
+  async function handleSubscribe(e: React.SubmitEvent) {
+    e.preventDefault();
+    setSubscribing(true);
+    setSubscribeError(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscribers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: subscribeEmail }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(
+          body?.errors?.email?.[0] ?? body?.message ?? `Request failed with status ${res.status}`
+        );
+      }
+
+      setSubscribed(true);
+      setSubscribeEmail("");
+    } catch (err) {
+      setSubscribeError(err instanceof Error ? err.message : "Could not subscribe.");
+    } finally {
+      setSubscribing(false);
+    }
+  }
+
   return (
     <footer className="relative w-full border-t border-border bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
@@ -248,20 +281,31 @@ export function SiteFooter({
               New arrivals, restocks, and members-only sales. No spam, unsubscribe anytime.
             </p>
           </div>
-          <form
-            className="flex w-full max-w-sm gap-2"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <Input
-              type="email"
-              placeholder="you@email.com"
-              required
-              className="h-10"
-            />
-            <Button type="submit" className="shrink-0">
-              Subscribe
-            </Button>
-          </form>
+          <div className="w-full max-w-sm">
+            {subscribed ? (
+              <p className="flex h-10 items-center text-sm font-medium text-foreground">
+                You&apos;re subscribed — thanks!
+              </p>
+            ) : (
+              <form className="flex gap-2" onSubmit={handleSubscribe}>
+                <Input
+                  type="email"
+                  placeholder="you@email.com"
+                  required
+                  className="h-10"
+                  value={subscribeEmail}
+                  onChange={(e) => setSubscribeEmail(e.target.value)}
+                  disabled={subscribing}
+                />
+                <Button type="submit" className="shrink-0" disabled={subscribing}>
+                  {subscribing ? "Subscribing…" : "Subscribe"}
+                </Button>
+              </form>
+            )}
+            {subscribeError && (
+              <p className="mt-1.5 text-xs text-destructive">{subscribeError}</p>
+            )}
+          </div>
         </div>
 
         {/* Link columns + brand */}

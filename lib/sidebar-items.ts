@@ -84,6 +84,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
 /** Rendered in the sidebar's separate "Account" group, but filtered the same way. */
 export const ACCOUNT_SIDEBAR_ITEMS: SidebarSubItem[] = [
   { title: "Users", href: "/dashboard/users", permissions: ["manage_staff"] },
+  { title: "Subscribers", href: "/dashboard/subscribers", permissions: ["manage_settings"] },
   { title: "Settings", href: "/dashboard/settings", permissions: ["manage_settings"] },
 ];
 

@@ -15,6 +15,7 @@ import {
   Percent,
   MessageSquareText,
   MessageCircle,
+  Mail,
   Settings,
   LogOut,
   type LucideIcon,
@@ -57,6 +58,7 @@ const ICONS: Record<string, LucideIcon> = {
   "/dashboard/theme": Palette,
   "/dashboard/sms": MessageCircle,
   "/dashboard/users": Users,
+  "/dashboard/subscribers": Mail,
   "/dashboard/settings": Settings,
 };
 
