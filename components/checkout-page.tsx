@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, Truck, ShieldCheck, Copy, Check, AlertTriangle } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Copy, Check, AlertTriangle } from "lucide-react";
 
 import { formatCurrency } from "@/lib/currency";
 
@@ -396,7 +396,7 @@ export function CheckoutPage({
           className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]"
         >
           {/* Form */}
-          <div className="space-y-8">
+          <div className="h-fit space-y-8 rounded-xl border border-border p-5">
             <section>
               <h2 className="text-sm font-semibold text-foreground">
                 Contact Information
@@ -486,7 +486,7 @@ export function CheckoutPage({
                   )}
                 </div>
 
-                <div className="space-y-1.5 sm:col-span-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -498,29 +498,6 @@ export function CheckoutPage({
                   />
                   {errors.email && (
                     <p className="text-xs text-destructive">{errors.email}</p>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            <Separator />
-
-            <section>
-              <h2 className="text-sm font-semibold text-foreground">
-                Shipping Address
-              </h2>
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Textarea
-                    id="address"
-                    placeholder="House, road, area"
-                    value={form.address}
-                    onChange={(e) => updateField("address", e.target.value)}
-                    aria-invalid={!!errors.address}
-                  />
-                  {errors.address && (
-                    <p className="text-xs text-destructive">{errors.address}</p>
                   )}
                 </div>
 
@@ -547,35 +524,36 @@ export function CheckoutPage({
                     <p className="text-xs text-destructive">{errors.district}</p>
                   )}
                 </div>
-
-                <div className="space-y-1.5">
-                  <Label>Shipping Cost</Label>
-                  <div className="flex h-9 items-center gap-2 rounded-lg border border-input px-2.5 text-sm text-muted-foreground">
-                    <Truck className="h-4 w-4" />
-                    {form.district ? (
-                      <span className="text-foreground">
-                        {formatCurrency(shippingCost)}{" "}
-                        <span className="text-muted-foreground">
-                          ({form.district === "Dhaka" ? "Inside" : "Outside"}{" "}
-                          Dhaka)
-                        </span>
-                      </span>
-                    ) : (
-                      "Select a district"
-                    )}
-                  </div>
-                </div>
               </div>
             </section>
 
-            <Separator />
+            <section>
+              <h2 className="text-sm font-semibold text-foreground">
+                Shipping Address
+              </h2>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Textarea
+                    id="address"
+                    placeholder="House, road, area"
+                    value={form.address}
+                    onChange={(e) => updateField("address", e.target.value)}
+                    aria-invalid={!!errors.address}
+                  />
+                  {errors.address && (
+                    <p className="text-xs text-destructive">{errors.address}</p>
+                  )}
+                </div>
+              </div>
+            </section>
 
             <section>
               <h2 className="text-sm font-semibold text-foreground">
                 Payment Method
               </h2>
               <RadioGroup
-                className="mt-4"
+                className="mt-4 sm:grid-cols-2"
                 value={form.paymentMethod}
                 onValueChange={(value) =>
                   updateField("paymentMethod", value as FormState["paymentMethod"])
