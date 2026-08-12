@@ -37,6 +37,8 @@ function typeLabel(discount: Discount): string {
       return `${formatCurrency(discount.value)} off`;
     case "free_shipping":
       return "Free shipping";
+    case "bogo":
+      return `Buy ${discount.buyQty}, get ${discount.getQty} free`;
   }
 }
 

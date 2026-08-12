@@ -26,13 +26,15 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth-context";
 
-export type DiscountType = "percentage" | "fixed" | "free_shipping";
+export type DiscountType = "percentage" | "fixed" | "free_shipping" | "bogo";
 
 export type Discount = {
   id: string;
   code: string;
   type: DiscountType;
   value: number | null;
+  buyQty: number | null;
+  getQty: number | null;
   minSubtotal: number | null;
   usageLimit: number | null;
   usedCount: number;
@@ -45,6 +47,8 @@ type DiscountForm = {
   code: string;
   type: DiscountType;
   value: string;
+  buyQty: string;
+  getQty: string;
   minSubtotal: string;
   usageLimit: string;
   startsAt: string;
@@ -62,6 +66,8 @@ function toForm(discount?: Discount): DiscountForm {
     code: discount?.code ?? "",
     type: discount?.type ?? "percentage",
     value: discount?.value != null ? String(discount.value) : "",
+    buyQty: discount?.buyQty != null ? String(discount.buyQty) : "1",
+    getQty: discount?.getQty != null ? String(discount.getQty) : "1",
     minSubtotal: discount?.minSubtotal != null ? String(discount.minSubtotal) : "",
     usageLimit: discount?.usageLimit != null ? String(discount.usageLimit) : "",
     startsAt: toDateInput(discount?.startsAt ?? null),
@@ -110,7 +116,15 @@ export function DiscountDialog({
       setCodeError("Code is required.");
       return;
     }
-    if (form.type !== "free_shipping" && !form.value.trim()) {
+    if (form.type === "bogo") {
+      const buyQty = Number(form.buyQty);
+      const getQty = Number(form.getQty);
+      if (!form.buyQty.trim() || !form.getQty.trim() || buyQty < 1 || getQty < 1) {
+        setCodeError(null);
+        setSubmitError("Enter a buy quantity and get quantity of at least 1.");
+        return;
+      }
+    } else if (form.type !== "free_shipping" && !form.value.trim()) {
       setCodeError(null);
       setSubmitError("Enter a value for this discount type.");
       return;
@@ -133,7 +147,12 @@ export function DiscountDialog({
         body: JSON.stringify({
           code: form.code,
           type: form.type,
-          value: form.type === "free_shipping" ? null : Number(form.value),
+          value:
+            form.type === "free_shipping" || form.type === "bogo"
+              ? null
+              : Number(form.value),
+          buyQty: form.type === "bogo" ? Number(form.buyQty) : null,
+          getQty: form.type === "bogo" ? Number(form.getQty) : null,
           minSubtotal: form.minSubtotal ? Number(form.minSubtotal) : null,
           usageLimit: form.usageLimit ? Number(form.usageLimit) : null,
           startsAt: form.startsAt || null,
@@ -217,11 +236,12 @@ export function DiscountDialog({
                     <SelectItem value="percentage">Percentage off</SelectItem>
                     <SelectItem value="fixed">Fixed amount off</SelectItem>
                     <SelectItem value="free_shipping">Free shipping</SelectItem>
+                    <SelectItem value="bogo">Buy X, get Y free</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {form.type !== "free_shipping" && (
+              {form.type !== "free_shipping" && form.type !== "bogo" && (
                 <div className="space-y-1.5">
                   <Label htmlFor="discount-value">
                     {form.type === "percentage" ? "Percent off" : "Amount off (৳)"}
@@ -239,6 +259,35 @@ export function DiscountDialog({
                 </div>
               )}
             </div>
+
+            {form.type === "bogo" && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="discount-buy-qty">Buy quantity</Label>
+                  <Input
+                    id="discount-buy-qty"
+                    type="number"
+                    min={1}
+                    step="1"
+                    placeholder="2"
+                    value={form.buyQty}
+                    onChange={(e) => update("buyQty", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="discount-get-qty">Get quantity free</Label>
+                  <Input
+                    id="discount-get-qty"
+                    type="number"
+                    min={1}
+                    step="1"
+                    placeholder="1"
+                    value={form.getQty}
+                    onChange={(e) => update("getQty", e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">

@@ -47,8 +47,10 @@ const INITIAL_FORM: FormState = {
 
 type AppliedDiscount = {
   code: string;
-  type: "percentage" | "fixed" | "free_shipping";
+  type: "percentage" | "fixed" | "free_shipping" | "bogo";
   value: number | null;
+  buyQty: number | null;
+  getQty: number | null;
   amountOff: number;
   freeShipping: boolean;
 };
@@ -189,7 +191,11 @@ export function CheckoutPage({
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/discounts/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: discountCode.trim(), subtotal }),
+        body: JSON.stringify({
+          code: discountCode.trim(),
+          subtotal,
+          items: items.map((item) => ({ price: item.price, qty: item.qty })),
+        }),
       });
 
       const body = await res.json().catch(() => null);
@@ -396,8 +402,8 @@ export function CheckoutPage({
           className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]"
         >
           {/* Form */}
-          <div className="h-fit space-y-8 rounded-xl border border-border p-5">
-            <section>
+          <div >
+            <section className="h-fit space-y-8 rounded-xl border border-border p-5">
               <h2 className="text-sm font-semibold text-foreground">
                 Contact Information
               </h2>
@@ -524,15 +530,7 @@ export function CheckoutPage({
                     <p className="text-xs text-destructive">{errors.district}</p>
                   )}
                 </div>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-sm font-semibold text-foreground">
-                Shipping Address
-              </h2>
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5 sm:col-span-2">
+                  <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="address">Address</Label>
                   <Textarea
                     id="address"
@@ -546,9 +544,13 @@ export function CheckoutPage({
                   )}
                 </div>
               </div>
+                            
+              
+            
             </section>
 
-            <section>
+
+            <section className="h-fit space-y-8 rounded-xl border border-border p-5 mt-4">
               <h2 className="text-sm font-semibold text-foreground">
                 Payment Method
               </h2>
@@ -641,9 +643,11 @@ export function CheckoutPage({
                   <p className="text-xs text-muted-foreground">
                     {appliedDiscount.freeShipping
                       ? "Free shipping applied"
-                      : appliedDiscount.type === "percentage"
-                        ? `${appliedDiscount.value}% off applied`
-                        : `${formatCurrency(appliedDiscount.value)} off applied`}
+                      : appliedDiscount.type === "bogo"
+                        ? `Buy ${appliedDiscount.buyQty}, get ${appliedDiscount.getQty} free applied`
+                        : appliedDiscount.type === "percentage"
+                          ? `${appliedDiscount.value}% off applied`
+                          : `${formatCurrency(appliedDiscount.value)} off applied`}
                   </p>
                 </div>
                 <button
