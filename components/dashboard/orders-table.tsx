@@ -139,10 +139,12 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
               className="pl-8"
             />
           </div>
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" />
-            Create Order
-          </Button>
+          <Can permission="create_orders">
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Create Order
+            </Button>
+          </Can>
         </div>
       </div>
 
