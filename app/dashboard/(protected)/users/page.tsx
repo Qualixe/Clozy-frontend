@@ -1,5 +1,6 @@
 import { ShieldAlert } from "lucide-react";
 
+import { Can } from "@/components/can";
 import { UsersTable } from "@/components/dashboard/users-table";
 import { UserDialog, type ManagedUser } from "@/components/dashboard/user-dialog";
 import { assertDashboardFetchOk, getServerAuthHeaders } from "@/lib/auth-server";
@@ -37,7 +38,9 @@ export default async function DashboardUsersPage() {
             {users.length} accounts — owners, admins, and staff can access the dashboard.
           </p>
         </div>
-        <UserDialog />
+        <Can permission="create_staff">
+          <UserDialog />
+        </Can>
       </div>
 
       <UsersTable users={users} />

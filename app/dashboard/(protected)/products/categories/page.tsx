@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { Can } from "@/components/can";
 import { CategoriesTable } from "@/components/dashboard/categories-table";
 import { CategoryDialog, type Category } from "@/components/dashboard/category-dialog";
 
@@ -34,7 +35,9 @@ export default async function DashboardCategoriesPage() {
             {categories.length} categories organizing your catalog.
           </p>
         </div>
-        <CategoryDialog />
+        <Can permission="create_categories">
+          <CategoryDialog />
+        </Can>
       </div>
 
       <CategoriesTable categories={categories} />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { Can } from "@/components/can";
 import { MenusTable, type MenuSummary } from "@/components/dashboard/menus-table";
 import { AddMenuDialog } from "@/components/dashboard/add-menu-dialog";
 import { assertDashboardFetchOk, getServerAuthHeaders } from "@/lib/auth-server";
@@ -36,7 +37,9 @@ export default async function DashboardMenusPage() {
             The navigation menus used across your storefront.
           </p>
         </div>
-        <AddMenuDialog />
+        <Can permission="create_menus">
+          <AddMenuDialog />
+        </Can>
       </div>
 
       <MenusTable menus={menus} />

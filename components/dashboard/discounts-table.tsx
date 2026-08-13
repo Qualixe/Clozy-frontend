@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Can } from "@/components/can";
 import { DiscountDialog, type Discount } from "@/components/dashboard/discount-dialog";
 import { useAuth } from "@/lib/auth-context";
 import { formatCurrency } from "@/lib/currency";
@@ -97,7 +98,9 @@ export function DiscountsTable({ discounts }: { discounts: Discount[] }) {
             className="pl-8"
           />
         </div>
-        <DiscountDialog />
+        <Can permission="create_discounts">
+          <DiscountDialog />
+        </Can>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border">
@@ -141,32 +144,34 @@ export function DiscountsTable({ discounts }: { discounts: Discount[] }) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <DiscountDialog
-                      discount={discount}
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Edit ${discount.code}`}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      }
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-muted-foreground hover:text-destructive"
-                      aria-label={`Delete ${discount.code}`}
-                      onClick={() => {
-                        setDeleteError(null);
-                        setPendingDelete(discount);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Can permission="edit_discounts">
+                    <div className="flex items-center justify-end gap-1">
+                      <DiscountDialog
+                        discount={discount}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Edit ${discount.code}`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label={`Delete ${discount.code}`}
+                        onClick={() => {
+                          setDeleteError(null);
+                          setPendingDelete(discount);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Can>
                 </TableCell>
               </TableRow>
             ))}

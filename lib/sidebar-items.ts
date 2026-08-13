@@ -23,17 +23,21 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   {
     title: "Products",
     href: "/dashboard/products",
-    permissions: ["manage_products"],
+    permissions: ["view_products", "create_products", "edit_products"],
     children: [
       {
         title: "Categories",
         href: "/dashboard/products/categories",
-        permissions: ["manage_categories"],
+        permissions: ["view_categories", "create_categories", "edit_categories"],
       },
     ],
   },
   { title: "Orders", href: "/dashboard/orders", permissions: ["view_orders"] },
-  { title: "Discounts", href: "/dashboard/discounts", permissions: ["manage_discounts"] },
+  {
+    title: "Discounts",
+    href: "/dashboard/discounts",
+    permissions: ["view_discounts", "create_discounts", "edit_discounts"],
+  },
   { title: "Reviews", href: "/dashboard/reviews", permissions: ["view_reviews"] },
   // The Customers page has no dedicated backend endpoint — it's derived
   // from GET /orders, so it shares that permission.
@@ -42,32 +46,59 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   {
     title: "Content",
     href: "/dashboard/content",
-    permissions: ["manage_menus", "manage_media"],
+    permissions: [
+      "view_menus",
+      "create_menus",
+      "edit_menus",
+      "view_media",
+      "create_media",
+      "edit_media",
+    ],
     children: [
-      { title: "Menus", href: "/dashboard/content/menus", permissions: ["manage_menus"] },
-      { title: "Media", href: "/dashboard/content/media", permissions: ["manage_media"] },
+      {
+        title: "Menus",
+        href: "/dashboard/content/menus",
+        permissions: ["view_menus", "create_menus", "edit_menus"],
+      },
+      {
+        title: "Media",
+        href: "/dashboard/content/media",
+        permissions: ["view_media", "create_media", "edit_media"],
+      },
     ],
   },
   {
     title: "CMS",
     href: "/dashboard/cms",
-    permissions: ["manage_cms_pages"],
+    permissions: ["view_cms_pages", "create_cms_pages", "edit_cms_pages"],
     children: [
-      { title: "About Page", href: "/dashboard/cms/about-page", permissions: ["manage_cms_pages"] },
-      { title: "Policies", href: "/dashboard/cms/policies", permissions: ["manage_cms_pages"] },
-      { title: "FAQs", href: "/dashboard/cms/faqs", permissions: ["manage_cms_pages"] },
+      {
+        title: "About Page",
+        href: "/dashboard/cms/about-page",
+        permissions: ["edit_cms_pages"],
+      },
+      {
+        title: "Policies",
+        href: "/dashboard/cms/policies",
+        permissions: ["view_cms_pages", "create_cms_pages", "edit_cms_pages"],
+      },
+      {
+        title: "FAQs",
+        href: "/dashboard/cms/faqs",
+        permissions: ["view_cms_pages", "create_cms_pages", "edit_cms_pages"],
+      },
     ],
   },
   {
     title: "Theme",
     href: "/dashboard/theme",
-    permissions: ["manage_theme"],
+    permissions: ["edit_theme"],
     children: [
-      { title: "Hero", href: "/dashboard/theme/hero", permissions: ["manage_theme"] },
-      { title: "New Arrivals", href: "/dashboard/theme/new-arrivals", permissions: ["manage_theme"] },
-      { title: "Promo Banner", href: "/dashboard/theme/promo-banner", permissions: ["manage_theme"] },
-      { title: "Category Banners", href: "/dashboard/theme/category-banners", permissions: ["manage_theme"] },
-      { title: "Video Section", href: "/dashboard/theme/video-section", permissions: ["manage_theme"] },
+      { title: "Hero", href: "/dashboard/theme/hero", permissions: ["edit_theme"] },
+      { title: "New Arrivals", href: "/dashboard/theme/new-arrivals", permissions: ["edit_theme"] },
+      { title: "Promo Banner", href: "/dashboard/theme/promo-banner", permissions: ["edit_theme"] },
+      { title: "Category Banners", href: "/dashboard/theme/category-banners", permissions: ["edit_theme"] },
+      { title: "Video Section", href: "/dashboard/theme/video-section", permissions: ["edit_theme"] },
     ],
   },
   {
@@ -83,7 +114,11 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
 
 /** Rendered in the sidebar's separate "Account" group, but filtered the same way. */
 export const ACCOUNT_SIDEBAR_ITEMS: SidebarSubItem[] = [
-  { title: "Users", href: "/dashboard/users", permissions: ["manage_staff"] },
+  {
+    title: "Users",
+    href: "/dashboard/users",
+    permissions: ["view_staff", "create_staff", "edit_staff"],
+  },
   { title: "Subscribers", href: "/dashboard/subscribers", permissions: ["manage_settings"] },
   { title: "Settings", href: "/dashboard/settings", permissions: ["manage_settings"] },
 ];

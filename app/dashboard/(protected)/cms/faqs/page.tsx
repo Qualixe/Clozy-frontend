@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { Can } from "@/components/can";
 import { FaqDialog } from "@/components/dashboard/faq-dialog";
 import { FaqsTable } from "@/components/dashboard/faqs-table";
 import { assertDashboardFetchOk, getServerAuthHeaders } from "@/lib/auth-server";
@@ -38,7 +39,9 @@ export default async function DashboardFaqsPage() {
             to reorder.
           </p>
         </div>
-        <FaqDialog />
+        <Can permission="create_cms_pages">
+          <FaqDialog />
+        </Can>
       </div>
 
       <FaqsTable faqs={faqs} />

@@ -240,7 +240,7 @@ export function UserEditForm({ user }: { user: ManagedUser }) {
                   />
                   {group.title}
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-2 pl-2">
                   {group.permissions.map((permission) => (
                     <label
                       key={permission}

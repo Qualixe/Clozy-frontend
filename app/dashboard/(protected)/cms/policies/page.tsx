@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Can } from "@/components/can";
 import { PoliciesTable } from "@/components/dashboard/policies-table";
 import { assertDashboardFetchOk, getServerAuthHeaders } from "@/lib/auth-server";
 import type { PolicySummary } from "@/lib/get-policies";
@@ -37,16 +38,18 @@ export default async function DashboardPoliciesPage() {
             Privacy, terms, and other policy pages shown on your storefront.
           </p>
         </div>
-        <Button
-          size="sm"
-          nativeButton={false}
-          render={
-            <Link href="/dashboard/cms/policies/new">
-              <Plus className="h-4 w-4" />
-              Add Policy
-            </Link>
-          }
-        />
+        <Can permission="create_cms_pages">
+          <Button
+            size="sm"
+            nativeButton={false}
+            render={
+              <Link href="/dashboard/cms/policies/new">
+                <Plus className="h-4 w-4" />
+                Add Policy
+              </Link>
+            }
+          />
+        </Can>
       </div>
 
       <PoliciesTable policies={policies} />

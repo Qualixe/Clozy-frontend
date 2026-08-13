@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Can } from "@/components/can";
 import { useAuth } from "@/lib/auth-context";
 import type { PolicySummary } from "@/lib/get-policies";
 
@@ -106,31 +107,33 @@ export function PoliciesTable({ policies }: { policies: PolicySummary[] }) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`Edit ${policy.title}`}
-                      nativeButton={false}
-                      render={
-                        <Link href={`/dashboard/cms/policies/${policy.id}`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                      }
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-muted-foreground hover:text-destructive"
-                      aria-label={`Delete ${policy.title}`}
-                      onClick={() => {
-                        setDeleteError(null);
-                        setPendingDelete(policy);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Can permission="edit_cms_pages">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Edit ${policy.title}`}
+                        nativeButton={false}
+                        render={
+                          <Link href={`/dashboard/cms/policies/${policy.id}`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label={`Delete ${policy.title}`}
+                        onClick={() => {
+                          setDeleteError(null);
+                          setPendingDelete(policy);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Can>
                 </TableCell>
               </TableRow>
             ))}

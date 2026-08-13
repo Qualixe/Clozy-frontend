@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Can } from "@/components/can";
 import { useAuth } from "@/lib/auth-context";
 
 export type MenuSummary = {
@@ -109,31 +110,33 @@ export function MenusTable({ menus }: { menus: MenuSummary[] }) {
                   {menu.itemCount}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`Edit ${menu.name}`}
-                      nativeButton={false}
-                      render={
-                        <Link href={`/dashboard/content/menus/${menu.id}`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                      }
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-muted-foreground hover:text-destructive"
-                      aria-label={`Delete ${menu.name}`}
-                      onClick={() => {
-                        setDeleteError(null);
-                        setPendingDelete(menu);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Can permission="edit_menus">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Edit ${menu.name}`}
+                        nativeButton={false}
+                        render={
+                          <Link href={`/dashboard/content/menus/${menu.id}`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label={`Delete ${menu.name}`}
+                        onClick={() => {
+                          setDeleteError(null);
+                          setPendingDelete(menu);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Can>
                 </TableCell>
               </TableRow>
             ))}

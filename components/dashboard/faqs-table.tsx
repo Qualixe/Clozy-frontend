@@ -24,14 +24,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Can } from "@/components/can";
 import { FaqDialog } from "@/components/dashboard/faq-dialog";
 import { useAuth } from "@/lib/auth-context";
+import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import type { Faq } from "@/lib/get-faqs";
 
 export function FaqsTable({ faqs }: { faqs: Faq[] }) {
   const router = useRouter();
   const { token } = useAuth();
+  const hasPermission = useAuthStore((s) => s.hasPermission);
+  const canReorder = hasPermission("edit_cms_pages");
   const [pendingDelete, setPendingDelete] = React.useState<Faq | null>(null);
   const [deleting, setDeleting] = React.useState(false);
   const [deleteError, setDeleteError] = React.useState<string | null>(null);
@@ -147,9 +151,10 @@ export function FaqsTable({ faqs }: { faqs: Faq[] }) {
             {items.map((faq) => (
               <TableRow
                 key={faq.id}
-                draggable
+                draggable={canReorder}
                 onDragStart={() => setDraggedId(faq.id)}
                 onDragOver={(e) => {
+                  if (!canReorder) return;
                   e.preventDefault();
                   if (dragOverId !== faq.id) setDragOverId(faq.id);
                 }}
@@ -172,7 +177,9 @@ export function FaqsTable({ faqs }: { faqs: Faq[] }) {
                 )}
               >
                 <TableCell className="text-muted-foreground">
-                  <GripVertical className="h-4 w-4 cursor-grab active:cursor-grabbing" />
+                  {canReorder && (
+                    <GripVertical className="h-4 w-4 cursor-grab active:cursor-grabbing" />
+                  )}
                 </TableCell>
                 <TableCell className="max-w-md truncate font-medium text-foreground">
                   {faq.question}
@@ -183,32 +190,34 @@ export function FaqsTable({ faqs }: { faqs: Faq[] }) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <FaqDialog
-                      faq={faq}
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Edit "${faq.question}"`}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      }
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-muted-foreground hover:text-destructive"
-                      aria-label={`Delete "${faq.question}"`}
-                      onClick={() => {
-                        setDeleteError(null);
-                        setPendingDelete(faq);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Can permission="edit_cms_pages">
+                    <div className="flex items-center justify-end gap-1">
+                      <FaqDialog
+                        faq={faq}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Edit "${faq.question}"`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label={`Delete "${faq.question}"`}
+                        onClick={() => {
+                          setDeleteError(null);
+                          setPendingDelete(faq);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Can>
                 </TableCell>
               </TableRow>
             ))}

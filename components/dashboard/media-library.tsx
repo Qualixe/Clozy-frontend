@@ -16,13 +16,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Can } from "@/components/can";
 import { useAuth } from "@/lib/auth-context";
+import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import type { UploadedMedia } from "@/components/dashboard/image-uploader";
 
 export function MediaLibrary({ media }: { media: UploadedMedia[] }) {
   const router = useRouter();
   const { token } = useAuth();
+  const hasPermission = useAuthStore((s) => s.hasPermission);
+  const canUpload = hasPermission("create_media");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const [uploading, setUploading] = React.useState(false);
@@ -97,56 +101,58 @@ export function MediaLibrary({ media }: { media: UploadedMedia[] }) {
 
   return (
     <div className="space-y-4">
-      <div
-        className={cn(
-          "flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-input p-8 text-center transition-colors",
-          dragOver && "border-primary bg-primary/5"
-        )}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          uploadFiles(e.dataTransfer.files);
-        }}
-      >
-        {uploading ? (
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        ) : (
-          <UploadCloud className="h-6 w-6 text-muted-foreground" />
-        )}
-        <p className="text-sm text-muted-foreground">
-          Drag and drop images here, or{" "}
-          <button
-            type="button"
-            className="font-medium text-foreground underline underline-offset-4"
-            onClick={() => inputRef.current?.click()}
-            disabled={uploading}
-          >
-            browse
-          </button>
-        </p>
-        <p className="text-xs text-muted-foreground">JPG, PNG, WEBP, GIF, or AVIF — up to 8MB</p>
-        {uploadError && <p className="text-xs text-destructive">{uploadError}</p>}
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            if (e.target.files) uploadFiles(e.target.files);
-            e.target.value = "";
+      {canUpload && (
+        <div
+          className={cn(
+            "flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-input p-8 text-center transition-colors",
+            dragOver && "border-primary bg-primary/5"
+          )}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
           }}
-        />
-      </div>
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            uploadFiles(e.dataTransfer.files);
+          }}
+        >
+          {uploading ? (
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          ) : (
+            <UploadCloud className="h-6 w-6 text-muted-foreground" />
+          )}
+          <p className="text-sm text-muted-foreground">
+            Drag and drop images here, or{" "}
+            <button
+              type="button"
+              className="font-medium text-foreground underline underline-offset-4"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+            >
+              browse
+            </button>
+          </p>
+          <p className="text-xs text-muted-foreground">JPG, PNG, WEBP, GIF, or AVIF — up to 8MB</p>
+          {uploadError && <p className="text-xs text-destructive">{uploadError}</p>}
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files) uploadFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
+        </div>
+      )}
 
       {media.length === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">
-          No uploads yet — add your first image above.
+          {canUpload ? "No uploads yet — add your first image above." : "No uploads yet."}
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -182,16 +188,18 @@ export function MediaLibrary({ media }: { media: UploadedMedia[] }) {
                       <Copy className="h-3.5 w-3.5" />
                     )}
                   </Button>
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="secondary"
-                    className="text-destructive hover:text-destructive"
-                    aria-label="Delete"
-                    onClick={() => setPendingDelete(item)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  <Can permission="edit_media">
+                    <Button
+                      type="button"
+                      size="icon-sm"
+                      variant="secondary"
+                      className="text-destructive hover:text-destructive"
+                      aria-label="Delete"
+                      onClick={() => setPendingDelete(item)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </Can>
                 </div>
               </div>
               <p className="truncate text-xs font-medium text-foreground">{item.filename}</p>

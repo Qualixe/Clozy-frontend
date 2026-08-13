@@ -26,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Can } from "@/components/can";
 import { type ManagedUser } from "@/components/dashboard/user-dialog";
 import { useAuth } from "@/lib/auth-context";
 
@@ -135,28 +136,30 @@ export function UsersTable({ users }: { users: ManagedUser[] }) {
                       {u.createdAt ?? "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          nativeButton={false}
-                          render={
-                            <Link href={`/dashboard/users/${u.id}/edit`} aria-label={`Edit ${u.name}`}>
-                              <Pencil className="h-4 w-4" />
-                            </Link>
-                          }
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          disabled={isSelf}
-                          onClick={() => setPendingDelete(u)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <Can permission="edit_staff">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            nativeButton={false}
+                            render={
+                              <Link href={`/dashboard/users/${u.id}/edit`} aria-label={`Edit ${u.name}`}>
+                                <Pencil className="h-4 w-4" />
+                              </Link>
+                            }
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            disabled={isSelf}
+                            onClick={() => setPendingDelete(u)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </Can>
                     </TableCell>
                   </TableRow>
                 );

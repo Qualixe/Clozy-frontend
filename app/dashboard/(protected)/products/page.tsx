@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FolderTree, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Can } from "@/components/can";
 import { ProductsTable } from "@/components/dashboard/products-table";
 import type { Product } from "@/components/product-card";
 
@@ -37,16 +38,18 @@ export default async function DashboardProductsPage() {
               </Link>
             }
           />
-          <Button
-            size="sm"
-            nativeButton={false}
-            render={
-              <Link href="/dashboard/products/new">
-                <Plus className="h-4 w-4" />
-                Add Product
-              </Link>
-            }
-          />
+          <Can permission="create_products">
+            <Button
+              size="sm"
+              nativeButton={false}
+              render={
+                <Link href="/dashboard/products/new">
+                  <Plus className="h-4 w-4" />
+                  Add Product
+                </Link>
+              }
+            />
+          </Can>
         </div>
       </div>
 

@@ -27,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Can } from "@/components/can";
 import { useAuth } from "@/lib/auth-context";
 import { formatCurrency } from "@/lib/currency";
 import type { Product } from "@/components/product-card";
@@ -151,31 +152,33 @@ export function ProductsTable({ products }: { products: Product[] }) {
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`Edit ${product.name}`}
-                      nativeButton={false}
-                      render={
-                        <Link href={`/dashboard/products/${product.id}/edit`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                      }
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-muted-foreground hover:text-destructive"
-                      aria-label={`Delete ${product.name}`}
-                      onClick={() => {
-                        setDeleteError(null);
-                        setPendingDelete(product);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Can permission="edit_products">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Edit ${product.name}`}
+                        nativeButton={false}
+                        render={
+                          <Link href={`/dashboard/products/${product.id}/edit`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label={`Delete ${product.name}`}
+                        onClick={() => {
+                          setDeleteError(null);
+                          setPendingDelete(product);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Can>
                 </TableCell>
               </TableRow>
             ))}

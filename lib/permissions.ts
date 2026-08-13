@@ -1,67 +1,131 @@
 /**
  * Mirrors the backend's role/permission vocabulary exactly — see
- * `backend/database/seeders/RolesAndPermissionsSeeder.php` for the
- * authoritative role → permission mapping. Keep these two lists in sync.
+ * `backend/app/Support/RolePermissions.php` for the authoritative role →
+ * permission mapping. Keep these two lists in sync.
  */
 
 export const ROLES = ["owner", "admin", "staff", "user"] as const;
 export type Role = (typeof ROLES)[number];
 
 export const PERMISSIONS = [
-  "manage_products",
-  "manage_categories",
+  "view_products",
+  "create_products",
+  "edit_products",
+  "view_categories",
+  "create_categories",
+  "edit_categories",
   "view_orders",
   "manage_orders",
-  "manage_discounts",
+  "view_discounts",
+  "create_discounts",
+  "edit_discounts",
   "view_reviews",
-  "manage_reviews",
+  "edit_reviews",
   "view_analytics",
-  "manage_menus",
-  "manage_media",
-  "manage_cms_pages",
-  "manage_theme",
+  "view_menus",
+  "create_menus",
+  "edit_menus",
+  "view_media",
+  "create_media",
+  "edit_media",
+  "view_cms_pages",
+  "create_cms_pages",
+  "edit_cms_pages",
+  "edit_theme",
   "view_sms",
   "manage_sms",
   "manage_settings",
-  "manage_staff",
+  "view_staff",
+  "create_staff",
+  "edit_staff",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
 
 export const PERMISSION_LABELS: Record<Permission, string> = {
-  manage_products: "Manage products",
-  manage_categories: "Manage categories",
+  view_products: "View products",
+  create_products: "Create products",
+  edit_products: "Edit & delete products",
+  view_categories: "View categories",
+  create_categories: "Create categories",
+  edit_categories: "Edit & delete categories",
   view_orders: "View orders",
   manage_orders: "Update order status",
-  manage_discounts: "Manage discounts",
+  view_discounts: "View discounts",
+  create_discounts: "Create discounts",
+  edit_discounts: "Edit & delete discounts",
   view_reviews: "View reviews",
-  manage_reviews: "Moderate reviews",
+  edit_reviews: "Moderate reviews",
   view_analytics: "View analytics",
-  manage_menus: "Manage menus",
-  manage_media: "Manage media library",
-  manage_cms_pages: "Manage About Page, Policies & FAQs",
-  manage_theme: "Manage homepage theme",
+  view_menus: "View menus",
+  create_menus: "Create menus",
+  edit_menus: "Edit & delete menus",
+  view_media: "View media library",
+  create_media: "Upload media",
+  edit_media: "Delete media",
+  view_cms_pages: "View About Page, Policies & FAQs",
+  create_cms_pages: "Create policies & FAQs",
+  edit_cms_pages: "Edit About Page, Policies & FAQs",
+  edit_theme: "Manage homepage theme",
   view_sms: "View SMS logs",
   manage_sms: "Send promotional SMS",
   manage_settings: "Manage store settings",
-  manage_staff: "Manage staff accounts",
+  view_staff: "View staff accounts",
+  create_staff: "Create staff accounts",
+  edit_staff: "Edit & remove staff accounts",
 };
 
 export const PERMISSION_GROUPS: { title: string; permissions: Permission[] }[] = [
-  { title: "Products", permissions: ["manage_products", "manage_categories"] },
+  {
+    title: "Products",
+    permissions: [
+      "view_products",
+      "create_products",
+      "edit_products",
+      "view_categories",
+      "create_categories",
+      "edit_categories",
+    ],
+  },
   { title: "Orders", permissions: ["view_orders", "manage_orders"] },
-  { title: "Discounts", permissions: ["manage_discounts"] },
-  { title: "Reviews", permissions: ["view_reviews", "manage_reviews"] },
+  {
+    title: "Discounts",
+    permissions: ["view_discounts", "create_discounts", "edit_discounts"],
+  },
+  { title: "Reviews", permissions: ["view_reviews", "edit_reviews"] },
   { title: "Analytics", permissions: ["view_analytics"] },
-  { title: "Content", permissions: ["manage_menus", "manage_media", "manage_cms_pages", "manage_theme"] },
+  {
+    title: "Content",
+    permissions: [
+      "view_menus",
+      "create_menus",
+      "edit_menus",
+      "view_media",
+      "create_media",
+      "edit_media",
+      "view_cms_pages",
+      "create_cms_pages",
+      "edit_cms_pages",
+      "edit_theme",
+    ],
+  },
   { title: "SMS", permissions: ["view_sms", "manage_sms"] },
-  { title: "Store", permissions: ["manage_settings", "manage_staff"] },
+  {
+    title: "Store",
+    permissions: ["manage_settings", "view_staff", "create_staff", "edit_staff"],
+  },
 ];
 
 /** Sensible starting checkbox state when a role is picked — mirrors backend's App\Support\RolePermissions. */
 export function defaultPermissionsForRole(role: Role): Permission[] {
   if (role === "admin" || role === "staff") {
-    return PERMISSIONS.filter((p) => p !== "manage_settings" && p !== "manage_staff");
+    return PERMISSIONS.filter(
+      (p) =>
+        p !== "manage_settings" &&
+        p !== "view_staff" &&
+        p !== "create_staff" &&
+        p !== "edit_staff"
+    );
   }
   return [];
 }

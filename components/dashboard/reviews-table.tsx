@@ -228,7 +228,7 @@ export function ReviewsTable({ reviews }: { reviews: Review[] }) {
                 </TableCell>
                 <TableCell>
                   <Can
-                    permission="manage_reviews"
+                    permission="edit_reviews"
                     fallback={
                       <Badge
                         variant="secondary"
@@ -268,7 +268,7 @@ export function ReviewsTable({ reviews }: { reviews: Review[] }) {
                   {review.date}
                 </TableCell>
                 <TableCell>
-                  <Can permission="manage_reviews">
+                  <Can permission="edit_reviews">
                     <Button
                       variant="ghost"
                       size="icon-sm"

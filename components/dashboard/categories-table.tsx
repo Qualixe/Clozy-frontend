@@ -25,13 +25,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Can } from "@/components/can";
 import { CategoryDialog, type Category } from "@/components/dashboard/category-dialog";
 import { useAuth } from "@/lib/auth-context";
+import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 
 export function CategoriesTable({ categories }: { categories: Category[] }) {
   const router = useRouter();
   const { token } = useAuth();
+  const hasPermission = useAuthStore((s) => s.hasPermission);
   const [query, setQuery] = React.useState("");
   const [pendingDelete, setPendingDelete] = React.useState<Category | null>(null);
   const [deleting, setDeleting] = React.useState(false);
@@ -53,8 +56,10 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
   const [reorderError, setReorderError] = React.useState<string | null>(null);
 
   // Drag-and-drop reordering only makes sense against the full, unfiltered
-  // list — row positions in a filtered view don't map cleanly to it.
-  const canReorder = query === "";
+  // list — row positions in a filtered view don't map cleanly to it. Also
+  // requires edit_categories, same as the PUT /categories/reorder route it
+  // persists to.
+  const canReorder = query === "" && hasPermission("edit_categories");
 
   const filtered = items.filter((c) =>
     c.name.toLowerCase().includes(query.toLowerCase())
@@ -145,7 +150,7 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
         {reorderError && (
           <p className="text-sm text-destructive">{reorderError}</p>
         )}
-        {!canReorder && (
+        {!canReorder && hasPermission("edit_categories") && query !== "" && (
           <p className="text-xs text-muted-foreground">
             Clear the search to drag and reorder.
           </p>
@@ -224,32 +229,34 @@ export function CategoriesTable({ categories }: { categories: Category[] }) {
                   {category.productCount}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <CategoryDialog
-                      category={category}
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Edit ${category.name}`}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      }
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-muted-foreground hover:text-destructive"
-                      aria-label={`Delete ${category.name}`}
-                      onClick={() => {
-                        setDeleteError(null);
-                        setPendingDelete(category);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Can permission="edit_categories">
+                    <div className="flex items-center justify-end gap-1">
+                      <CategoryDialog
+                        category={category}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Edit ${category.name}`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label={`Delete ${category.name}`}
+                        onClick={() => {
+                          setDeleteError(null);
+                          setPendingDelete(category);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Can>
                 </TableCell>
               </TableRow>
             ))}
