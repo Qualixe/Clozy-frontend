@@ -1,6 +1,13 @@
 export type StoreSettings = {
   insideDhakaRate: number;
   outsideDhakaRate: number;
+  codEnabled: boolean;
+  bkashGatewayEnabled: boolean;
+  bkashShippingAdvanceEnabled: boolean;
+  bkashPartialAdvanceEnabled: boolean;
+  bkashPartialAdvanceMode: "percentage" | "fixed";
+  bkashPartialAdvancePercent: number;
+  bkashPartialAdvanceFixedAmount: number | null;
   facebookPixelId: string | null;
   googleAnalyticsId: string | null;
   googleTagManagerId: string | null;
@@ -50,7 +57,6 @@ export type AdminStoreSettings = StoreSettings & {
   pathaoUsername: string | null;
   pathaoPassword: string | null;
   pathaoStoreId: string | null;
-  bkashGatewayEnabled: boolean;
   bkashBaseUrl: string | null;
   bkashAppKey: string | null;
   bkashAppSecret: string | null;

@@ -1,5 +1,10 @@
 export type OrderStatus = "Processing" | "Fulfilled" | "Cancelled";
-export type PaymentMethod = "COD" | "bKash" | "Cash";
+export type PaymentMethod =
+  | "COD"
+  | "bKash"
+  | "Cash"
+  | "bKash (Shipping Advance)"
+  | "bKash (Advance Payment)";
 
 export type Order = {
   id: string;
@@ -31,6 +36,11 @@ export type OrderDetail = Order & {
   shippingCost: number;
   discountCode: string | null;
   discountAmount: number;
+  /** How much was already charged online via bKash, for the two hybrid
+   * "pay part now, rest on delivery" methods. Null for COD/Cash/full bKash. */
+  advanceAmount: number | null;
+  /** What's left to collect on delivery — the courier's COD amount. */
+  codAmountDue: number;
   bkashNumber: string | null;
   courier: "steadfast" | "pathao" | null;
   courierConsignmentId: string | null;

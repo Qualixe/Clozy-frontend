@@ -31,6 +31,13 @@ export default async function SiteLayout({
     getSettings().catch(() => ({
       insideDhakaRate: 3,
       outsideDhakaRate: 6,
+      codEnabled: true,
+      bkashGatewayEnabled: false,
+      bkashShippingAdvanceEnabled: false,
+      bkashPartialAdvanceEnabled: false,
+      bkashPartialAdvanceMode: "percentage" as const,
+      bkashPartialAdvancePercent: 20,
+      bkashPartialAdvanceFixedAmount: null,
       facebookPixelId: null,
       googleAnalyticsId: null,
       googleTagManagerId: null,

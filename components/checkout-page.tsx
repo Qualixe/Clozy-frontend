@@ -3,9 +3,19 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, ShieldCheck, Copy, Check, AlertTriangle } from "lucide-react";
+import {
+  CheckCircle2,
+  ShieldCheck,
+  Copy,
+  Check,
+  AlertTriangle,
+  HandCoins,
+  Smartphone,
+  type LucideIcon,
+} from "lucide-react";
 
 import { formatCurrency } from "@/lib/currency";
+import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,22 +37,23 @@ import districts from "@/data/districts.json";
 // Form state
 // ---------------------------------------------------------------------------
 
+type PaymentMethod = "cod" | "bkash" | "bkash_shipping_advance" | "bkash_partial_advance";
+
 type FormState = {
   name: string;
   phone: string;
   email: string;
   address: string;
   district: string;
-  paymentMethod: "cod" | "bkash";
+  paymentMethod: PaymentMethod;
 };
 
-const INITIAL_FORM: FormState = {
+const INITIAL_FORM: Omit<FormState, "paymentMethod"> = {
   name: "",
   phone: "",
   email: "",
   address: "",
   district: "",
-  paymentMethod: "cod",
 };
 
 type AppliedDiscount = {
@@ -82,12 +93,40 @@ function validate(form: FormState, phoneVerified: boolean) {
 export function CheckoutPage({
   insideDhakaRate = 3,
   outsideDhakaRate = 6,
+  codEnabled = true,
+  bkashGatewayEnabled = false,
+  bkashShippingAdvanceEnabled = false,
+  bkashPartialAdvanceEnabled = false,
+  bkashPartialAdvanceMode = "percentage",
+  bkashPartialAdvancePercent = 20,
+  bkashPartialAdvanceFixedAmount = null,
 }: {
   insideDhakaRate?: number;
   outsideDhakaRate?: number;
+  codEnabled?: boolean;
+  bkashGatewayEnabled?: boolean;
+  bkashShippingAdvanceEnabled?: boolean;
+  bkashPartialAdvanceEnabled?: boolean;
+  bkashPartialAdvanceMode?: "percentage" | "fixed";
+  bkashPartialAdvancePercent?: number;
+  bkashPartialAdvanceFixedAmount?: number | null;
 } = {}) {
   const { items, clear } = useCart();
-  const [form, setForm] = React.useState<FormState>(INITIAL_FORM);
+  // First enabled method wins as the default — cod is usually on, but a
+  // store that's gone bKash-only shouldn't default to an unavailable option.
+  const defaultPaymentMethod: PaymentMethod = codEnabled
+    ? "cod"
+    : bkashGatewayEnabled
+      ? "bkash"
+      : bkashShippingAdvanceEnabled
+        ? "bkash_shipping_advance"
+        : bkashPartialAdvanceEnabled
+          ? "bkash_partial_advance"
+          : "cod";
+  const [form, setForm] = React.useState<FormState>(() => ({
+    ...INITIAL_FORM,
+    paymentMethod: defaultPaymentMethod,
+  }));
   const [errors, setErrors] = React.useState<
     Partial<Record<keyof FormState, string>>
   >({});
@@ -180,6 +219,109 @@ export function CheckoutPage({
   const effectiveShipping = appliedDiscount?.freeShipping ? 0 : shippingCost;
   const discountAmount = appliedDiscount?.amountOff ?? 0;
   const total = Math.max(0, subtotal + effectiveShipping - discountAmount);
+
+  // Previews only — the backend recomputes these authoritatively at order
+  // creation, so a stale/tampered value here can't change what's charged.
+  const shippingAdvanceAmount = Math.round(effectiveShipping * 100) / 100;
+  const partialAdvanceAmount =
+    bkashPartialAdvanceMode === "fixed"
+      ? Math.min(bkashPartialAdvanceFixedAmount ?? 0, total)
+      : Math.round(total * bkashPartialAdvancePercent) / 100;
+
+  const advanceAmountForMethod: Partial<Record<PaymentMethod, number>> = {
+    bkash: total,
+    bkash_shipping_advance: shippingAdvanceAmount,
+    bkash_partial_advance: partialAdvanceAmount,
+  };
+  const currentAdvanceAmount = advanceAmountForMethod[form.paymentMethod] ?? 0;
+  const codDueNow = Math.max(0, total - currentAdvanceAmount);
+  const isHybridMethod =
+    form.paymentMethod === "bkash_shipping_advance" ||
+    form.paymentMethod === "bkash_partial_advance";
+
+  // All three cash-collected-on-arrival methods present as "Cash on
+  // Delivery" — the badge is what actually distinguishes them, since from
+  // the customer's perspective they're still paying the rest in cash.
+  const partialAdvanceLabel =
+    bkashPartialAdvanceMode === "percentage"
+      ? `${bkashPartialAdvancePercent}%`
+      : formatCurrency(partialAdvanceAmount);
+
+  const paymentOptions: {
+    value: PaymentMethod;
+    title: string;
+    description: string;
+    icon: LucideIcon;
+    iconSrc?: string;
+    tint: "amber" | "pink";
+  }[] = [
+    ...(codEnabled
+      ? [
+          {
+            value: "cod" as const,
+            title: "Cash on Delivery",
+            description: "Pay with cash when your order arrives.",
+            icon: HandCoins,
+            iconSrc: "/cod.svg",
+            tint: "amber" as const,
+          },
+        ]
+      : []),
+    ...(bkashGatewayEnabled
+      ? [
+          {
+            value: "bkash" as const,
+            title: "bKash",
+            description: "Pay instantly with your bKash account.",
+            icon: Smartphone,
+            iconSrc: "/bkash-icon.png",
+            tint: "pink" as const,
+          },
+        ]
+      : []),
+    ...(bkashShippingAdvanceEnabled
+      ? [
+          {
+            value: "bkash_shipping_advance" as const,
+            title: "COD + Shipping Fee",
+            description: "Pay shipping via bKash, rest on delivery.",
+            icon: HandCoins,
+            iconSrc: "/cod.svg",
+            tint: "amber" as const,
+          },
+        ]
+      : []),
+    ...(bkashPartialAdvanceEnabled
+      ? [
+          {
+            value: "bkash_partial_advance" as const,
+            title: `COD + ${partialAdvanceLabel} Advance`,
+            description: `Pay ${partialAdvanceLabel} via bKash, rest on delivery.`,
+            icon: HandCoins,
+            iconSrc: "/cod.svg",
+            tint: "amber" as const,
+          },
+        ]
+      : []),
+  ];
+
+  const TINT_STYLES: Record<
+    "amber" | "pink",
+    { icon: string; border: string; bg: string; check: string }
+  > = {
+    amber: {
+      icon: "bg-amber-400 text-white",
+      border: "has-data-checked:border-amber-400",
+      bg: "has-data-checked:bg-amber-50 dark:has-data-checked:bg-amber-400/10",
+      check: "bg-amber-400",
+    },
+    pink: {
+      icon: "bg-[#E2136E] text-white",
+      border: "has-data-checked:border-[#E2136E]",
+      bg: "has-data-checked:bg-pink-50 dark:has-data-checked:bg-[#E2136E]/10",
+      check: "bg-[#E2136E]",
+    },
+  };
 
   async function applyDiscount() {
     if (!discountCode.trim()) return;
@@ -274,7 +416,11 @@ export function CheckoutPage({
 
       const order = await res.json();
 
-      if (form.paymentMethod === "bkash") {
+      // The backend decides authoritatively whether this order has
+      // something due online right now — true for full bKash, and for the
+      // two hybrid methods only when their computed advance is > 0 (e.g. a
+      // free-shipping discount can zero out the shipping-advance amount).
+      if (order.paymentStatus === "pending") {
         const paymentRes = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/bkash/create-payment`,
           { method: "POST" }
@@ -515,7 +661,7 @@ export function CheckoutPage({
                       if (value !== null) updateField("district", value);
                     }}
                   >
-                    <SelectTrigger id="district" className="w-full">
+                    <SelectTrigger id="district" className="h-(--control-height) w-full">
                       <SelectValue placeholder="Select district" />
                     </SelectTrigger>
                     <SelectContent>
@@ -550,47 +696,98 @@ export function CheckoutPage({
             </section>
 
 
-            <section className="h-fit space-y-8 rounded-xl border border-border p-5 mt-4">
+            <section className="h-fit space-y-5 rounded-xl border border-border p-5 mt-4">
               <h2 className="text-sm font-semibold text-foreground">
                 Payment Method
               </h2>
-              <RadioGroup
-                className="mt-4 sm:grid-cols-2"
-                value={form.paymentMethod}
-                onValueChange={(value) =>
-                  updateField("paymentMethod", value as FormState["paymentMethod"])
-                }
-              >
-                <Label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3 has-data-checked:border-foreground">
-                  <RadioGroupItem value="cod" />
-                  <span className="flex-1">
-                    <span className="block text-sm font-medium text-foreground">
-                      Cash on Delivery
-                    </span>
-                    <span className="block text-xs text-muted-foreground">
-                      Pay with cash when your order arrives.
-                    </span>
-                  </span>
-                </Label>
-
-                <Label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3 has-data-checked:border-foreground">
-                  <RadioGroupItem value="bkash" />
-                  <span className="flex-1">
-                    <span className="block text-sm font-medium text-foreground">
-                      bKash
-                    </span>
-                    <span className="block text-xs text-muted-foreground">
-                      Pay instantly with your bKash account.
-                    </span>
-                  </span>
-                </Label>
-              </RadioGroup>
-
-              {form.paymentMethod === "bkash" && (
-                <p className="mt-3 text-xs text-muted-foreground">
-                  You'll be redirected to bKash to complete your payment
-                  securely after placing the order.
+              {paymentOptions.length === 0 ? (
+                <p className="text-sm text-destructive">
+                  No payment methods are available right now. Please contact
+                  us to place your order.
                 </p>
+              ) : (
+                <>
+                  <RadioGroup
+                    className="sm:grid-cols-2"
+                    value={form.paymentMethod}
+                    onValueChange={(value) =>
+                      updateField("paymentMethod", value as FormState["paymentMethod"])
+                    }
+                  >
+                    {paymentOptions.map((option) => {
+                      const tint = TINT_STYLES[option.tint];
+                      return (
+                        <Label
+                          key={option.value}
+                          className={cn(
+                            "group relative flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-border bg-background p-3.5 transition-all hover:border-foreground/25",
+                            tint.border,
+                            tint.bg
+                          )}
+                        >
+                          <RadioGroupItem value={option.value} className="sr-only" />
+                          {option.iconSrc ? (
+                            <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl">
+                              <Image
+                                src={option.iconSrc}
+                                alt=""
+                                fill
+                                sizes="44px"
+                                className="object-contain"
+                              />
+                            </span>
+                          ) : (
+                            <span
+                              className={cn(
+                                "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+                                tint.icon
+                              )}
+                            >
+                              <option.icon className="h-5 w-5" />
+                            </span>
+                          )}
+                          <span className="min-w-0 flex-1 space-y-0.5">
+                            <span className="block text-sm font-semibold text-foreground">
+                              {option.title}
+                            </span>
+                            <span className="block text-xs leading-relaxed text-muted-foreground">
+                              {option.description}
+                            </span>
+                          </span>
+                          <span
+                            className={cn(
+                              "absolute -top-2 -right-2 flex h-5 w-5 scale-75 items-center justify-center rounded-full text-white opacity-0 shadow-sm transition-all group-has-data-checked:scale-100 group-has-data-checked:opacity-100",
+                              tint.check
+                            )}
+                          >
+                            <Check className="h-3 w-3" strokeWidth={3} />
+                          </span>
+                        </Label>
+                      );
+                    })}
+                  </RadioGroup>
+
+                  {form.paymentMethod === "bkash" && (
+                    <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+                      You'll be redirected to bKash to complete your payment
+                      securely after placing the order.
+                    </p>
+                  )}
+
+                  {isHybridMethod && (
+                    <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+                      You'll be redirected to bKash to pay{" "}
+                      <span className="font-medium text-foreground">
+                        {formatCurrency(currentAdvanceAmount)}
+                      </span>{" "}
+                      now — the remaining{" "}
+                      <span className="font-medium text-foreground">
+                        {formatCurrency(codDueNow)}
+                      </span>{" "}
+                      is due in cash when your order arrives.
+                    </p>
+                  )}
+                </>
               )}
             </section>
           </div>
@@ -726,6 +923,21 @@ export function CheckoutPage({
               <span>Total</span>
               <span>{formatCurrency(total)}</span>
             </div>
+
+            {isHybridMethod && currentAdvanceAmount > 0 && (
+              <div className="mt-2 space-y-1 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Pay now (bKash)</span>
+                  <span className="text-foreground">
+                    {formatCurrency(currentAdvanceAmount)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Due on delivery</span>
+                  <span className="text-foreground">{formatCurrency(codDueNow)}</span>
+                </div>
+              </div>
+            )}
 
             {submitError && (
               <p className="mt-3 text-sm text-destructive">{submitError}</p>

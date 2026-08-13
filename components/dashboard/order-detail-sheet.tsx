@@ -413,6 +413,22 @@ export function OrderDetailSheet({
                 <span className="text-foreground">Total</span>
                 <span className="text-foreground">{formatCurrency(detail.total)}</span>
               </div>
+              {detail.advanceAmount !== null && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Paid via bKash</span>
+                    <span className="text-foreground">
+                      {formatCurrency(detail.advanceAmount)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Collect on delivery</span>
+                    <span className="text-foreground">
+                      {formatCurrency(detail.codAmountDue)}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -2,7 +2,19 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Check, ImageOff, X } from "lucide-react";
+import {
+  Check,
+  CreditCard,
+  ImageOff,
+  Mail,
+  MessageSquare,
+  Palette,
+  Sparkles,
+  Store,
+  Target,
+  Truck,
+  X,
+} from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +37,7 @@ import {
 } from "@/components/ui/tabs";
 import { MediaPickerDialog } from "@/components/dashboard/media-picker-dialog";
 import { useAuth } from "@/lib/auth-context";
+import { cn } from "@/lib/utils";
 import type { AdminStoreSettings } from "@/lib/get-settings";
 
 type SettingsState = {
@@ -41,6 +54,11 @@ type SettingsState = {
   bkashAppSecret: string;
   bkashUsername: string;
   bkashPassword: string;
+  bkashShippingAdvanceEnabled: boolean;
+  bkashPartialAdvanceEnabled: boolean;
+  bkashPartialAdvanceMode: "percentage" | "fixed";
+  bkashPartialAdvancePercent: number;
+  bkashPartialAdvanceFixedAmount: string;
   facebookPixelId: string;
   googleAnalyticsId: string;
   googleTagManagerId: string;
@@ -98,18 +116,13 @@ const DEFAULT_CANCELLED_TEMPLATE =
 
 const INITIAL_SETTINGS: Pick<
   SettingsState,
-  | "storeName"
-  | "supportEmail"
-  | "supportPhone"
-  | "storeDescription"
-  | "codEnabled"
+  "storeName" | "supportEmail" | "supportPhone" | "storeDescription"
 > = {
   storeName: "Clozy",
   supportEmail: "hello@clozy.com",
   supportPhone: "+880 1234 567890",
   storeDescription:
     "Considered essentials, made to last. Designed in-house, shipped worldwide.",
-  codEnabled: true,
 };
 
 export function SettingsForm({
@@ -127,10 +140,14 @@ export function SettingsForm({
       ? (activeTab as (typeof TAB_VALUES)[number])
       : "general"
   );
+  const [paymentSubTab, setPaymentSubTab] = React.useState<"method" | "credential">(
+    "method"
+  );
   const [settings, setSettings] = React.useState<SettingsState>({
     ...INITIAL_SETTINGS,
     insideDhakaRate: initialSettings.insideDhakaRate ?? 3,
     outsideDhakaRate: initialSettings.outsideDhakaRate ?? 6,
+    codEnabled: initialSettings.codEnabled ?? true,
     facebookPixelId: initialSettings.facebookPixelId ?? "",
     googleAnalyticsId: initialSettings.googleAnalyticsId ?? "",
     googleTagManagerId: initialSettings.googleTagManagerId ?? "",
@@ -161,6 +178,14 @@ export function SettingsForm({
     bkashAppSecret: initialSettings.bkashAppSecret ?? "",
     bkashUsername: initialSettings.bkashUsername ?? "",
     bkashPassword: initialSettings.bkashPassword ?? "",
+    bkashShippingAdvanceEnabled: initialSettings.bkashShippingAdvanceEnabled,
+    bkashPartialAdvanceEnabled: initialSettings.bkashPartialAdvanceEnabled,
+    bkashPartialAdvanceMode: initialSettings.bkashPartialAdvanceMode ?? "percentage",
+    bkashPartialAdvancePercent: initialSettings.bkashPartialAdvancePercent ?? 20,
+    bkashPartialAdvanceFixedAmount:
+      initialSettings.bkashPartialAdvanceFixedAmount != null
+        ? String(initialSettings.bkashPartialAdvanceFixedAmount)
+        : "",
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
@@ -228,8 +253,8 @@ export function SettingsForm({
     setSaveError(null);
 
     try {
-      // Store name/description/payment toggles are still local-only — no
-      // backend field exists for them yet.
+      // Store name/description are still local-only — no backend field
+      // exists for them yet.
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
         method: "PUT",
         headers: {
@@ -239,6 +264,7 @@ export function SettingsForm({
         body: JSON.stringify({
           insideDhakaRate: settings.insideDhakaRate,
           outsideDhakaRate: settings.outsideDhakaRate,
+          codEnabled: settings.codEnabled,
           facebookPixelId: settings.facebookPixelId || null,
           googleAnalyticsId: settings.googleAnalyticsId || null,
           googleTagManagerId: settings.googleTagManagerId || null,
@@ -267,6 +293,13 @@ export function SettingsForm({
           bkashAppSecret: settings.bkashAppSecret || null,
           bkashUsername: settings.bkashUsername || null,
           bkashPassword: settings.bkashPassword || null,
+          bkashShippingAdvanceEnabled: settings.bkashShippingAdvanceEnabled,
+          bkashPartialAdvanceEnabled: settings.bkashPartialAdvanceEnabled,
+          bkashPartialAdvanceMode: settings.bkashPartialAdvanceMode,
+          bkashPartialAdvancePercent: settings.bkashPartialAdvancePercent,
+          bkashPartialAdvanceFixedAmount: settings.bkashPartialAdvanceFixedAmount
+            ? Number(settings.bkashPartialAdvanceFixedAmount)
+            : null,
           anthropicApiKey: settings.anthropicApiKey || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
@@ -310,14 +343,38 @@ export function SettingsForm({
         className="flex-col gap-6 sm:flex-row sm:items-start"
       >
         <TabsList className="w-full shrink-0 sm:w-48">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="branding">Branding</TabsTrigger>
-          <TabsTrigger value="shipping">Shipping</TabsTrigger>
-          <TabsTrigger value="payment">Payment</TabsTrigger>
-          <TabsTrigger value="pixels">Pixels</TabsTrigger>
-          <TabsTrigger value="sms">SMS</TabsTrigger>
-          <TabsTrigger value="email">Email</TabsTrigger>
-          <TabsTrigger value="ai">AI</TabsTrigger>
+          <TabsTrigger value="general">
+            <Store className="h-4 w-4" />
+            General
+          </TabsTrigger>
+          <TabsTrigger value="branding">
+            <Palette className="h-4 w-4" />
+            Branding
+          </TabsTrigger>
+          <TabsTrigger value="shipping">
+            <Truck className="h-4 w-4" />
+            Shipping
+          </TabsTrigger>
+          <TabsTrigger value="payment">
+            <CreditCard className="h-4 w-4" />
+            Payment
+          </TabsTrigger>
+          <TabsTrigger value="pixels">
+            <Target className="h-4 w-4" />
+            Pixels
+          </TabsTrigger>
+          <TabsTrigger value="sms">
+            <MessageSquare className="h-4 w-4" />
+            SMS
+          </TabsTrigger>
+          <TabsTrigger value="email">
+            <Mail className="h-4 w-4" />
+            Email
+          </TabsTrigger>
+          <TabsTrigger value="ai">
+            <Sparkles className="h-4 w-4" />
+            AI
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="max-w-xl space-y-5">
@@ -749,98 +806,248 @@ export function SettingsForm({
         </TabsContent>
 
         <TabsContent value="payment" className="max-w-xl space-y-5">
-          <div className="flex items-center justify-between rounded-lg border border-border p-4">
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                Cash on Delivery
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Let customers pay in cash when their order arrives.
-              </p>
-            </div>
-            <Switch
-              checked={settings.codEnabled}
-              onCheckedChange={(checked) => update("codEnabled", checked)}
-            />
+          {/* A plain segmented control rather than a nested <Tabs> — the
+              shared Tabs primitive hardcodes its group name to "tabs", so a
+              second one nested inside the outer (vertical) Settings Tabs
+              would inherit its vertical/stacked styling instead of staying
+              horizontal. */}
+          <div className="inline-flex w-fit items-center gap-1 rounded-lg bg-muted p-1 text-muted-foreground">
+            {(
+              [
+                { value: "method", label: "Payment Method" },
+                { value: "credential", label: "Payment Credential" },
+              ] as const
+            ).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setPaymentSubTab(option.value)}
+                className={cn(
+                  "rounded-md px-3.5 py-1.5 text-sm font-medium whitespace-nowrap transition-all",
+                  paymentSubTab === option.value
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-foreground/60 hover:text-foreground"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
 
-          <div className="rounded-lg border border-border p-4">
-            <div className="flex items-center justify-between">
+          {paymentSubTab === "method" && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between rounded-lg border border-border p-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    Cash on Delivery
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Let customers pay in cash when their order arrives.
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.codEnabled}
+                  onCheckedChange={(checked) => update("codEnabled", checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg border border-border p-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    bKash Payment Gateway
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Customers pay through bKash&apos;s own hosted checkout
+                    page — no manual number collection needed. Set up its API
+                    credentials under Payment Credential.
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.bkashGatewayEnabled}
+                  onCheckedChange={(checked) => update("bkashGatewayEnabled", checked)}
+                />
+              </div>
+
+              <div className="rounded-lg border border-border p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      Pay Shipping Fee via bKash
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Customer pays just the shipping fee via bKash at
+                      checkout, then pays the rest in cash on delivery.
+                      {!settings.bkashGatewayEnabled &&
+                        " Requires the bKash Payment Gateway to be enabled."}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.bkashShippingAdvanceEnabled}
+                    disabled={!settings.bkashGatewayEnabled}
+                    onCheckedChange={(checked) =>
+                      update("bkashShippingAdvanceEnabled", checked)
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-border p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      Advance Payment via bKash
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Customer pays a set percentage or amount via bKash at
+                      checkout, then pays the rest in cash on delivery.
+                      {!settings.bkashGatewayEnabled &&
+                        " Requires the bKash Payment Gateway to be enabled."}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.bkashPartialAdvanceEnabled}
+                    disabled={!settings.bkashGatewayEnabled}
+                    onCheckedChange={(checked) =>
+                      update("bkashPartialAdvanceEnabled", checked)
+                    }
+                  />
+                </div>
+
+                {settings.bkashPartialAdvanceEnabled && (
+                  <>
+                    <Separator className="my-4" />
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="bkashPartialAdvanceMode">Advance amount</Label>
+                        <Select
+                          value={settings.bkashPartialAdvanceMode}
+                          onValueChange={(value) => {
+                            if (value) update("bkashPartialAdvanceMode", value as "percentage" | "fixed");
+                          }}
+                        >
+                          <SelectTrigger id="bkashPartialAdvanceMode" className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="percentage">Percentage of order total</SelectItem>
+                            <SelectItem value="fixed">Fixed amount (৳)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {settings.bkashPartialAdvanceMode === "percentage" ? (
+                        <div className="space-y-1.5">
+                          <Label htmlFor="bkashPartialAdvancePercent">Percent (%)</Label>
+                          <Input
+                            id="bkashPartialAdvancePercent"
+                            type="number"
+                            min={0}
+                            max={100}
+                            step="0.01"
+                            value={settings.bkashPartialAdvancePercent}
+                            onChange={(e) =>
+                              update("bkashPartialAdvancePercent", Number(e.target.value))
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <Label htmlFor="bkashPartialAdvanceFixedAmount">Amount (৳)</Label>
+                          <Input
+                            id="bkashPartialAdvanceFixedAmount"
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            value={settings.bkashPartialAdvanceFixedAmount}
+                            onChange={(e) =>
+                              update("bkashPartialAdvanceFixedAmount", e.target.value)
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {settings.bkashPartialAdvanceMode === "percentage"
+                        ? "Charged upfront via bKash; if it exceeds the order total, the full total is charged instead."
+                        : "Charged upfront via bKash; capped at the order total for smaller orders."}
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {paymentSubTab === "credential" && (
+            <div className="rounded-lg border border-border p-4">
               <div>
                 <p className="text-sm font-medium text-foreground">
                   bKash Payment Gateway
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Customers pay through bKash&apos;s own hosted checkout page
-                  — no manual number collection needed.
+                  {settings.bkashGatewayEnabled
+                    ? "Currently enabled — turn it off under Payment Method if you need to take it offline."
+                    : "Currently disabled — enable it under Payment Method once these credentials are set."}
                 </p>
               </div>
-              <Switch
-                checked={settings.bkashGatewayEnabled}
-                onCheckedChange={(checked) => update("bkashGatewayEnabled", checked)}
-              />
-            </div>
 
-            {settings.bkashGatewayEnabled && (
-              <>
-                <Separator className="my-4" />
-                <div className="space-y-1.5">
-                  <Label htmlFor="bkashBaseUrl">API Base URL</Label>
-                  <Input
-                    id="bkashBaseUrl"
-                    placeholder="https://tokenized.sandbox.bka.sh/v1.2.0-beta"
-                    value={settings.bkashBaseUrl}
-                    onChange={(e) => update("bkashBaseUrl", e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Sandbox by default — switch to the production URL when
-                    you're ready to go live.
-                  </p>
-                </div>
-                <div className="mt-4 grid gap-5 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bkashAppKey">App Key</Label>
-                    <Input
-                      id="bkashAppKey"
-                      type="password"
-                      value={settings.bkashAppKey}
-                      onChange={(e) => update("bkashAppKey", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bkashAppSecret">App Secret</Label>
-                    <Input
-                      id="bkashAppSecret"
-                      type="password"
-                      value={settings.bkashAppSecret}
-                      onChange={(e) => update("bkashAppSecret", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bkashUsername">Username</Label>
-                    <Input
-                      id="bkashUsername"
-                      value={settings.bkashUsername}
-                      onChange={(e) => update("bkashUsername", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bkashPassword">Password</Label>
-                    <Input
-                      id="bkashPassword"
-                      type="password"
-                      value={settings.bkashPassword}
-                      onChange={(e) => update("bkashPassword", e.target.value)}
-                    />
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Found in your bKash merchant/developer portal, under API
-                  credentials.
+              <Separator className="my-4" />
+
+              <div className="space-y-1.5">
+                <Label htmlFor="bkashBaseUrl">API Base URL</Label>
+                <Input
+                  id="bkashBaseUrl"
+                  placeholder="https://tokenized.sandbox.bka.sh/v1.2.0-beta"
+                  value={settings.bkashBaseUrl}
+                  onChange={(e) => update("bkashBaseUrl", e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Sandbox by default — switch to the production URL when
+                  you're ready to go live.
                 </p>
-              </>
-            )}
-          </div>
+              </div>
+              <div className="mt-4 grid gap-5 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="bkashAppKey">App Key</Label>
+                  <Input
+                    id="bkashAppKey"
+                    type="password"
+                    value={settings.bkashAppKey}
+                    onChange={(e) => update("bkashAppKey", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="bkashAppSecret">App Secret</Label>
+                  <Input
+                    id="bkashAppSecret"
+                    type="password"
+                    value={settings.bkashAppSecret}
+                    onChange={(e) => update("bkashAppSecret", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="bkashUsername">Username</Label>
+                  <Input
+                    id="bkashUsername"
+                    value={settings.bkashUsername}
+                    onChange={(e) => update("bkashUsername", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="bkashPassword">Password</Label>
+                  <Input
+                    id="bkashPassword"
+                    type="password"
+                    value={settings.bkashPassword}
+                    onChange={(e) => update("bkashPassword", e.target.value)}
+                  />
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Found in your bKash merchant/developer portal, under API
+                credentials.
+              </p>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="pixels" className="max-w-xl space-y-5">
