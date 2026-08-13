@@ -146,6 +146,23 @@
   }
 }
 
+/*
+ * Generic ambient drift for decorative background blobs (404 page, etc).
+ * Each instance sets its own --drift-x/--drift-y/--drift-scale so one
+ * keyframe can drive many differently-shaped paths instead of defining a
+ * named keyframe per element.
+ */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(var(--drift-x, 24px), var(--drift-y, -24px), 0)
+      scale(var(--drift-scale, 1.06));
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
