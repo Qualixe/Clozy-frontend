@@ -95,19 +95,6 @@ export function NotFoundScene() {
         />
       </div>
 
-      {/* Brand mark */}
-      <Link
-        href="/"
-        className="animate-in fade-in slide-in-from-top-3 fill-mode-both relative z-10 mb-10 flex items-center gap-2 duration-700"
-      >
-        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-          C
-        </span>
-        <span className="text-lg font-semibold tracking-tight text-foreground">
-          Clozy
-        </span>
-      </Link>
-
       {/* Giant numeral */}
       <div
         className="animate-in fade-in zoom-in-95 fill-mode-both relative z-10 select-none text-center leading-none font-black tracking-tighter delay-100 duration-700"
