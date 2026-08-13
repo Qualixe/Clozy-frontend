@@ -30,8 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
 import districts from "@/data/districts.json";
+import type { Order, OrderDetail } from "@/data/orders";
 
 // ---------------------------------------------------------------------------
 // Form state
@@ -112,6 +114,7 @@ export function CheckoutPage({
   bkashPartialAdvanceFixedAmount?: number | null;
 } = {}) {
   const { items, clear } = useCart();
+  const { user, token, ready } = useAuth();
   // First enabled method wins as the default — cod is usually on, but a
   // store that's gone bKash-only shouldn't default to an unavailable option.
   const defaultPaymentMethod: PaymentMethod = codEnabled
@@ -160,6 +163,47 @@ export function CheckoutPage({
   const [verifyingOtp, setVerifyingOtp] = React.useState(false);
   const [otpError, setOtpError] = React.useState<string | null>(null);
   const phoneVerified = verifiedPhone !== null && verifiedPhone === form.phone.trim();
+
+  // Auto-fill for a logged-in customer: name/email come straight off the
+  // account, phone/address/district (not stored on the account itself —
+  // see auth-context's AuthUser shape) come from their most recent order,
+  // if they have one. Only ever fills fields the customer hasn't already
+  // typed into, and only runs once per visit.
+  const autofilledRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!ready || !user || !token || autofilledRef.current) return;
+    autofilledRef.current = true;
+
+    setForm((f) => ({
+      ...f,
+      name: f.name || user.name,
+      email: f.email || user.email,
+    }));
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/account/orders`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((orders: Order[] | null) => {
+        const mostRecent = orders?.[0];
+        if (!mostRecent) return null;
+        return fetch(`${process.env.NEXT_PUBLIC_API_URL}/account/orders/${mostRecent.id}`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+        }).then((res) => (res.ok ? (res.json() as Promise<OrderDetail>) : null));
+      })
+      .then((detail) => {
+        if (!detail) return;
+        setForm((f) => ({
+          ...f,
+          phone: f.phone || detail.phone || "",
+          address: f.address || detail.address || "",
+          district: f.district || detail.district || "",
+        }));
+      })
+      .catch(() => {
+        // Best-effort — the customer can still fill the form in by hand.
+      });
+  }, [ready, user, token]);
 
   async function sendOtp() {
     const phone = form.phone.trim();
@@ -223,10 +267,17 @@ export function CheckoutPage({
   // Previews only — the backend recomputes these authoritatively at order
   // creation, so a stale/tampered value here can't change what's charged.
   const shippingAdvanceAmount = Math.round(effectiveShipping * 100) / 100;
-  const partialAdvanceAmount =
+  // The advance is the full shipping fee plus a portion of the product
+  // price — not a percentage of the whole order — so shipping is always
+  // covered upfront and the rest of the product price is COD.
+  const partialAdvanceProductPortion =
     bkashPartialAdvanceMode === "fixed"
-      ? Math.min(bkashPartialAdvanceFixedAmount ?? 0, total)
-      : Math.round(total * bkashPartialAdvancePercent) / 100;
+      ? (bkashPartialAdvanceFixedAmount ?? 0)
+      : Math.round(subtotal * bkashPartialAdvancePercent) / 100;
+  const partialAdvanceAmount = Math.min(
+    effectiveShipping + partialAdvanceProductPortion,
+    total
+  );
 
   const advanceAmountForMethod: Partial<Record<PaymentMethod, number>> = {
     bkash: total,
@@ -245,7 +296,11 @@ export function CheckoutPage({
   const partialAdvanceLabel =
     bkashPartialAdvanceMode === "percentage"
       ? `${bkashPartialAdvancePercent}%`
-      : formatCurrency(partialAdvanceAmount);
+      : formatCurrency(partialAdvanceProductPortion);
+  const partialAdvanceDescription =
+    bkashPartialAdvanceMode === "percentage"
+      ? `Pay shipping fee + ${bkashPartialAdvancePercent}% of product price via bKash, rest on delivery.`
+      : `Pay shipping fee + ${formatCurrency(partialAdvanceProductPortion)} via bKash, rest on delivery.`;
 
   const paymentOptions: {
     value: PaymentMethod;
@@ -296,7 +351,7 @@ export function CheckoutPage({
           {
             value: "bkash_partial_advance" as const,
             title: `COD + ${partialAdvanceLabel} Advance`,
-            description: `Pay ${partialAdvanceLabel} via bKash, rest on delivery.`,
+            description: partialAdvanceDescription,
             icon: HandCoins,
             iconSrc: "/cod.svg",
             tint: "amber" as const,
@@ -653,7 +708,7 @@ export function CheckoutPage({
                   )}
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 ">
                   <Label htmlFor="district">District</Label>
                   <Select
                     value={form.district}
@@ -661,7 +716,7 @@ export function CheckoutPage({
                       if (value !== null) updateField("district", value);
                     }}
                   >
-                    <SelectTrigger id="district" className="h-(--control-height) w-full">
+                    <SelectTrigger id="district" className="h-(--control-height)! w-full">
                       <SelectValue placeholder="Select district" />
                     </SelectTrigger>
                     <SelectContent>

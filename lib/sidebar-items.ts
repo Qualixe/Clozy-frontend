@@ -70,8 +70,13 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   {
     title: "CMS",
     href: "/dashboard/cms",
-    permissions: ["view_cms_pages", "create_cms_pages", "edit_cms_pages"],
+    permissions: ["view_cms_pages", "create_cms_pages", "edit_cms_pages", "edit_theme"],
     children: [
+      {
+        title: "Home",
+        href: "/dashboard/cms/home",
+        permissions: ["edit_theme"],
+      },
       {
         title: "About Page",
         href: "/dashboard/cms/about-page",
@@ -87,18 +92,6 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
         href: "/dashboard/cms/faqs",
         permissions: ["view_cms_pages", "create_cms_pages", "edit_cms_pages"],
       },
-    ],
-  },
-  {
-    title: "Theme",
-    href: "/dashboard/theme",
-    permissions: ["edit_theme"],
-    children: [
-      { title: "Hero", href: "/dashboard/theme/hero", permissions: ["edit_theme"] },
-      { title: "New Arrivals", href: "/dashboard/theme/new-arrivals", permissions: ["edit_theme"] },
-      { title: "Promo Banner", href: "/dashboard/theme/promo-banner", permissions: ["edit_theme"] },
-      { title: "Category Banners", href: "/dashboard/theme/category-banners", permissions: ["edit_theme"] },
-      { title: "Video Section", href: "/dashboard/theme/video-section", permissions: ["edit_theme"] },
     ],
   },
   {

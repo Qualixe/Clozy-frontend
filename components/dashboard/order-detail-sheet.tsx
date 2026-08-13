@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Truck, MapPin, Phone, Mail, CreditCard, Send, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { Truck, MapPin, Phone, Mail, CreditCard, Send, RefreshCw, Receipt } from "lucide-react";
 
 import {
   Sheet,
@@ -171,8 +172,18 @@ export function OrderDetailSheet({
   return (
     <Sheet open={order !== null} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md">
-        <SheetHeader className="border-b border-border">
+        <SheetHeader className="flex-row items-center justify-between border-b border-border pr-10">
           <SheetTitle>{order?.orderNumber}</SheetTitle>
+          {order && (
+            <Link
+              href={`/dashboard/orders/${order.id}/invoice`}
+              target="_blank"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <Receipt className="h-4 w-4" />
+              Invoice
+            </Link>
+          )}
         </SheetHeader>
 
         {loading && (

@@ -1,35 +1,35 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { ThemeNewArrivalsForm } from "@/components/dashboard/theme-new-arrivals-form";
-import { getNewArrivals } from "@/lib/get-new-arrivals";
+import { ThemeVideoSectionForm } from "@/components/dashboard/theme-video-section-form";
+import { getVideoSection } from "@/lib/get-video-section";
 
-export default async function DashboardThemeNewArrivalsPage() {
-  const data = await getNewArrivals();
+export default async function DashboardCmsHomeVideoSectionPage() {
+  const data = await getVideoSection();
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <Link
-          href="/dashboard/theme"
+          href="/dashboard/cms/home"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Theme
+          Home
         </Link>
       </div>
 
       <div>
         <h1 className="text-2xl font-semibold text-foreground">
-          New Arrivals Section
+          Video Section
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Pick which products show in the homepage&apos;s New Arrivals
-          section, and edit its heading.
+          Upload the portrait videos, captions, and heading for the
+          homepage&apos;s video carousel.
         </p>
       </div>
 
-      <ThemeNewArrivalsForm initial={data} />
+      <ThemeVideoSectionForm initial={data} />
     </div>
   );
 }

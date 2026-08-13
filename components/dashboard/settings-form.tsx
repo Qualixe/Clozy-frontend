@@ -56,9 +56,7 @@ type SettingsState = {
   bkashPassword: string;
   bkashShippingAdvanceEnabled: boolean;
   bkashPartialAdvanceEnabled: boolean;
-  bkashPartialAdvanceMode: "percentage" | "fixed";
   bkashPartialAdvancePercent: number;
-  bkashPartialAdvanceFixedAmount: string;
   facebookPixelId: string;
   googleAnalyticsId: string;
   googleTagManagerId: string;
@@ -180,12 +178,7 @@ export function SettingsForm({
     bkashPassword: initialSettings.bkashPassword ?? "",
     bkashShippingAdvanceEnabled: initialSettings.bkashShippingAdvanceEnabled,
     bkashPartialAdvanceEnabled: initialSettings.bkashPartialAdvanceEnabled,
-    bkashPartialAdvanceMode: initialSettings.bkashPartialAdvanceMode ?? "percentage",
     bkashPartialAdvancePercent: initialSettings.bkashPartialAdvancePercent ?? 20,
-    bkashPartialAdvanceFixedAmount:
-      initialSettings.bkashPartialAdvanceFixedAmount != null
-        ? String(initialSettings.bkashPartialAdvanceFixedAmount)
-        : "",
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
@@ -295,11 +288,11 @@ export function SettingsForm({
           bkashPassword: settings.bkashPassword || null,
           bkashShippingAdvanceEnabled: settings.bkashShippingAdvanceEnabled,
           bkashPartialAdvanceEnabled: settings.bkashPartialAdvanceEnabled,
-          bkashPartialAdvanceMode: settings.bkashPartialAdvanceMode,
+          // Fixed-amount mode was removed from the dashboard — always
+          // percentage-based now, so this is no longer editable/sent.
+          bkashPartialAdvanceMode: "percentage",
           bkashPartialAdvancePercent: settings.bkashPartialAdvancePercent,
-          bkashPartialAdvanceFixedAmount: settings.bkashPartialAdvanceFixedAmount
-            ? Number(settings.bkashPartialAdvanceFixedAmount)
-            : null,
+          bkashPartialAdvanceFixedAmount: null,
           anthropicApiKey: settings.anthropicApiKey || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
@@ -898,8 +891,9 @@ export function SettingsForm({
                       Advance Payment via bKash
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Customer pays a set percentage or amount via bKash at
-                      checkout, then pays the rest in cash on delivery.
+                      Customer pays the shipping fee plus a set percentage or
+                      amount of the product price via bKash at checkout, then
+                      pays the rest in cash on delivery.
                       {!settings.bkashGatewayEnabled &&
                         " Requires the bKash Payment Gateway to be enabled."}
                     </p>
@@ -916,60 +910,24 @@ export function SettingsForm({
                 {settings.bkashPartialAdvanceEnabled && (
                   <>
                     <Separator className="my-4" />
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="bkashPartialAdvanceMode">Advance amount</Label>
-                        <Select
-                          value={settings.bkashPartialAdvanceMode}
-                          onValueChange={(value) => {
-                            if (value) update("bkashPartialAdvanceMode", value as "percentage" | "fixed");
-                          }}
-                        >
-                          <SelectTrigger id="bkashPartialAdvanceMode" className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="percentage">Percentage of order total</SelectItem>
-                            <SelectItem value="fixed">Fixed amount (৳)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {settings.bkashPartialAdvanceMode === "percentage" ? (
-                        <div className="space-y-1.5">
-                          <Label htmlFor="bkashPartialAdvancePercent">Percent (%)</Label>
-                          <Input
-                            id="bkashPartialAdvancePercent"
-                            type="number"
-                            min={0}
-                            max={100}
-                            step="0.01"
-                            value={settings.bkashPartialAdvancePercent}
-                            onChange={(e) =>
-                              update("bkashPartialAdvancePercent", Number(e.target.value))
-                            }
-                          />
-                        </div>
-                      ) : (
-                        <div className="space-y-1.5">
-                          <Label htmlFor="bkashPartialAdvanceFixedAmount">Amount (৳)</Label>
-                          <Input
-                            id="bkashPartialAdvanceFixedAmount"
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            value={settings.bkashPartialAdvanceFixedAmount}
-                            onChange={(e) =>
-                              update("bkashPartialAdvanceFixedAmount", e.target.value)
-                            }
-                          />
-                        </div>
-                      )}
+                    <div className="max-w-xs space-y-1.5">
+                      <Label htmlFor="bkashPartialAdvancePercent">Percent of product price (%)</Label>
+                      <Input
+                        id="bkashPartialAdvancePercent"
+                        type="number"
+                        min={0}
+                        max={100}
+                        step="0.01"
+                        value={settings.bkashPartialAdvancePercent}
+                        onChange={(e) =>
+                          update("bkashPartialAdvancePercent", Number(e.target.value))
+                        }
+                      />
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">
-                      {settings.bkashPartialAdvanceMode === "percentage"
-                        ? "Charged upfront via bKash; if it exceeds the order total, the full total is charged instead."
-                        : "Charged upfront via bKash; capped at the order total for smaller orders."}
+                      Shipping fee plus this percentage of the product price
+                      is charged upfront via bKash, capped at the order
+                      total.
                     </p>
                   </>
                 )}

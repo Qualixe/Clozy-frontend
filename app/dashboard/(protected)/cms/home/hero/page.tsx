@@ -14,18 +14,18 @@ async function getHeroSlides(): Promise<HeroSlideAdmin[]> {
   return res.json();
 }
 
-export default async function DashboardThemeHeroPage() {
+export default async function DashboardCmsHomeHeroPage() {
   const slides = await getHeroSlides();
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <Link
-          href="/dashboard/theme"
+          href="/dashboard/cms/home"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Theme
+          Home
         </Link>
       </div>
 

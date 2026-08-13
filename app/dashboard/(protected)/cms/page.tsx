@@ -1,9 +1,15 @@
 import Link from "next/link";
-import { Info, ScrollText, HelpCircle, ChevronRight } from "lucide-react";
+import { Home, Info, ScrollText, HelpCircle, ChevronRight } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const SECTIONS = [
+  {
+    title: "Home",
+    description: "Hero, New Arrivals, Promo Banner, and other homepage sections.",
+    href: "/dashboard/cms/home",
+    icon: Home,
+  },
   {
     title: "About Page",
     description: "The hero, story, values, and CTA on your About page.",

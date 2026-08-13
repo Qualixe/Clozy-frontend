@@ -1,35 +1,35 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { ThemeCategoryBannersForm } from "@/components/dashboard/theme-category-banners-form";
-import { getCategoryGridBanner } from "@/lib/get-category-grid-banner";
+import { ThemeNewArrivalsForm } from "@/components/dashboard/theme-new-arrivals-form";
+import { getNewArrivals } from "@/lib/get-new-arrivals";
 
-export default async function DashboardThemeCategoryBannersPage() {
-  const data = await getCategoryGridBanner();
+export default async function DashboardCmsHomeNewArrivalsPage() {
+  const data = await getNewArrivals();
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <Link
-          href="/dashboard/theme"
+          href="/dashboard/cms/home"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Theme
+          Home
         </Link>
       </div>
 
       <div>
         <h1 className="text-2xl font-semibold text-foreground">
-          Category Banners
+          New Arrivals Section
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Pick which categories show in the homepage&apos;s 4-up category
-          grid banner, and their order.
+          Pick which products show in the homepage&apos;s New Arrivals
+          section, and edit its heading.
         </p>
       </div>
 
-      <ThemeCategoryBannersForm initial={data} />
+      <ThemeNewArrivalsForm initial={data} />
     </div>
   );
 }
