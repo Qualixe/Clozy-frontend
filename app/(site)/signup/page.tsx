@@ -33,7 +33,9 @@ export default function SignupPage() {
     setSubmitting(true);
     try {
       await register(name, email, password, confirmPassword);
-      router.push("/");
+      // New signups are always plain customers — send them straight to
+      // their profile to finish setting it up.
+      router.push("/profile");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed.");

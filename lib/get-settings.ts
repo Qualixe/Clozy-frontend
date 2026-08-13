@@ -16,6 +16,8 @@ export type StoreSettings = {
   logoUrl: string | null;
   faviconUrl: string | null;
   categoryShowcaseHeading: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
   footerTagline: string | null;
   footerInstagramUrl: string | null;
   footerTwitterUrl: string | null;

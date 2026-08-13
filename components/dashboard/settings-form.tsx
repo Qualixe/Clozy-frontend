@@ -83,6 +83,8 @@ type SettingsState = {
   logoUrl: string;
   faviconUrl: string;
   categoryShowcaseHeading: string;
+  metaTitle: string;
+  metaDescription: string;
   emailLogoUrl: string;
   emailAccentColor: string;
   emailFooterText: string;
@@ -184,6 +186,8 @@ export function SettingsForm({
     faviconUrl: initialSettings.faviconUrl ?? "",
     categoryShowcaseHeading:
       initialSettings.categoryShowcaseHeading ?? DEFAULT_CATEGORY_SHOWCASE_HEADING,
+    metaTitle: initialSettings.metaTitle ?? "",
+    metaDescription: initialSettings.metaDescription ?? "",
     emailLogoUrl: initialSettings.emailLogoUrl ?? "",
     emailAccentColor: initialSettings.emailAccentColor ?? DEFAULT_ACCENT_COLOR,
     emailFooterText: initialSettings.emailFooterText ?? "",
@@ -297,6 +301,8 @@ export function SettingsForm({
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
           categoryShowcaseHeading: settings.categoryShowcaseHeading || null,
+          metaTitle: settings.metaTitle || null,
+          metaDescription: settings.metaDescription || null,
           emailLogoUrl: settings.emailLogoUrl || null,
           emailAccentColor: settings.emailAccentColor || null,
           emailFooterText: settings.emailFooterText || null,
@@ -413,6 +419,37 @@ export function SettingsForm({
         </TabsContent>
 
         <TabsContent value="branding" className="max-w-xl space-y-5">
+          <div>
+            <p className="text-sm font-medium text-foreground">SEO</p>
+            <p className="text-xs text-muted-foreground">
+              The title and description shown in search results and browser
+              tabs, storefront-wide. Leave blank to use the defaults.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="metaTitle">Meta Title</Label>
+            <Input
+              id="metaTitle"
+              placeholder="Clozy"
+              value={settings.metaTitle}
+              onChange={(e) => update("metaTitle", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="metaDescription">Meta Description</Label>
+            <Textarea
+              id="metaDescription"
+              rows={2}
+              placeholder="Considered essentials, made to last. Designed in-house, shipped worldwide."
+              value={settings.metaDescription}
+              onChange={(e) => update("metaDescription", e.target.value)}
+            />
+          </div>
+
+          <Separator />
+
           <div>
             <p className="text-sm font-medium text-foreground">Logo</p>
             <p className="text-xs text-muted-foreground">

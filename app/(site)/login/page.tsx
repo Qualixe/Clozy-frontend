@@ -29,8 +29,8 @@ function LoginForm() {
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
-  const redirectTo = searchParams.get("redirect") || "/";
-  const needsDashboardAccess = redirectTo.startsWith("/dashboard");
+  const explicitRedirect = searchParams.get("redirect");
+  const needsDashboardAccess = explicitRedirect?.startsWith("/dashboard") ?? false;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,9 +49,13 @@ function LoginForm() {
   React.useEffect(() => {
     if (!user) return;
     if (needsDashboardAccess && !canAccessDashboard(user)) return;
-    router.replace(redirectTo);
+    // No explicit destination (e.g. bounced here from checkout or the
+    // dashboard) — send a plain customer to their profile, everyone else
+    // (staff signing in with nothing specific in mind) to the homepage.
+    const target = explicitRedirect || (user.role === "user" ? "/profile" : "/");
+    router.replace(target);
     router.refresh();
-  }, [user, router, redirectTo, needsDashboardAccess]);
+  }, [user, router, explicitRedirect, needsDashboardAccess]);
 
   const signedInWithoutDashboardAccess = needsDashboardAccess && user && !canAccessDashboard(user);
 

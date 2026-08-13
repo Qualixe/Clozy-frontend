@@ -10,13 +10,18 @@ import { WishlistProvider } from "@/lib/wishlist-context";
 import { getMenuByHandle } from "@/lib/get-menu";
 import { getSettings } from "@/lib/get-settings";
 
-// Overrides the root layout's default favicon with the dashboard-uploaded
-// one, when set. Runs only for storefront routes — the dashboard keeps the
-// default icon from the root layout.
+// Overrides the root layout's default favicon/title/description with
+// dashboard-configured values, when set. Runs only for storefront routes —
+// the dashboard keeps the defaults from the root layout.
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings().catch(() => null);
-  if (!settings?.faviconUrl) return {};
-  return { icons: { icon: settings.faviconUrl } };
+  if (!settings) return {};
+
+  const metadata: Metadata = {};
+  if (settings.faviconUrl) metadata.icons = { icon: settings.faviconUrl };
+  if (settings.metaTitle) metadata.title = settings.metaTitle;
+  if (settings.metaDescription) metadata.description = settings.metaDescription;
+  return metadata;
 }
 
 export default async function SiteLayout({
@@ -46,6 +51,8 @@ export default async function SiteLayout({
       logoUrl: null,
       faviconUrl: null,
       categoryShowcaseHeading: null,
+      metaTitle: null,
+      metaDescription: null,
       footerTagline: null,
       footerInstagramUrl: null,
       footerTwitterUrl: null,

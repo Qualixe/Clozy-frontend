@@ -59,69 +59,67 @@ export function AccountSettings() {
   }
 
   return (
-    <main className="w-full bg-background">
-      <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Account</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
-            Settings
-          </h1>
+    <div>
+      <div>
+        <p className="text-sm font-medium text-muted-foreground">Account</p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
+          Settings
+        </h1>
+      </div>
+
+      <form onSubmit={handleSubmit} className="mt-8 max-w-sm space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="account-name">Name</Label>
+          <Input
+            id="account-name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setSaved(false);
+            }}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="account-email">Email</Label>
+          <Input
+            id="account-email"
+            type="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setSaved(false);
+            }}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="account-password">New password (optional)</Label>
+          <Input
+            id="account-password"
+            type="password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setSaved(false);
+            }}
+            placeholder="Leave blank to keep current password"
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 max-w-sm space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="account-name">Name</Label>
-            <Input
-              id="account-name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setSaved(false);
-              }}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="account-email">Email</Label>
-            <Input
-              id="account-email"
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setSaved(false);
-              }}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="account-password">New password (optional)</Label>
-            <Input
-              id="account-password"
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setSaved(false);
-              }}
-              placeholder="Leave blank to keep current password"
-            />
-          </div>
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
-
-          <div className="flex items-center gap-3 pt-2">
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving…" : "Save Changes"}
-            </Button>
-            {saved && !submitting && (
-              <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-500">
-                <Check className="h-4 w-4" />
-                Saved
-              </span>
-            )}
-          </div>
-        </form>
-      </div>
-    </main>
+        <div className="flex items-center gap-3 pt-2">
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Saving…" : "Save Changes"}
+          </Button>
+          {saved && !submitting && (
+            <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-500">
+              <Check className="h-4 w-4" />
+              Saved
+            </span>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }
 

@@ -8,6 +8,13 @@ export type AuthUser = {
   roles: Role[];
   permissions: Permission[];
   emailVerified: boolean;
+  avatarUrl: string | null;
+  gender: "male" | "female" | "other" | null;
+  phone: string | null;
+  phoneVerified: boolean;
+  dob: string | null;
+  address: string | null;
+  district: string | null;
 };
 
 export type AuthSession = {

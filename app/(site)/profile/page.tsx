@@ -1,12 +1,12 @@
 import { RequireAuth } from "@/components/require-auth";
 import { AccountTabs } from "@/components/account-tabs";
-import { AccountOrders } from "@/components/account-orders";
+import { ProfilePage } from "@/components/profile-page";
 
 export default function Page() {
   return (
-    <RequireAuth>
+    <RequireAuth requireVerified={false}>
       <AccountTabs>
-        <AccountOrders />
+        <ProfilePage />
       </AccountTabs>
     </RequireAuth>
   );

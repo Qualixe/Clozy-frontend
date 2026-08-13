@@ -256,6 +256,14 @@ export function SiteHeader({
                   )}
                   <DropdownMenuItem
                     render={
+                      <Link href="/profile">
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    }
+                  />
+                  <DropdownMenuItem
+                    render={
                       <Link href="/account/orders">
                         <Package className="mr-2 h-4 w-4" />
                         Orders
