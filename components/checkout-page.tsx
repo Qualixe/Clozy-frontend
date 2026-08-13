@@ -162,7 +162,12 @@ export function CheckoutPage({
   const [sendingOtp, setSendingOtp] = React.useState(false);
   const [verifyingOtp, setVerifyingOtp] = React.useState(false);
   const [otpError, setOtpError] = React.useState<string | null>(null);
-  const phoneVerified = verifiedPhone !== null && verifiedPhone === form.phone.trim();
+  // A logged-in customer whose account phone is already verified shouldn't
+  // have to redo the OTP dance — unless they've typed in a different number.
+  const accountPhoneVerified =
+    !!user?.phoneVerified && !!user.phone && user.phone === form.phone.trim();
+  const phoneVerified =
+    accountPhoneVerified || (verifiedPhone !== null && verifiedPhone === form.phone.trim());
 
   // Auto-fill for a logged-in customer: name/email come straight off the
   // account, phone/address/district (not stored on the account itself —
