@@ -555,7 +555,7 @@ export function CheckoutPage({
         <p className="mt-2 text-sm font-medium text-foreground">
           Total paid: {formatCurrency(confirmedTotal)}
         </p>
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
           <Button
             nativeButton={false}
             render={<Link href="/shop">Continue Shopping</Link>}
@@ -568,6 +568,17 @@ export function CheckoutPage({
                 href={`/track-order?order=${encodeURIComponent(confirmedOrderNumber)}&contact=${encodeURIComponent(form.email)}`}
               >
                 Track Your Order
+              </Link>
+            }
+          />
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={
+              <Link
+                href={`/orders/invoice?order=${encodeURIComponent(confirmedOrderNumber)}&contact=${encodeURIComponent(form.email)}`}
+              >
+                View Invoice
               </Link>
             }
           />

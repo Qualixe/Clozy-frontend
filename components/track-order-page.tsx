@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, PackageSearch, XCircle } from "lucide-react";
 
@@ -282,6 +283,19 @@ export function TrackOrderPage() {
                 </div>
               </>
             )}
+
+            <Button
+              variant="outline"
+              className="w-full"
+              nativeButton={false}
+              render={
+                <Link
+                  href={`/orders/invoice?order=${encodeURIComponent(order.orderNumber)}&contact=${encodeURIComponent(contact)}`}
+                >
+                  View Invoice
+                </Link>
+              }
+            />
 
             <Button variant="outline" className="w-full" onClick={reset}>
               Track Another Order

@@ -16,9 +16,13 @@ const STATUS_LABELS: Record<NonNullable<OrderDetail["paymentStatus"]>, string> =
 export function InvoiceView({
   order,
   logoUrl,
+  backHref = "/dashboard/orders",
+  backLabel = "Back to Orders",
 }: {
   order: OrderDetail;
   logoUrl: string | null;
+  backHref?: string;
+  backLabel?: string;
 }) {
   return (
     <div className="min-h-screen bg-muted/30 py-8 print:bg-white print:py-0">
@@ -26,11 +30,11 @@ export function InvoiceView({
 
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 pb-4 print:hidden">
         <Link
-          href="/dashboard/orders"
+          href={backHref}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Orders
+          {backLabel}
         </Link>
         <button
           type="button"
