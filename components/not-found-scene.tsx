@@ -13,7 +13,7 @@ import {
 
 const QUICK_LINKS = [
   { label: "Shop All", href: "/shop", icon: ShoppingBag },
-  { label: "Collections", href: "/collections", icon: LayoutGrid },
+  { label: "Collections", href: "/shop", icon: LayoutGrid },
   { label: "Track Order", href: "/track-order", icon: PackageSearch },
   { label: "Contact Us", href: "/contact", icon: MessageCircle },
 ];
