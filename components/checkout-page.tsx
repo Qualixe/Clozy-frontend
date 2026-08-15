@@ -322,7 +322,7 @@ export function CheckoutPage({
             title: "Cash on Delivery",
             description: "Pay with cash when your order arrives.",
             icon: HandCoins,
-            iconSrc: "/cod.svg",
+            iconSrc: "/cod-shipping-fee.png",
             tint: "amber" as const,
           },
         ]
@@ -346,7 +346,7 @@ export function CheckoutPage({
             title: "COD + Shipping Fee",
             description: "Pay shipping Fee via Online Payment",
             icon: HandCoins,
-            iconSrc: "/cod.svg",
+            iconSrc: "/shipping-fee-required.png",
             tint: "amber" as const,
           },
         ]
