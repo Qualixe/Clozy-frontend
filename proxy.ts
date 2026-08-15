@@ -16,6 +16,13 @@ export function proxy(request: NextRequest) {
   const session = decodeAuthCookie(request.cookies.get(AUTH_COOKIE)?.value);
 
   if (!canAccessDashboard(session?.user)) {
+    // Logged in, just not staff — send them to their own account instead of
+    // bouncing to a login form they don't need. Fully signed-out visitors
+    // still go to /login, with a redirect back to the dashboard URL they
+    // wanted (useful if they log in as a staff account instead).
+    if (session?.user) {
+      return NextResponse.redirect(new URL("/profile", request.url));
+    }
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);

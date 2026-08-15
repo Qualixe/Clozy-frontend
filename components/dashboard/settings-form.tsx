@@ -416,9 +416,9 @@ export function SettingsForm({
               onChange={(e) => update("storeDescription", e.target.value)}
             />
           </div>
-        </TabsContent>
 
-        <TabsContent value="branding" className="max-w-xl space-y-5">
+          <Separator />
+
           <div>
             <p className="text-sm font-medium text-foreground">SEO</p>
             <p className="text-xs text-muted-foreground">
@@ -447,9 +447,9 @@ export function SettingsForm({
               onChange={(e) => update("metaDescription", e.target.value)}
             />
           </div>
+        </TabsContent>
 
-          <Separator />
-
+        <TabsContent value="branding" className="max-w-xl space-y-5">
           <div>
             <p className="text-sm font-medium text-foreground">Logo</p>
             <p className="text-xs text-muted-foreground">
