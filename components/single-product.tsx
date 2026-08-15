@@ -322,42 +322,44 @@ export function ProductPage({ product }: { product: ProductDetail }) {
             )}
 
             {/* Size */}
-            {/* <div className="mt-6">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-foreground">Size</p>
-                <Link
-                  href="/size-guide"
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
-                >
-                  Size guide
-                </Link>
+            {product.sizes.length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-foreground">Size</p>
+                  <Link
+                    href="/size-guide"
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
+                  >
+                    Size guide
+                  </Link>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {product.sizes.map((size) => {
+                    const outOfStock = product.outOfStockSizes.includes(size);
+                    return (
+                      <button
+                        key={size}
+                        disabled={outOfStock}
+                        onClick={() => setSelectedSize(size)}
+                        className={cn(
+                          "flex h-10 w-12 items-center justify-center rounded-md border text-sm font-medium transition-colors",
+                          outOfStock &&
+                            "cursor-not-allowed border-destructive/20 bg-destructive/10 text-destructive/60 line-through",
+                          !outOfStock &&
+                            selectedSize === size &&
+                            "border-foreground bg-foreground text-background",
+                          !outOfStock &&
+                            selectedSize !== size &&
+                            "border-border text-foreground hover:border-foreground"
+                        )}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {product.sizes.map((size) => {
-                  const outOfStock = product.outOfStockSizes.includes(size);
-                  return (
-                    <button
-                      key={size}
-                      disabled={outOfStock}
-                      onClick={() => setSelectedSize(size)}
-                      className={cn(
-                        "flex h-10 w-12 items-center justify-center rounded-md border text-sm font-medium transition-colors",
-                        outOfStock &&
-                          "cursor-not-allowed border-destructive/20 bg-destructive/10 text-destructive/60 line-through",
-                        !outOfStock &&
-                          selectedSize === size &&
-                          "border-foreground bg-foreground text-background",
-                        !outOfStock &&
-                          selectedSize !== size &&
-                          "border-border text-foreground hover:border-foreground"
-                      )}
-                    >
-                      {size}
-                    </button>
-                  );
-                })}
-              </div>
-            </div> */}
+            )}
 
             {/* Content blocks — before Buy Button */}
             {product.contentBlocksBeforeBuyButton.map((block) => (
