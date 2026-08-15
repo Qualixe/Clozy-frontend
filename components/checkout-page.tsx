@@ -162,8 +162,8 @@ export function CheckoutPage({
   const [sendingOtp, setSendingOtp] = React.useState(false);
   const [verifyingOtp, setVerifyingOtp] = React.useState(false);
   const [otpError, setOtpError] = React.useState<string | null>(null);
-  // A logged-in customer whose account phone is already verified shouldn't
-  // have to redo the OTP dance — unless they've typed in a different number.
+  // A logged-in customer whose account phone is already verified never
+  // needs to redo the OTP dance — unless they've typed in a different number.
   const accountPhoneVerified =
     !!user?.phoneVerified && !!user.phone && user.phone === form.phone.trim();
   const phoneVerified =
@@ -448,7 +448,10 @@ export function CheckoutPage({
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           name: form.name,
           phone: form.phone,
