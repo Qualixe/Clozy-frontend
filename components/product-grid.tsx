@@ -13,8 +13,11 @@ export function ProductGrid({ products }: { products: Product[] }) {
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+      {products.map((product, index) => (
+        // First row (up to the lg:grid-cols-4 column count) is the LCP
+        // candidate on /shop and /collections/[slug] — preload those,
+        // lazy-load the rest.
+        <ProductCard key={product.id} product={product} priority={index < 4} />
       ))}
     </div>
   );

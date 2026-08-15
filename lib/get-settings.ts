@@ -26,9 +26,16 @@ export type StoreSettings = {
 };
 
 export async function getSettings(): Promise<StoreSettings> {
-  // Force this to render dynamically (fetched per-request) rather than at
-  // build time — the backend isn't guaranteed to be reachable during a
-  // Vercel build, and a failed build-time fetch fails the whole build.
+  // Deliberately kept as no-store (not ISR): this payload gates live
+  // checkout behavior (bkash/COD toggles, shipping rates used in price
+  // calculation) via app/(site)/layout.tsx and the checkout flow, so it
+  // shouldn't be stale for up to a revalidation window. It also anchors
+  // every storefront route (it's fetched in the shared site layout on
+  // every request) as dynamically rendered, which is what keeps the
+  // now-ISR'd fetches in get-categories.ts / get-hero-slides.ts /
+  // get-menu.ts safe from ever running at `next build` time — the original
+  // concern behind the "backend isn't guaranteed reachable during a Vercel
+  // build" comments on those files.
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
     cache: "no-store",
   });

@@ -1,7 +1,5 @@
 "use client";
 
-import * as React from "react";
-
 import {
   Tabs,
   TabsContent,
@@ -17,7 +15,6 @@ import {
   ProductCarouselNext,
 } from "@/components/ui/product-carousel";
 import { ProductCard, type Product } from "@/components/product-card";
-import { ProductCardSkeleton } from "@/components/product-card-skeleton";
 
 const TABS = [
   { value: "featured", label: "Featured" },
@@ -30,35 +27,12 @@ const TABS = [
 // Section
 // ---------------------------------------------------------------------------
 
-export function ProductsSection() {
-  const [products, setProducts] = React.useState<Product[]>([]);
-  const [status, setStatus] = React.useState<"loading" | "error" | "ready">(
-    "loading"
-  );
-
-  React.useEffect(() => {
-    let cancelled = false;
-
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
-        return res.json();
-      })
-      .then((data: Product[]) => {
-        if (cancelled) return;
-        setProducts(data);
-        setStatus("ready");
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setStatus("error");
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+// Data is now fetched server-side (app/(site)/page.tsx, alongside the
+// homepage's other Promise.all data sources) and passed in as a prop, so
+// there's no client-side fetch/loading-skeleton-on-mount here anymore.
+// This stays a client component only because the tab list itself is
+// interactive (filters the already-fetched data by tab client-side).
+export function ProductsSection({ products }: { products: Product[] }) {
   return (
     <section className="w-full bg-background pt-4 pb-16 sm:pt-6 sm:pb-20">
       <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
@@ -83,21 +57,13 @@ export function ProductsSection() {
             </div>
           </div>
 
-          {status === "loading" && (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <ProductCardSkeleton key={i} />
-              ))}
-            </div>
-          )}
-
-          {status === "error" && (
-            <p className="py-12 text-center text-sm text-destructive">
-              Could not load products. Is the backend running?
+          {products.length === 0 && (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              No products available right now.
             </p>
           )}
 
-          {status === "ready" &&
+          {products.length > 0 &&
             TABS.map((tab) => {
               const filtered = products.filter((p) =>
                 p.tabs.includes(tab.value)

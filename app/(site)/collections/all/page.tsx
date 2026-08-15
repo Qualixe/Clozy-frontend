@@ -2,14 +2,17 @@ import { CategoryCard, type Category } from "@/components/category-card";
 
 async function getCategories(): Promise<Category[]> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
-    cache: "no-store",
+    next: { revalidate: 60 },
   });
   if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
   return res.json();
 }
 
 export default async function Page() {
-  const categories = await getCategories();
+  // A backend hiccup at request time (or a cold ISR revalidation racing an
+  // unreachable backend at build time) shouldn't crash the page — same
+  // catch-and-fallback pattern used by the homepage's data fetches.
+  const categories = await getCategories().catch(() => []);
 
   return (
     <main className="w-full bg-background">

@@ -8,7 +8,7 @@ export type Faq = {
 export async function getPublishedFaqs(): Promise<Faq[]> {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/faqs/published`, {
-      cache: "no-store",
+      next: { revalidate: 60 },
     });
     if (!res.ok) return [];
     return await res.json();

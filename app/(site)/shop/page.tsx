@@ -5,7 +5,7 @@ async function getProducts(search?: string): Promise<Product[]> {
   const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/products`);
   if (search) url.searchParams.set("search", search);
 
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(url, { next: { revalidate: 60 } });
   if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
   return res.json();
 }

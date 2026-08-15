@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { Camera, Check, Loader2, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -214,11 +215,12 @@ export function ProfilePage() {
           className="group relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-lg font-semibold text-muted-foreground"
         >
           {user?.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={user.avatarUrl}
               alt=""
-              className="h-full w-full object-cover"
+              fill
+              sizes="80px"
+              className="object-cover"
             />
           ) : (
             initials

@@ -1,6 +1,7 @@
 import CategoryShowcase from "@/components/category";
 import HeroSlider from "@/components/hero";
 import ProductsSection from "@/components/products";
+import type { Product } from "@/components/product-card";
 import { NewArrivalsSection } from "@/components/new-arrivals";
 import { CategoryBanners } from "@/components/category-banners";
 import { CategoryGridBanners } from "@/components/category-grid-banners";
@@ -14,13 +15,24 @@ import { getPromoBanner } from "@/lib/get-promo-banner";
 import { getSettings } from "@/lib/get-settings";
 import { getVideoSection } from "@/lib/get-video-section";
 
+// Same public, admin-managed product data the /shop and /collections pages
+// fetch — cacheable for a short window rather than force-dynamic.
+async function getProducts(): Promise<Product[]> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+  return res.json();
+}
+
 export default async function Home() {
   // A backend hiccup shouldn't take the homepage down — fall back to an
   // empty list rather than throwing.
-  const [categories, heroSlides, newArrivals, videoSection, categoryGridBanner, promoBanner, settings] =
+  const [categories, heroSlides, products, newArrivals, videoSection, categoryGridBanner, promoBanner, settings] =
     await Promise.all([
       getCategories().catch(() => []),
       getHeroSlides().catch(() => []),
+      getProducts().catch(() => []),
       getNewArrivals().catch(() => ({
         enabled: false,
         eyebrow: "",
@@ -64,7 +76,7 @@ export default async function Home() {
       <HeroSlider slides={heroSlides} />
       <CategoryShowcase categories={categories} />
 
-      <ProductsSection />
+      <ProductsSection products={products} />
       <CategoryBanners
         categories={categories}
         heading={settings.categoryShowcaseHeading}

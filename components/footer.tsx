@@ -118,13 +118,18 @@ function BkashIcon({ className }: { className?: string }) {
     <div
       role="img"
       aria-label="bKash"
-      className={`flex items-center justify-center overflow-hidden rounded-[5px] border border-foreground/10 bg-white p-1 ${className ?? ""}`}
+      className={`relative flex items-center justify-center overflow-hidden rounded-[5px] border border-foreground/10 bg-white p-1 ${className ?? ""}`}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src="/BKash-bKash2-Logo.wine%20(1).svg"
         alt=""
-        className="h-full w-full object-contain"
+        fill
+        sizes="64px"
+        // Local SVG asset — skip the image optimizer (which doesn't process
+        // SVGs by default) rather than widen next.config.ts's image
+        // security settings just for this logo.
+        unoptimized
+        className="object-contain"
       />
     </div>
   );

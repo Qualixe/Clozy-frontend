@@ -29,11 +29,16 @@ export type Product = {
 export function ProductCard({
   product,
   as: MediaWrapper = "div",
+  priority = false,
 }: {
   product: Product;
   /** Element/component the image is wrapped in — pass `ProductCarouselMedia`
    *  when rendering inside a `ProductCarousel` so its height can be measured. */
   as?: React.ElementType;
+  /** Pass `true` for above-the-fold cards (e.g. the first row of a product
+   *  grid) so next/image preloads the image as an LCP candidate instead of
+   *  lazy-loading it. Defaults to `false`. */
+  priority?: boolean;
 }) {
   const { addItem } = useCart();
 
@@ -57,6 +62,7 @@ export function ProductCard({
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            priority={priority}
           />
         </Link>
 

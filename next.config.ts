@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     // at internal services / cloud metadata endpoints via an admin-entered
     // image URL, since remotePatterns below is deliberately wide open.
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       // Product/category images are arbitrary URLs entered by admins in
       // the dashboard, so any host needs to be renderable — including http,

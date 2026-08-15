@@ -10,7 +10,7 @@ export type PromoBannerData = {
 
 export async function getPromoBanner(): Promise<PromoBannerData> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/promo-banner`, {
-    cache: "no-store",
+    next: { revalidate: 60 },
   });
   if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
   return res.json();
