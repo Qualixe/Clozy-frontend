@@ -785,7 +785,7 @@ export function CheckoutPage({
                             tint.bg
                           )}
                         >
-                          <RadioGroupItem value={option.value} className="sr-only" />
+                          <RadioGroupItem value={option.value} className="sr-only absolute" />
                           {option.iconSrc ? (
                             <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl">
                               <Image
