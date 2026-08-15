@@ -28,5 +28,11 @@ export default async function OrderInvoicePage({
     getSettings().catch(() => null),
   ]);
 
-  return <InvoiceView order={order} logoUrl={settings?.logoUrl ?? null} />;
+  return (
+    <InvoiceView
+      order={order}
+      logoUrl={settings?.logoUrl ?? null}
+      pdfUrl={`/api/invoice/pdf?orderId=${id}`}
+    />
+  );
 }

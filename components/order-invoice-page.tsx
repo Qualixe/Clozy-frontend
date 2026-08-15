@@ -102,6 +102,7 @@ export function OrderInvoicePage() {
         logoUrl={logoUrl}
         backHref="/orders/invoice"
         backLabel="Look up another order"
+        pdfUrl={`/api/invoice/pdf?orderNumber=${encodeURIComponent(order.orderNumber)}&contact=${encodeURIComponent(contact)}`}
       />
     );
   }
