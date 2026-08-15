@@ -358,7 +358,7 @@ export function CheckoutPage({
             title: `COD + ${partialAdvanceLabel} Advance`,
             description: partialAdvanceDescription,
             icon: HandCoins,
-            iconSrc: "/cod.svg",
+            iconSrc: "/advance_payment.png",
             tint: "amber" as const,
           },
         ]
