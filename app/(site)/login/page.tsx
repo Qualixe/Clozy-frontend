@@ -29,7 +29,15 @@ function LoginForm() {
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
-  const explicitRedirect = searchParams.get("redirect");
+  // Only ever a same-origin relative path — proxy.ts sends nothing else,
+  // but the query param is attacker-controlled input, so a value like
+  // `https://evil.example` or `//evil.example` (protocol-relative) must
+  // never be handed to the router as a post-login destination.
+  const rawRedirect = searchParams.get("redirect");
+  const explicitRedirect =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") && !rawRedirect.startsWith("/\\")
+      ? rawRedirect
+      : null;
   const needsDashboardAccess = explicitRedirect?.startsWith("/dashboard") ?? false;
 
   async function handleSubmit(e: React.FormEvent) {

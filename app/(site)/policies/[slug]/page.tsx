@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 
 import { getPolicyBySlug } from "@/lib/get-policies";
 
@@ -50,7 +51,7 @@ export default async function PolicyPage({
 
       <div
         className="prose prose-sm mt-10 max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground dark:prose-invert"
-        dangerouslySetInnerHTML={{ __html: policy.content }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(policy.content) }}
       />
     </div>
   );

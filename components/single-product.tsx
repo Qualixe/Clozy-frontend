@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import DOMPurify from "isomorphic-dompurify";
 import {
   Minus,
   Plus,
@@ -364,7 +365,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
                 </h3>
                 <div
                   className="prose prose-sm mt-2 max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground"
-                  dangerouslySetInnerHTML={{ __html: block.value }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.value) }}
                 />
               </div>
             ))}
@@ -412,7 +413,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
                 </h3>
                 <div
                   className="prose prose-sm mt-2 max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground"
-                  dangerouslySetInnerHTML={{ __html: block.value }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.value) }}
                 />
               </div>
             ))}
