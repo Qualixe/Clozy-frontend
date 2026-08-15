@@ -358,7 +358,7 @@ export function CheckoutPage({
             title: `COD + ${partialAdvanceLabel} Advance`,
             description: partialAdvanceDescription,
             icon: HandCoins,
-            iconSrc: "/advance_payment.png",
+            iconSrc: "/shipping-fee-required2.png",
             tint: "amber" as const,
           },
         ]
@@ -803,7 +803,7 @@ export function CheckoutPage({
                                 tint.icon
                               )}
                             >
-                              <option.icon className="h-5 w-5" />
+                              <option.icon className="h-10 w-10" />
                             </span>
                           )}
                           <span className="min-w-0 flex-1 space-y-0.5">
