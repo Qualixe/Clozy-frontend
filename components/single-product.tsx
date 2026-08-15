@@ -102,7 +102,9 @@ export function ProductPage({ product }: { product: ProductDetail }) {
   const [selectedColor, setSelectedColor] = React.useState(
     product.colors[0]?.name ?? ""
   );
-  const [selectedSize, setSelectedSize] = React.useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = React.useState<string | null>(
+    product.sizes.find((size) => !product.outOfStockSizes.includes(size)) ?? null
+  );
   const [quantity, setQuantity] = React.useState(1);
   const { addItem } = useCart();
 
@@ -320,7 +322,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
             )}
 
             {/* Size */}
-            <div className="mt-6">
+            {/* <div className="mt-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-foreground">Size</p>
                 <Link
@@ -355,7 +357,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
                   );
                 })}
               </div>
-            </div>
+            </div> */}
 
             {/* Content blocks — before Buy Button */}
             {product.contentBlocksBeforeBuyButton.map((block) => (
@@ -397,7 +399,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
               </div>
 
               <Button
-                className="h-11 flex-1"
+                className="h-11 flex-1 cursor-pointer disabled:cursor-not-allowed"
                 disabled={!selectedSize}
                 onClick={handleAddToCart}
               >
