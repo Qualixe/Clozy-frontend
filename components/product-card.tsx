@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ShoppingCart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ export type Product = {
   image: string;
   tag?: "New" | "Sale";
   tabs: Array<"featured" | "bestsellers" | "new" | "sale">;
+  /** Has a color/size choice to make — no single "the" price/variant to add. */
+  hasVariants?: boolean;
 };
 
 export function ProductCard({
@@ -41,8 +44,16 @@ export function ProductCard({
   priority?: boolean;
 }) {
   const { addItem } = useCart();
+  const router = useRouter();
 
   function handleAddToCart() {
+    // A card has no color/size picker — a variant product needs the full
+    // page so the customer actually chooses before anything's added.
+    if (product.hasVariants) {
+      router.push(`/products/${product.slug}`);
+      return;
+    }
+
     addItem({
       id: product.id,
       productId: product.id,
@@ -82,7 +93,7 @@ export function ProductCard({
         <div className="absolute inset-x-3 bottom-3 translate-y-12 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
           <Button className="w-full" onClick={handleAddToCart}>
             <ShoppingCart className="h-4 w-4" />
-            Add to Cart
+            {product.hasVariants ? "Select Options" : "Add to Cart"}
           </Button>
         </div>
       </MediaWrapper>
