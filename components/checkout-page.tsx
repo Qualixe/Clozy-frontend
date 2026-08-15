@@ -304,8 +304,8 @@ export function CheckoutPage({
       : formatCurrency(partialAdvanceProductPortion);
   const partialAdvanceDescription =
     bkashPartialAdvanceMode === "percentage"
-      ? `Pay shipping fee + ${bkashPartialAdvancePercent}% of product price via bKash, rest on delivery.`
-      : `Pay shipping fee + ${formatCurrency(partialAdvanceProductPortion)} via bKash, rest on delivery.`;
+      ? `Shipping Fee + ${bkashPartialAdvancePercent}% product price`
+      : `Shipping Fee + ${formatCurrency(partialAdvanceProductPortion)} product price`;
 
   const paymentOptions: {
     value: PaymentMethod;
@@ -344,7 +344,7 @@ export function CheckoutPage({
           {
             value: "bkash_shipping_advance" as const,
             title: "COD + Shipping Fee",
-            description: "Pay shipping via bKash, rest on delivery.",
+            description: "Pay shipping Fee via Online Payment",
             icon: HandCoins,
             iconSrc: "/cod.svg",
             tint: "amber" as const,
@@ -780,7 +780,7 @@ export function CheckoutPage({
                         <Label
                           key={option.value}
                           className={cn(
-                            "group relative flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-border bg-background p-3.5 transition-all hover:border-foreground/25",
+                            "group relative flex cursor-pointer items-center gap-3 rounded-[10px] border-2 border-border bg-background p-3.5 transition-all hover:border-foreground/25",
                             tint.border,
                             tint.bg
                           )}
