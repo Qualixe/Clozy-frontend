@@ -16,6 +16,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { formatCurrency } from "@/lib/currency";
 import {
   Carousel,
@@ -44,6 +60,16 @@ import { WriteReviewDialog } from "@/components/write-review-dialog";
 import type { Product } from "@/components/product-card";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
+
+// Generic placeholder chart — not tied to any product's actual sizing yet.
+const SIZE_GUIDE_ROWS = [
+  { size: "XS", chest: "32-34", waist: "26-28", hip: "34-36" },
+  { size: "S", chest: "35-37", waist: "29-31", hip: "37-39" },
+  { size: "M", chest: "38-40", waist: "32-34", hip: "40-42" },
+  { size: "L", chest: "41-43", waist: "35-37", hip: "43-45" },
+  { size: "XL", chest: "44-46", waist: "38-40", hip: "46-48" },
+  { size: "XXL", chest: "47-49", waist: "41-43", hip: "49-51" },
+];
 
 // ---------------------------------------------------------------------------
 // Data shape — populated from the Laravel API (`GET /products/{id}`)
@@ -326,12 +352,56 @@ export function ProductPage({ product }: { product: ProductDetail }) {
               <div className="mt-6">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-foreground">Size</p>
-                  <Link
-                    href="/size-guide"
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
-                  >
-                    Size guide
-                  </Link>
+                  <Sheet>
+                    <SheetTrigger
+                      render={
+                        <button
+                          type="button"
+                          className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
+                        />
+                      }
+                    >
+                      Size guide
+                    </SheetTrigger>
+                    <SheetContent side="right">
+                      <SheetHeader>
+                        <SheetTitle>Size Guide</SheetTitle>
+                        <SheetDescription>
+                          General measurements to help you pick the right
+                          size. All values are approximate.
+                        </SheetDescription>
+                      </SheetHeader>
+                      <div className="px-4 pb-4">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Size</TableHead>
+                              <TableHead>Chest (in)</TableHead>
+                              <TableHead>Waist (in)</TableHead>
+                              <TableHead>Hip (in)</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {SIZE_GUIDE_ROWS.map((row) => (
+                              <TableRow key={row.size}>
+                                <TableCell className="font-medium text-foreground">
+                                  {row.size}
+                                </TableCell>
+                                <TableCell>{row.chest}</TableCell>
+                                <TableCell>{row.waist}</TableCell>
+                                <TableCell>{row.hip}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                        <p className="mt-4 text-xs text-muted-foreground">
+                          Measurements are in inches. For the best fit, measure
+                          a similar garment you already own and compare it to
+                          the chart above.
+                        </p>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {product.sizes.map((size) => {
