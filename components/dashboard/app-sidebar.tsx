@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -60,7 +61,7 @@ const ICONS: Record<string, LucideIcon> = {
   "/dashboard/settings": Settings,
 };
 
-export function AppSidebar() {
+export function AppSidebar({ logoUrl }: { logoUrl?: string | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -97,13 +98,21 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Link href="/dashboard" className="flex items-center gap-2 px-2 py-1.5">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-            C
-          </span>
-          <span className="text-sm font-semibold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">
-            Clozy Admin
-          </span>
+        <Link href="/dashboard" className="flex items-center gap-2 px-2 py-2">
+          {logoUrl ? (
+            <Image
+              src={logoUrl}
+              alt=""
+              width={160}
+              height={40}
+              className="h-10 w-auto object-contain"
+              priority
+            />
+          ) : (
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-base font-bold text-primary-foreground">
+              C
+            </span>
+          )}
         </Link>
       </SidebarHeader>
 
