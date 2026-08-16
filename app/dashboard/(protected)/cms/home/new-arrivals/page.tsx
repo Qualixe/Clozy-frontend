@@ -2,7 +2,18 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { ThemeNewArrivalsForm } from "@/components/dashboard/theme-new-arrivals-form";
-import { getNewArrivals } from "@/lib/get-new-arrivals";
+import type { NewArrivalsData } from "@/components/new-arrivals";
+
+// Local no-store fetcher rather than the shared lib/get-new-arrivals.ts
+// (ISR revalidate: 60 for the public storefront) — see category-banners/page.tsx
+// for why that breaks static prerendering of this dashboard page.
+async function getNewArrivals(): Promise<NewArrivalsData> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/new-arrivals`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+  return res.json();
+}
 
 export default async function DashboardCmsHomeNewArrivalsPage() {
   const data = await getNewArrivals();

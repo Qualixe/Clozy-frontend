@@ -2,7 +2,20 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { ThemeCategoryBannersForm } from "@/components/dashboard/theme-category-banners-form";
-import { getCategoryGridBanner } from "@/lib/get-category-grid-banner";
+import type { CategoryGridBannerData } from "@/components/category-grid-banners";
+
+// Local no-store fetcher rather than the shared lib/get-category-grid-banner.ts
+// (which uses ISR revalidate: 60 for the public storefront) — that ISR
+// config makes Next try to statically prerender this dashboard page at
+// `next build` time, which fails whenever the backend isn't reachable
+// during the build. See hero/page.tsx for the same pattern.
+async function getCategoryGridBanner(): Promise<CategoryGridBannerData> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category-grid-banner`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+  return res.json();
+}
 
 export default async function DashboardCmsHomeCategoryBannersPage() {
   const data = await getCategoryGridBanner();
