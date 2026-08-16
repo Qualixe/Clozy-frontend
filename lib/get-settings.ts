@@ -76,8 +76,11 @@ export type AdminStoreSettings = StoreSettings & {
   bkashPassword: string | null;
   anthropicApiKey: string | null;
   anthropicConfigured: boolean;
-  aiProvider: "anthropic" | "openai";
+  aiProvider: "anthropic" | "openai" | "gemini";
   openaiApiKey: string | null;
   openaiConfigured: boolean;
   openaiModel: string | null;
+  geminiApiKey: string | null;
+  geminiConfigured: boolean;
+  geminiModel: string | null;
 };

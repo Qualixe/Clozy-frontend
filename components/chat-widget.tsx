@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { MessageCircle, X, Send, Sparkles, AlertTriangle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -128,7 +128,12 @@ export function ChatWidget({ enabled }: { enabled: boolean }) {
               </div>
             )}
 
-            {error && <p className="text-xs text-destructive">{error}</p>}
+            {error && (
+              <div className="flex max-w-[85%] items-start gap-2 rounded-2xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
             {products.length > 0 && (
               <div className="space-y-2 pt-1">

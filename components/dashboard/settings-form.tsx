@@ -81,9 +81,11 @@ type SettingsState = {
   pathaoPassword: string;
   pathaoStoreId: string;
   anthropicApiKey: string;
-  aiProvider: "anthropic" | "openai";
+  aiProvider: "anthropic" | "openai" | "gemini";
   openaiApiKey: string;
   openaiModel: string;
+  geminiApiKey: string;
+  geminiModel: string;
   logoUrl: string;
   faviconUrl: string;
   categoryShowcaseHeading: string;
@@ -189,6 +191,8 @@ export function SettingsForm({
     aiProvider: initialSettings.aiProvider ?? "anthropic",
     openaiApiKey: initialSettings.openaiApiKey ?? "",
     openaiModel: initialSettings.openaiModel ?? "",
+    geminiApiKey: initialSettings.geminiApiKey ?? "",
+    geminiModel: initialSettings.geminiModel ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
     categoryShowcaseHeading:
@@ -311,6 +315,8 @@ export function SettingsForm({
           aiProvider: settings.aiProvider,
           openaiApiKey: settings.openaiApiKey || null,
           openaiModel: settings.openaiModel || null,
+          geminiApiKey: settings.geminiApiKey || null,
+          geminiModel: settings.geminiModel || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
           categoryShowcaseHeading: settings.categoryShowcaseHeading || null,
@@ -1378,6 +1384,7 @@ export function SettingsForm({
               <SelectContent>
                 <SelectItem value="anthropic">Anthropic (Claude)</SelectItem>
                 <SelectItem value="openai">OpenAI</SelectItem>
+                <SelectItem value="gemini">Google Gemini</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1449,6 +1456,46 @@ export function SettingsForm({
             />
             <p className="text-xs text-muted-foreground">
               Leave blank to use gpt-4o-mini.
+            </p>
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-sm font-medium text-foreground">Google Gemini</p>
+            <p className="text-xs text-muted-foreground">
+              Get a key from{" "}
+              <a
+                href="https://aistudio.google.com/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                aistudio.google.com
+              </a>
+              . Leave blank to disable AI features while this provider is active.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="geminiApiKey">API Key</Label>
+            <Input
+              id="geminiApiKey"
+              type="password"
+              placeholder="AIza…"
+              value={settings.geminiApiKey}
+              onChange={(e) => update("geminiApiKey", e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="geminiModel">Model</Label>
+            <Input
+              id="geminiModel"
+              placeholder="gemini-flash-latest"
+              value={settings.geminiModel}
+              onChange={(e) => update("geminiModel", e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Leave blank to use gemini-flash-latest.
             </p>
           </div>
         </TabsContent>

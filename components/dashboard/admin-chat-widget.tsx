@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { MessageCircle, X, Send, Sparkles, AlertTriangle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -138,7 +138,12 @@ export function AdminChatWidget() {
               </div>
             )}
 
-            {error && <p className="text-xs text-destructive">{error}</p>}
+            {error && (
+              <div className="flex max-w-[85%] items-start gap-2 rounded-2xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSend} className="flex items-center gap-2 border-t border-border p-3">
