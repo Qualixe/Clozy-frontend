@@ -12,7 +12,12 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const policy = await getPolicyBySlug(slug);
-  return { title: policy?.title ?? "Policy" };
+  if (!policy) return { title: "Policy" };
+
+  return {
+    title: policy.seoTitle || policy.title,
+    description: policy.seoDescription || undefined,
+  };
 }
 
 export default async function PolicyPage({

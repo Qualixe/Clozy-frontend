@@ -167,7 +167,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
           </TableHeader>
           <TableBody>
             {paginated.map((order) => (
-              <TableRow key={order.id}>
+              <TableRow key={order.id} onClick={() => setViewingOrder(order)}>
                 <TableCell className="font-medium text-foreground">
                   {order.orderNumber}
                 </TableCell>

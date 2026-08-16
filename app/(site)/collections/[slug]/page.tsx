@@ -42,7 +42,10 @@ export async function generateMetadata({
   const url = `${getSiteUrl()}/collections/${category.slug}`;
 
   return {
-    title: `${category.name} | Clozy`,
+    // Plain string — templated to "<name> | <site name>" by the (site)
+    // layout's generateMetadata(), which is the one place that knows the
+    // dashboard-configured site name.
+    title: category.name,
     description,
     alternates: { canonical: url },
     openGraph: {

@@ -13,14 +13,27 @@ import { getSettings } from "@/lib/get-settings";
 // Overrides the root layout's default favicon/title/description with
 // dashboard-configured values, when set. Runs only for storefront routes —
 // the dashboard keeps the defaults from the root layout.
+//
+// `title` is a template: every page under (site) that sets a plain-string
+// title (product name, category name, "FAQ", ...) gets "%s | <site name>"
+// automatically — this is the one place that decides the site name, so a
+// page never needs to hardcode "Clozy" itself. A page with no title of its
+// own falls back to `default`, and any page without its own `description`
+// inherits this one.
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings().catch(() => null);
-  if (!settings) return {};
+  const siteName = settings?.metaTitle || "Clozy";
 
-  const metadata: Metadata = {};
-  if (settings.faviconUrl) metadata.icons = { icon: settings.faviconUrl };
-  if (settings.metaTitle) metadata.title = settings.metaTitle;
-  if (settings.metaDescription) metadata.description = settings.metaDescription;
+  const metadata: Metadata = {
+    title: {
+      template: `%s | ${siteName}`,
+      default: siteName,
+    },
+  };
+  if (settings?.faviconUrl) metadata.icons = { icon: settings.faviconUrl };
+  metadata.description =
+    settings?.metaDescription ||
+    "Considered essentials, made to last. Designed in-house, shipped worldwide.";
   return metadata;
 }
 

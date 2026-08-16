@@ -8,6 +8,8 @@ export type PolicySummary = {
 
 export type Policy = PolicySummary & {
   content: string;
+  seoTitle: string | null;
+  seoDescription: string | null;
 };
 
 export async function getPublishedPolicies(): Promise<PolicySummary[]> {

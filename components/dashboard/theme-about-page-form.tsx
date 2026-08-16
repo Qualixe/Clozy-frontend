@@ -84,6 +84,8 @@ export function ThemeAboutPageForm({ initial }: { initial: AboutPageData }) {
   const [ctaBody, setCtaBody] = React.useState(initial.ctaBody);
   const [ctaButtonLabel, setCtaButtonLabel] = React.useState(initial.ctaButtonLabel);
   const [ctaButtonHref, setCtaButtonHref] = React.useState(initial.ctaButtonHref);
+  const [seoTitle, setSeoTitle] = React.useState(initial.seoTitle ?? "");
+  const [seoDescription, setSeoDescription] = React.useState(initial.seoDescription ?? "");
 
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
@@ -186,6 +188,8 @@ export function ThemeAboutPageForm({ initial }: { initial: AboutPageData }) {
           ctaBody: ctaBody || null,
           ctaButtonLabel: ctaButtonLabel || null,
           ctaButtonHref: ctaButtonHref || null,
+          seoTitle: seoTitle || null,
+          seoDescription: seoDescription || null,
         }),
       });
 
@@ -628,6 +632,46 @@ export function ThemeAboutPageForm({ initial }: { initial: AboutPageData }) {
               }}
             />
           </div>
+        </div>
+      </section>
+
+      <Separator />
+
+      {/* SEO */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold text-foreground">SEO</h2>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="ap-seo-title" className="text-xs font-normal text-muted-foreground">
+            Meta title
+          </Label>
+          <Input
+            id="ap-seo-title"
+            placeholder="Shown in search engine results"
+            value={seoTitle}
+            onChange={(e) => {
+              setSeoTitle(e.target.value);
+              touch();
+            }}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="ap-seo-description"
+            className="text-xs font-normal text-muted-foreground"
+          >
+            Meta description
+          </Label>
+          <Textarea
+            id="ap-seo-description"
+            rows={2}
+            placeholder="A short summary for search engines"
+            value={seoDescription}
+            onChange={(e) => {
+              setSeoDescription(e.target.value);
+              touch();
+            }}
+          />
         </div>
       </section>
 

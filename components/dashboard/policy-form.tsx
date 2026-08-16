@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth-context";
 import type { Policy } from "@/lib/get-policies";
 
@@ -21,6 +22,8 @@ export type PolicyFormValues = {
   slug: string;
   content: string;
   status: "draft" | "published";
+  seoTitle: string;
+  seoDescription: string;
 };
 
 const EMPTY_POLICY_FORM: PolicyFormValues = {
@@ -28,6 +31,8 @@ const EMPTY_POLICY_FORM: PolicyFormValues = {
   slug: "",
   content: "",
   status: "draft",
+  seoTitle: "",
+  seoDescription: "",
 };
 
 export function fromPolicy(policy: Policy): PolicyFormValues {
@@ -36,6 +41,8 @@ export function fromPolicy(policy: Policy): PolicyFormValues {
     slug: policy.slug,
     content: policy.content,
     status: policy.status,
+    seoTitle: policy.seoTitle ?? "",
+    seoDescription: policy.seoDescription ?? "",
   };
 }
 
@@ -189,6 +196,36 @@ export function PolicyForm({
             placeholder="Write the policy's content…"
             minHeight="16rem"
           />
+        </section>
+
+        <section className="space-y-4">
+          <Label>SEO</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="policy-seo-title" className="text-xs font-normal text-muted-foreground">
+              Meta title
+            </Label>
+            <Input
+              id="policy-seo-title"
+              placeholder="Shown in search engine results"
+              value={form.seoTitle}
+              onChange={(e) => update("seoTitle", e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="policy-seo-description"
+              className="text-xs font-normal text-muted-foreground"
+            >
+              Meta description
+            </Label>
+            <Textarea
+              id="policy-seo-description"
+              rows={2}
+              placeholder="A short summary for search engines"
+              value={form.seoDescription}
+              onChange={(e) => update("seoDescription", e.target.value)}
+            />
+          </div>
         </section>
 
         {submitError && (

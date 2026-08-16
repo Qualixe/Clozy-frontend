@@ -34,7 +34,10 @@ export async function generateMetadata({
   const url = `${getSiteUrl()}/products/${product.slug}`;
 
   return {
-    title: `${product.name} | Clozy`,
+    // Plain string — templated to "<name> | <site name>" by the (site)
+    // layout's generateMetadata(), which is the one place that knows the
+    // dashboard-configured site name.
+    title: product.name,
     description,
     alternates: { canonical: url },
     openGraph: {

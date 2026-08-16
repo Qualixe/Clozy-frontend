@@ -40,6 +40,8 @@ export type AboutPageData = {
   ctaBody: string;
   ctaButtonLabel: string;
   ctaButtonHref: string;
+  seoTitle: string | null;
+  seoDescription: string | null;
 };
 
 export async function getAboutPage(): Promise<AboutPageData> {
