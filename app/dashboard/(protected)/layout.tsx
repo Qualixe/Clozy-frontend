@@ -5,6 +5,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import { AdminChatWidget } from "@/components/dashboard/admin-chat-widget";
 
 export default function DashboardLayout({
   children,
@@ -22,6 +23,7 @@ export default function DashboardLayout({
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 sm:p-6">{children}</div>
       </SidebarInset>
+      <AdminChatWidget />
     </SidebarProvider>
   );
 }

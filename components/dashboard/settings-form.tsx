@@ -81,6 +81,9 @@ type SettingsState = {
   pathaoPassword: string;
   pathaoStoreId: string;
   anthropicApiKey: string;
+  aiProvider: "anthropic" | "openai";
+  openaiApiKey: string;
+  openaiModel: string;
   logoUrl: string;
   faviconUrl: string;
   categoryShowcaseHeading: string;
@@ -183,6 +186,9 @@ export function SettingsForm({
     bkashPartialAdvanceEnabled: initialSettings.bkashPartialAdvanceEnabled,
     bkashPartialAdvancePercent: initialSettings.bkashPartialAdvancePercent ?? 20,
     anthropicApiKey: initialSettings.anthropicApiKey ?? "",
+    aiProvider: initialSettings.aiProvider ?? "anthropic",
+    openaiApiKey: initialSettings.openaiApiKey ?? "",
+    openaiModel: initialSettings.openaiModel ?? "",
     logoUrl: initialSettings.logoUrl ?? "",
     faviconUrl: initialSettings.faviconUrl ?? "",
     categoryShowcaseHeading:
@@ -302,6 +308,9 @@ export function SettingsForm({
           bkashPartialAdvancePercent: settings.bkashPartialAdvancePercent,
           bkashPartialAdvanceFixedAmount: null,
           anthropicApiKey: settings.anthropicApiKey || null,
+          aiProvider: settings.aiProvider,
+          openaiApiKey: settings.openaiApiKey || null,
+          openaiModel: settings.openaiModel || null,
           logoUrl: settings.logoUrl || null,
           faviconUrl: settings.faviconUrl || null,
           categoryShowcaseHeading: settings.categoryShowcaseHeading || null,
@@ -1347,12 +1356,40 @@ export function SettingsForm({
 
         <TabsContent value="ai" className="max-w-xl space-y-5">
           <div>
+            <p className="text-sm font-medium text-foreground">Provider</p>
+            <p className="text-xs text-muted-foreground">
+              Powers both the storefront chat widget and the &quot;Generate
+              AI Insights&quot; button on the Analytics page. Both providers&apos;
+              keys can be saved at once — this just decides which one is
+              actually used.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="aiProvider">Active Provider</Label>
+            <Select
+              value={settings.aiProvider}
+              onValueChange={(value) =>
+                value && update("aiProvider", value as SettingsState["aiProvider"])
+              }
+            >
+              <SelectTrigger id="aiProvider" className="w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="anthropic">Anthropic (Claude)</SelectItem>
+                <SelectItem value="openai">OpenAI</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Separator />
+
+          <div>
             <p className="text-sm font-medium text-foreground">
-              Claude API Key
+              Anthropic (Claude)
             </p>
             <p className="text-xs text-muted-foreground">
-              Powers the &quot;Generate AI Insights&quot; button on the
-              Analytics page. Get a key from{" "}
+              Get a key from{" "}
               <a
                 href="https://console.anthropic.com/settings/keys"
                 target="_blank"
@@ -1361,7 +1398,7 @@ export function SettingsForm({
               >
                 console.anthropic.com
               </a>
-              . Leave blank to disable AI insights.
+              . Leave blank to disable AI features while this provider is active.
             </p>
           </div>
           <div className="space-y-1.5">
@@ -1373,6 +1410,46 @@ export function SettingsForm({
               value={settings.anthropicApiKey}
               onChange={(e) => update("anthropicApiKey", e.target.value)}
             />
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-sm font-medium text-foreground">OpenAI</p>
+            <p className="text-xs text-muted-foreground">
+              Get a key from{" "}
+              <a
+                href="https://platform.openai.com/api-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                platform.openai.com
+              </a>
+              . Leave blank to disable AI features while this provider is active.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="openaiApiKey">API Key</Label>
+            <Input
+              id="openaiApiKey"
+              type="password"
+              placeholder="sk-…"
+              value={settings.openaiApiKey}
+              onChange={(e) => update("openaiApiKey", e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="openaiModel">Model</Label>
+            <Input
+              id="openaiModel"
+              placeholder="gpt-4o-mini"
+              value={settings.openaiModel}
+              onChange={(e) => update("openaiModel", e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Leave blank to use gpt-4o-mini.
+            </p>
           </div>
         </TabsContent>
       </Tabs>
