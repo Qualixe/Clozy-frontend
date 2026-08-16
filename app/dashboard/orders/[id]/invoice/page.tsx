@@ -33,6 +33,9 @@ export default async function OrderInvoicePage({
       order={order}
       logoUrl={settings?.logoUrl ?? null}
       pdfUrl={`/api/invoice/pdf?orderId=${id}`}
+      supportPhone={settings?.supportPhone}
+      supportEmail={settings?.supportEmail}
+      storeAddress={settings?.storeAddress}
     />
   );
 }

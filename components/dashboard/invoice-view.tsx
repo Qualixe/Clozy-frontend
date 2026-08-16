@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Download, Loader2, Printer } from "lucide-react";
+import { ArrowLeft, Download, Loader2, Mail, MapPin, Phone, Printer } from "lucide-react";
 
 import { formatCurrency } from "@/lib/currency";
 import { useAuth } from "@/lib/auth-context";
@@ -25,12 +25,18 @@ export function InvoiceView({
    *  needs auth, the public track-order one doesn't, so the token is only
    *  attached when present. */
   pdfUrl,
+  supportPhone,
+  supportEmail,
+  storeAddress,
 }: {
   order: OrderDetail;
   logoUrl: string | null;
   backHref?: string;
   backLabel?: string;
   pdfUrl?: string;
+  supportPhone?: string | null;
+  supportEmail?: string | null;
+  storeAddress?: string | null;
 }) {
   const { token } = useAuth();
   const [downloading, setDownloading] = React.useState(false);
@@ -329,6 +335,33 @@ export function InvoiceView({
             For questions about this order, please contact support with your order number.
           </p>
         </div>
+
+        {(supportPhone || supportEmail || storeAddress) && (
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-t border-border pt-6">
+            {supportPhone && (
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
+                  <Phone className="h-3.5 w-3.5" />
+                </span>
+                <span className="text-xs text-foreground">{supportPhone}</span>
+              </div>
+            )}
+            {supportEmail && (
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-400 text-foreground">
+                  <Mail className="h-3.5 w-3.5" />
+                </span>
+                <span className="text-xs text-foreground">{supportEmail}</span>
+              </div>
+            )}
+            {storeAddress && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="text-xs text-foreground">{storeAddress}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -44,6 +44,7 @@ type SettingsState = {
   storeName: string;
   supportEmail: string;
   supportPhone: string;
+  storeAddress: string;
   storeDescription: string;
   insideDhakaRate: number;
   outsideDhakaRate: number;
@@ -114,13 +115,10 @@ const DEFAULT_CONFIRMATION_TEMPLATE =
 const DEFAULT_CANCELLED_TEMPLATE =
   "Hi {customer_name}, your order {order_number} has been cancelled. Contact us if you have questions.";
 
-const INITIAL_SETTINGS: Pick<
-  SettingsState,
-  "storeName" | "supportEmail" | "supportPhone" | "storeDescription"
-> = {
+// storeName/storeDescription have no backend column yet — placeholder only,
+// unlike supportEmail/supportPhone/storeAddress below them, which are real.
+const INITIAL_SETTINGS: Pick<SettingsState, "storeName" | "storeDescription"> = {
   storeName: "Clozy",
-  supportEmail: "hello@clozy.com",
-  supportPhone: "+880 1234 567890",
   storeDescription:
     "Considered essentials, made to last. Designed in-house, shipped worldwide.",
 };
@@ -148,6 +146,9 @@ export function SettingsForm({
     insideDhakaRate: initialSettings.insideDhakaRate ?? 3,
     outsideDhakaRate: initialSettings.outsideDhakaRate ?? 6,
     codEnabled: initialSettings.codEnabled ?? true,
+    supportEmail: initialSettings.supportEmail ?? "",
+    supportPhone: initialSettings.supportPhone ?? "",
+    storeAddress: initialSettings.storeAddress ?? "",
     facebookPixelId: initialSettings.facebookPixelId ?? "",
     googleAnalyticsId: initialSettings.googleAnalyticsId ?? "",
     googleTagManagerId: initialSettings.googleTagManagerId ?? "",
@@ -262,6 +263,9 @@ export function SettingsForm({
           insideDhakaRate: settings.insideDhakaRate,
           outsideDhakaRate: settings.outsideDhakaRate,
           codEnabled: settings.codEnabled,
+          supportEmail: settings.supportEmail || null,
+          supportPhone: settings.supportPhone || null,
+          storeAddress: settings.storeAddress || null,
           facebookPixelId: settings.facebookPixelId || null,
           googleAnalyticsId: settings.googleAnalyticsId || null,
           googleTagManagerId: settings.googleTagManagerId || null,
@@ -415,6 +419,20 @@ export function SettingsForm({
               value={settings.storeDescription}
               onChange={(e) => update("storeDescription", e.target.value)}
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="storeAddress">Store Address</Label>
+            <Input
+              id="storeAddress"
+              placeholder="Street address, city"
+              value={settings.storeAddress}
+              onChange={(e) => update("storeAddress", e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Shown on the printable invoice footer, alongside Support Email
+              and Support Phone above.
+            </p>
           </div>
 
           <Separator />

@@ -26,7 +26,21 @@ function esc(value: string): string {
  * "Total" column/row) rather than sharing code, since one renders in the
  * browser and the other in a headless one with no bundler in between.
  */
-export function renderInvoiceHtml(order: OrderDetail, logoUrl: string | null): string {
+export type InvoiceContactInfo = {
+  supportPhone?: string | null;
+  supportEmail?: string | null;
+  storeAddress?: string | null;
+};
+
+const ICON_PHONE = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>`;
+const ICON_MAIL = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#171717" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`;
+const ICON_PIN = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#737373" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>`;
+
+export function renderInvoiceHtml(
+  order: OrderDetail,
+  logoUrl: string | null,
+  contact: InvoiceContactInfo = {}
+): string {
   const billToLines = [
     [order.address, order.district].filter(Boolean).join(", "),
     order.email,
@@ -74,6 +88,27 @@ export function renderInvoiceHtml(order: OrderDetail, logoUrl: string | null): s
         <div class="totals-row" style="font-weight: 600;">
           <span>Due on Delivery</span>
           <span>${money(order.codAmountDue)}</span>
+        </div>`
+      : "";
+
+  const contactBar =
+    contact.supportPhone || contact.supportEmail || contact.storeAddress
+      ? `<div class="contact-bar">
+          ${
+            contact.supportPhone
+              ? `<div class="contact-item"><span class="badge dark">${ICON_PHONE}</span><span class="text">${esc(contact.supportPhone)}</span></div>`
+              : ""
+          }
+          ${
+            contact.supportEmail
+              ? `<div class="contact-item"><span class="badge amber">${ICON_MAIL}</span><span class="text">${esc(contact.supportEmail)}</span></div>`
+              : ""
+          }
+          ${
+            contact.storeAddress
+              ? `<div class="contact-item">${ICON_PIN}<span class="text">${esc(contact.storeAddress)}</span></div>`
+              : ""
+          }
         </div>`
       : "";
 
@@ -154,6 +189,28 @@ export function renderInvoiceHtml(order: OrderDetail, logoUrl: string | null): s
   .footer p { margin: 0; }
   .footer .thanks { font-size: 14px; font-weight: 600; }
   .footer .contact { margin-top: 4px; font-size: 11px; color: #737373; }
+  .contact-bar {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e5e5;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 32px;
+  }
+  .contact-item { display: flex; align-items: center; gap: 8px; }
+  .contact-item .badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .contact-item .badge.dark { background: #171717; }
+  .contact-item .badge.amber { background: #fbbf24; }
+  .contact-item span.text { font-size: 12px; color: #171717; }
 </style>
 </head>
 <body>
@@ -210,6 +267,8 @@ export function renderInvoiceHtml(order: OrderDetail, logoUrl: string | null): s
     <p class="thanks">Thank you for shopping with us.</p>
     <p class="contact">For questions about this order, please contact support with your order number.</p>
   </div>
+
+  ${contactBar}
 </body>
 </html>`;
 }

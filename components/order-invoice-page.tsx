@@ -27,6 +27,11 @@ export function OrderInvoicePage() {
   const [error, setError] = React.useState<string | null>(null);
   const [order, setOrder] = React.useState<OrderDetail | null>(null);
   const [logoUrl, setLogoUrl] = React.useState<string | null>(null);
+  const [contactInfo, setContactInfo] = React.useState<{
+    supportPhone: string | null;
+    supportEmail: string | null;
+    storeAddress: string | null;
+  }>({ supportPhone: null, supportEmail: null, storeAddress: null });
 
   const lookupOrder = React.useCallback(
     async (orderNumberValue: string, contactValue: string) => {
@@ -70,9 +75,17 @@ export function OrderInvoicePage() {
 
   React.useEffect(() => {
     getSettings()
-      .then((s) => setLogoUrl(s.logoUrl))
+      .then((s) => {
+        setLogoUrl(s.logoUrl);
+        setContactInfo({
+          supportPhone: s.supportPhone,
+          supportEmail: s.supportEmail,
+          storeAddress: s.storeAddress,
+        });
+      })
       .catch(() => {
-        // Best-effort — the invoice falls back to the text wordmark.
+        // Best-effort — the invoice falls back to the text wordmark and
+        // omits the contact footer.
       });
   }, []);
 
@@ -103,6 +116,9 @@ export function OrderInvoicePage() {
         backHref="/orders/invoice"
         backLabel="Look up another order"
         pdfUrl={`/api/invoice/pdf?orderNumber=${encodeURIComponent(order.orderNumber)}&contact=${encodeURIComponent(contact)}`}
+        supportPhone={contactInfo.supportPhone}
+        supportEmail={contactInfo.supportEmail}
+        storeAddress={contactInfo.storeAddress}
       />
     );
   }

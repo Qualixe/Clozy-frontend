@@ -2,6 +2,9 @@ export type StoreSettings = {
   insideDhakaRate: number;
   outsideDhakaRate: number;
   codEnabled: boolean;
+  supportEmail: string | null;
+  supportPhone: string | null;
+  storeAddress: string | null;
   bkashGatewayEnabled: boolean;
   bkashShippingAdvanceEnabled: boolean;
   bkashPartialAdvanceEnabled: boolean;

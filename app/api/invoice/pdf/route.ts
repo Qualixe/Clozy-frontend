@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import puppeteer from "puppeteer";
 
-import { renderInvoiceHtml } from "@/lib/render-invoice-html";
+import { renderInvoiceHtml, type InvoiceContactInfo } from "@/lib/render-invoice-html";
 import type { OrderDetail } from "@/data/orders";
 
 function jsonError(message: string, status: number): Response {
@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
   }
 
   let logoUrl: string | null = null;
+  let contactInfo: InvoiceContactInfo = {};
   try {
     const settingsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
       cache: "no-store",
@@ -94,12 +95,17 @@ export async function GET(request: NextRequest) {
     if (settingsRes.ok) {
       const settings = await settingsRes.json();
       logoUrl = settings.logoUrl ?? null;
+      contactInfo = {
+        supportPhone: settings.supportPhone ?? null,
+        supportEmail: settings.supportEmail ?? null,
+        storeAddress: settings.storeAddress ?? null,
+      };
     }
   } catch {
-    // Best-effort — falls back to the text wordmark.
+    // Best-effort — falls back to the text wordmark and omits the contact footer.
   }
 
-  const html = renderInvoiceHtml(order, logoUrl);
+  const html = renderInvoiceHtml(order, logoUrl, contactInfo);
 
   let browser;
   try {
