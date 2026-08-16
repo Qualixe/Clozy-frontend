@@ -61,8 +61,15 @@ export function renderInvoiceHtml(
         <tr>
           <td class="sl ${i % 2 === 1 ? "zebra" : ""}">${String(i + 1).padStart(2, "0")}</td>
           <td class="desc ${i % 2 === 1 ? "zebra" : ""}">
-            <p class="item-name">${esc(item.name)}</p>
-            ${item.variant ? `<p class="item-variant">${esc(item.variant)}</p>` : ""}
+            <div class="item-row">
+              <div class="item-thumb">
+                ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" />` : ""}
+              </div>
+              <div>
+                <p class="item-name">${esc(item.name)}</p>
+                ${item.variant ? `<p class="item-variant">${esc(item.variant)}</p>` : ""}
+              </div>
+            </div>
           </td>
           <td class="qty ${i % 2 === 1 ? "zebra" : ""}">${item.qty}</td>
           <td class="price ${i % 2 === 1 ? "zebra" : ""}">${money(item.price)}</td>
@@ -168,17 +175,28 @@ export function renderInvoiceHtml(
   .invoice-meta .row { display: flex; justify-content: flex-end; gap: 16px; margin-top: 4px; }
   .invoice-meta .row dt { font-weight: 600; margin: 0; }
   .invoice-meta .row dd { margin: 0; color: #737373; }
-  table { width: 100%; border-collapse: collapse; margin-top: 32px; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 32px; font-size: 13px; border: 1px solid #d4d4d4; }
   thead tr { background: #171717; color: #fff; }
-  thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #d4d4d4; }
   thead th.center { text-align: center; }
   thead th.right { text-align: right; }
-  tbody td { padding: 12px; vertical-align: top; }
+  tbody td { padding: 10px 12px; vertical-align: top; border: 1px solid #d4d4d4; }
   tbody td.sl { color: #737373; width: 40px; }
   tbody td.qty { text-align: center; }
   tbody td.price { text-align: center; }
   tbody td.total-col { text-align: right; font-weight: 600; background: rgba(251, 191, 36, 0.2); width: 100px; }
   tbody .zebra { background: #f5f5f5; }
+  .item-row { display: flex; align-items: center; gap: 10px; }
+  .item-thumb {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    border: 1px solid #d4d4d4;
+    background: #f5f5f5;
+    overflow: hidden;
+  }
+  .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
   .item-name { margin: 0; }
   .item-variant { margin: 2px 0 0; font-size: 11px; color: #737373; }
   .totals-wrap { display: flex; justify-content: flex-end; margin-top: 24px; }
@@ -265,7 +283,6 @@ export function renderInvoiceHtml(
 
   <div class="footer">
     <p class="thanks">Thank you for shopping with us.</p>
-    <p class="contact">For questions about this order, please contact support with your order number.</p>
   </div>
 
   ${contactBar}

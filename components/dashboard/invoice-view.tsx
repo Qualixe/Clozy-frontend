@@ -204,7 +204,10 @@ export function InvoiceView({
             )}
           </div>
 
-          <dl className="space-y-1 text-sm">
+          <dl className=" text-sm">
+             <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase text-right mb-2">
+              Invoice Info
+            </p>
             <div className="flex items-center justify-end gap-4">
               <dt className="font-semibold text-foreground">Invoice No</dt>
               <dd className="text-muted-foreground">{order.orderNumber}</dd>
@@ -230,22 +233,22 @@ export function InvoiceView({
 
         {/* Items */}
         <div className="mt-8 overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full border border-border text-sm">
             <thead>
               <tr className="bg-foreground text-background">
-                <th className="w-12 py-2.5 pl-3 text-left text-xs font-semibold uppercase tracking-wide">
+                <th className="w-12 border border-border py-2.5 pl-3 text-left text-xs font-semibold uppercase tracking-wide">
                   SL.
                 </th>
-                <th className="py-2.5 text-left text-xs font-semibold uppercase tracking-wide">
-                  Item Description
+                <th className="border border-border py-2.5 pl-3 text-left text-xs font-semibold uppercase tracking-wide">
+                  Product Description
                 </th>
-                <th className="py-2.5 text-center text-xs font-semibold uppercase tracking-wide">
+                <th className="border border-border py-2.5 text-center text-xs font-semibold uppercase tracking-wide">
                   Qty.
                 </th>
-                <th className="py-2.5 text-center text-xs font-semibold uppercase tracking-wide">
+                <th className="border border-border py-2.5 text-center text-xs font-semibold uppercase tracking-wide">
                   Price
                 </th>
-                <th className="w-28 py-2.5 pr-3 text-right text-xs font-semibold uppercase tracking-wide">
+                <th className="w-28 border border-border py-2.5 pr-3 text-right text-xs font-semibold uppercase tracking-wide">
                   Total
                 </th>
               </tr>
@@ -254,27 +257,44 @@ export function InvoiceView({
               {order.items.map((item, i) => (
                 <tr key={item.id}>
                   <td
-                    className={`py-3 pl-3 text-muted-foreground ${i % 2 === 1 ? "bg-muted/50" : ""}`}
+                    className={`border border-border py-3 pl-3 text-muted-foreground ${i % 2 === 1 ? "bg-muted/50" : ""}`}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </td>
-                  <td className={`py-3 pr-2 ${i % 2 === 1 ? "bg-muted/50" : ""}`}>
-                    <p className="text-foreground">{item.name}</p>
-                    {item.variant && (
-                      <p className="text-xs text-muted-foreground">{item.variant}</p>
-                    )}
+                  <td
+                    className={`border border-border py-2 pl-3 pr-2 ${i % 2 === 1 ? "bg-muted/50" : ""}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
+                        {item.image && (
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            sizes="40px"
+                            className="object-cover"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-foreground">{item.name}</p>
+                        {item.variant && (
+                          <p className="text-xs text-muted-foreground">{item.variant}</p>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td
-                    className={`py-3 text-center text-foreground ${i % 2 === 1 ? "bg-muted/50" : ""}`}
+                    className={`border border-border py-3 text-center text-foreground ${i % 2 === 1 ? "bg-muted/50" : ""}`}
                   >
                     {item.qty}
                   </td>
                   <td
-                    className={`py-3 text-center text-foreground ${i % 2 === 1 ? "bg-muted/50" : ""}`}
+                    className={`border border-border py-3 text-center text-foreground ${i % 2 === 1 ? "bg-muted/50" : ""}`}
                   >
                     {formatCurrency(item.price)}
                   </td>
-                  <td className="bg-amber-400/20 py-3 pr-3 text-right font-medium text-foreground">
+                  <td className="border border-border  py-3 pr-3 text-right font-medium text-foreground">
                     {formatCurrency(item.price * item.qty)}
                   </td>
                 </tr>
@@ -304,7 +324,7 @@ export function InvoiceView({
                 </span>
               </div>
             )}
-            <div className="flex items-center justify-between bg-amber-400 px-3 py-2 text-base font-bold text-foreground">
+            <div className="flex items-center justify-between bg-amber-400/40 px-3 py-2 text-base font-bold text-foreground">
               <span>Total</span>
               <span>{formatCurrency(order.total)}</span>
             </div>
@@ -327,14 +347,6 @@ export function InvoiceView({
           </div>
         </div>
 
-        <div className="mt-12 border-t border-border pt-4 text-center">
-          <p className="text-sm font-semibold text-foreground">
-            Thank you for shopping with us.
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            For questions about this order, please contact support with your order number.
-          </p>
-        </div>
 
         {(supportPhone || supportEmail || storeAddress) && (
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-t border-border pt-6">
