@@ -16,7 +16,7 @@ type ChatMessage = {
 const GREETING: ChatMessage = {
   role: "assistant",
   content:
-    "Hi! I'm your store ops copilot. Ask me about orders, customers, products, discounts, reviews, CMS content, staff, subscribers, or store performance — I can only see what you have permission to view in the dashboard.",
+    "Hi! I'm your store ops copilot. Ask me about orders, customers, products, discounts, reviews, CMS content, menus, categories, media, SMS logs, staff, subscribers, or store performance — I can only see what you have permission to view in the dashboard.",
 };
 
 /**
