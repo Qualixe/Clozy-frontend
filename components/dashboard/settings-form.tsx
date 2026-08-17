@@ -115,6 +115,9 @@ const TAB_VALUES = [
 const DEFAULT_ACCENT_COLOR = "#111827";
 const DEFAULT_CATEGORY_SHOWCASE_HEADING = "Shop by Category";
 
+const PATHAO_SANDBOX_URL = "https://courier-api-sandbox.pathao.com";
+const PATHAO_LIVE_URL = "https://api-hermes.pathao.com";
+
 const DEFAULT_CONFIRMATION_TEMPLATE =
   "Hi {customer_name}, your order {order_number} has been confirmed. Total: {total}. Thank you for shopping with us!";
 const DEFAULT_CANCELLED_TEMPLATE =
@@ -217,6 +220,17 @@ export function SettingsForm({
   const [pathaoStores, setPathaoStores] = React.useState<
     { storeId: number; storeName: string }[]
   >([]);
+  // Tracks the Environment select explicitly, decoupled from pathaoBaseUrl,
+  // so picking "Custom" can leave the URL blank for editing without the
+  // empty-string-means-sandbox default (used for not-yet-configured stores)
+  // snapping the select back to "Sandbox" on every render.
+  const [pathaoUrlMode, setPathaoUrlMode] = React.useState<"sandbox" | "live" | "custom">(() => {
+    if (initialSettings.pathaoBaseUrl === PATHAO_LIVE_URL) return "live";
+    if (!initialSettings.pathaoBaseUrl || initialSettings.pathaoBaseUrl === PATHAO_SANDBOX_URL) {
+      return "sandbox";
+    }
+    return "custom";
+  });
   const [fetchingStores, setFetchingStores] = React.useState(false);
   const [storesError, setStoresError] = React.useState<string | null>(null);
 
@@ -771,17 +785,43 @@ export function SettingsForm({
               <>
                 <Separator className="my-4" />
                 <div className="space-y-1.5">
-                  <Label htmlFor="pathaoBaseUrl">API Base URL</Label>
-                  <Input
-                    id="pathaoBaseUrl"
-                    placeholder="https://courier-api-sandbox.pathao.com"
-                    value={settings.pathaoBaseUrl}
-                    onChange={(e) => update("pathaoBaseUrl", e.target.value)}
-                  />
+                  <Label htmlFor="pathaoEnvironment">Environment</Label>
+                  <Select
+                    value={pathaoUrlMode}
+                    onValueChange={(value) => {
+                      if (!value) return;
+                      setPathaoUrlMode(value as "sandbox" | "live" | "custom");
+                      if (value === "live") update("pathaoBaseUrl", PATHAO_LIVE_URL);
+                      else if (value === "sandbox") update("pathaoBaseUrl", PATHAO_SANDBOX_URL);
+                      else if (settings.pathaoBaseUrl === PATHAO_LIVE_URL || settings.pathaoBaseUrl === PATHAO_SANDBOX_URL) {
+                        update("pathaoBaseUrl", "");
+                      }
+                    }}
+                  >
+                    <SelectTrigger id="pathaoEnvironment" className="w-56">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sandbox">Sandbox (testing)</SelectItem>
+                      <SelectItem value="live">Live (real deliveries)</SelectItem>
+                      <SelectItem value="custom">Custom URL</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <p className="text-xs text-muted-foreground">
-                    Use the sandbox URL while testing, switch to the
-                    production URL when you're ready to go live.
+                    {pathaoUrlMode === "live"
+                      ? "Live — orders sent to Pathao from here become real deliveries."
+                      : pathaoUrlMode === "sandbox"
+                        ? "Sandbox — safe for testing, nothing gets actually shipped."
+                        : "Point this at your own Pathao-compatible endpoint."}
                   </p>
+                  {pathaoUrlMode === "custom" && (
+                    <Input
+                      id="pathaoBaseUrl"
+                      placeholder={PATHAO_SANDBOX_URL}
+                      value={settings.pathaoBaseUrl}
+                      onChange={(e) => update("pathaoBaseUrl", e.target.value)}
+                    />
+                  )}
                 </div>
                 <div className="mt-4 grid gap-5 sm:grid-cols-2">
                   <div className="space-y-1.5">
