@@ -794,37 +794,37 @@ export function CheckoutPage({
                         <Label
                           key={option.value}
                           className={cn(
-                            "group relative flex cursor-pointer items-center gap-3 rounded-[10px] border-2 border-border bg-background p-3.5 transition-all hover:border-foreground/25",
+                            "group relative flex cursor-pointer items-center gap-1.25 rounded-[10px] border-2 border-border bg-background p-2 transition-all hover:border-foreground/25",
                             tint.border,
                             tint.bg
                           )}
                         >
                           <RadioGroupItem value={option.value} className="sr-only absolute" />
                           {option.iconSrc ? (
-                            <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl">
+                            <span className="relative h-8.75 w-8.75 shrink-0 overflow-hidden rounded-xl">
                               <Image
                                 src={option.iconSrc}
                                 alt=""
                                 fill
-                                sizes="44px"
+                                sizes="35px"
                                 className="object-contain"
                               />
                             </span>
                           ) : (
                             <span
                               className={cn(
-                                "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+                                "flex h-8.75 w-8.75 shrink-0 items-center justify-center rounded-xl",
                                 tint.icon
                               )}
                             >
-                              <option.icon className="h-10 w-10" />
+                              <option.icon className="h-8 w-8" />
                             </span>
                           )}
                           <span className="min-w-0 flex-1 space-y-0.5">
                             <span className="block text-sm font-semibold text-foreground">
                               {option.title}
                             </span>
-                            <span className="block text-xs leading-relaxed text-muted-foreground">
+                            <span className="block text-[10px] leading-none text-muted-foreground">
                               {option.description}
                             </span>
                           </span>
